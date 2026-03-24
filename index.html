@@ -33,6 +33,7 @@
                         <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Tree ID</label>
                         <input type="text" name="Tree ID" id="tree_id" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold" placeholder="OAK-01" required>
                     </div>
+                    
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">DBH (Inches)</label>
@@ -68,9 +69,11 @@
                             <button type="button" onclick="getLocation()" class="ncsu-dark text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase">Capture</button>
                         </div>
                     </div>
+
                     <input type="hidden" name="CO2 Lbs" id="hidden_co2">
                     <input type="hidden" name="Asset Value" id="hidden_value">
                     <input type="hidden" name="Timestamp" id="timestamp">
+
                     <button type="submit" class="w-full ncsu-red text-white font-black py-5 rounded-xl shadow-xl uppercase tracking-widest mt-4">Log to Asset Registry</button>
                 </form>
             </div>
@@ -92,7 +95,46 @@
             </div>
         </div>
 
+        <div class="bg-stone-50 p-8 border-t border-stone-200">
+            <h2 class="text-sm font-black text-stone-900 uppercase tracking-widest mb-6">Scientific Methodology & Valuation Framework</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10 text-[12px] text-stone-600 leading-relaxed">
+                <div class="space-y-4">
+                    <h3 class="font-black text-stone-800 uppercase text-[10px]">I. Allometric Biomass Equations</h3>
+                    <p>
+                        Estimates of total aboveground biomass (<em>bm</em>) are derived using species-specific regressions from <strong>Jenkins et al. (2003)</strong>. This model provides a standardized national-scale framework for North American forest types.
+                    </p>
+                    <p>
+                        The calculation utilizes the natural log-transformed diameter: 
+                        <span class="block bg-white p-2 border border-stone-200 rounded my-2 font-mono text-center text-[10px]">bm = exp(b0 + b1 * ln(dbh_cm))</span>
+                        where <em>dbh_cm</em> is the diameter at breast height in centimeters.
+                    </p>
+                </div>
+                <div class="space-y-4">
+                    <h3 class="font-black text-stone-800 uppercase text-[10px]">II. Carbon Sequestration & CO2e</h3>
+                    <p>
+                        Biomass is converted to carbon (C) by applying a mass fraction of <strong>0.50</strong>. To determine Carbon Dioxide Equivalent (CO2e), a molecular weight ratio of <strong>3.6663</strong> (44/12) is applied.
+                    </p>
+                    <h3 class="font-black text-stone-800 uppercase text-[10px]">III. Social Cost of Carbon (SCC)</h3>
+                    <p>
+                        Asset valuation is based on the <strong>Social Cost of Carbon</strong> (SCC) per the <strong>U.S. EPA (2023)</strong>. We utilize the central estimate of <strong>$210 per metric ton</strong> (2% discount rate).
+                    </p>
+                </div>
+            </div>
+
+            <div class="pt-8 border-t border-stone-200 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="text-[9px] text-stone-500 italic">
+                    <strong>Forestry Citation:</strong> Jenkins, J. C., Chojnacky, D. C., et al. (2003). National-scale biomass estimators for US tree species. Forest Science.
+                </div>
+                <div class="text-[9px] text-stone-500 italic">
+                    <strong>Economic Citation:</strong> U.S. EPA. (2023). Report on the Social Cost of Greenhouse Gases: Estimates Incorporating Recent Scientific Advances.
+                </div>
+                <div class="text-[9px] text-stone-500 italic">
+                    <strong>Technical Citation:</strong> Gemini (Google AI). (2026). NCSU Strategic Investment Survey Tool: Technical Integration & Handshake Logic.
+                </div>
+            </div>
         </div>
+    </div>
 
     <script>
         const jenkinsData = {
@@ -143,7 +185,6 @@
             document.getElementById('timestamp').value = new Date().toLocaleString();
             const formData = new FormData(e.target);
             try {
-                // This will now include the "Condition" field automatically via FormData
                 await fetch(SHEET_URL, { method: 'POST', body: formData, mode: 'no-cors' });
                 alert("SUCCESS: Logged to Asset Registry");
                 e.target.reset();
