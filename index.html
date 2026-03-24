@@ -16,13 +16,12 @@
 <body class="min-h-screen p-4 pb-12">
 
     <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-2xl overflow-hidden border-t-8 border-red-600">
-        <div class="ncsu-dark p-6 text-white flex justify-between items-center border-b border-stone-800">
+        <div class="ncsu-dark p-6 text-white flex justify-between items-center">
             <div>
-                <h1 class="text-xl font-black italic uppercase tracking-tight">NC STATE UNIVERSITY</h1>
+                <h1 class="text-xl font-black italic uppercase">NC STATE UNIVERSITY</h1>
                 <p class="text-red-500 text-[10px] font-bold tracking-widest uppercase mt-1">Campus Planning & Strategic Investment</p>
             </div>
-            <div class="text-[10px] font-bold text-red-700 bg-white px-3 py-1.5 rounded uppercase flex items-center gap-2">
-                <div class="w-2.5 h-2.5 ncsu-red rounded-full animate-pulse"></div>
+            <div class="text-[10px] font-bold text-red-700 bg-white px-3 py-1.5 rounded uppercase">
                 ACADEMIC REGISTRY ACTIVE
             </div>
         </div>
@@ -32,13 +31,12 @@
                 <form id="treeForm" class="space-y-4">
                     <div>
                         <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Tree ID</label>
-                        <input type="text" name="Tree ID" id="tree_id" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold" placeholder="Ex: OAK-01" required>
+                        <input type="text" name="Tree ID" id="tree_id" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold" placeholder="OAK-01" required>
                     </div>
-
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">DBH</label>
-                            <input type="number" name="DBH" id="dbh_input" step="1" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold" placeholder="0" required>
+                            <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">DBH (Inches)</label>
+                            <input type="number" name="DBH" id="dbh_input" step="1" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold" required>
                         </div>
                         <div>
                             <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Species Group</label>
@@ -50,20 +48,17 @@
                             </select>
                         </div>
                     </div>
-
                     <div>
                         <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">GPS Location</label>
                         <div class="flex gap-2">
-                            <input type="text" name="GPS" id="coords" readonly class="flex-1 bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 text-[11px] font-mono" placeholder="Lat, Lon">
+                            <input type="text" name="GPS" id="coords" readonly class="flex-1 bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 text-[11px] font-mono" placeholder="Capture Lat, Lon">
                             <button type="button" onclick="getLocation()" class="ncsu-dark text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase">Capture</button>
                         </div>
                     </div>
-
                     <input type="hidden" name="CO2 Lbs" id="hidden_co2">
                     <input type="hidden" name="Asset Value" id="hidden_value">
                     <input type="hidden" name="Timestamp" id="timestamp">
-
-                    <button type="submit" class="w-full ncsu-red text-white font-black py-5 rounded-xl shadow-xl uppercase tracking-widest mt-4">Log to Asset Sheet</button>
+                    <button type="submit" class="w-full ncsu-red text-white font-black py-5 rounded-xl shadow-xl uppercase tracking-widest mt-4">Log to Asset Registry</button>
                 </form>
             </div>
 
@@ -85,18 +80,51 @@
         </div>
 
         <div class="bg-stone-50 p-8 border-t border-stone-200">
-            <h2 class="text-sm font-black text-stone-900 uppercase tracking-widest mb-4">Methodology & Citations</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-[11px] text-stone-600 leading-relaxed mb-6">
-                <p><strong>Forestry Basis:</strong> Biomass estimation uses Jenkins et al. (2003) regressions: bm = exp(b0 + b1 * ln(dbh)). CO2 is calculated using a 0.5 carbon fraction and a 3.6663 molecular ratio.</p>
-                <p><strong>Economic Basis:</strong> Ecosystem Asset Value reflects the Social Cost of Carbon (SCC). Per EPA (2023) guidelines, the 2026 central estimate is valued at $210/metric ton CO2e.</p>
+            <h2 class="text-sm font-black text-stone-900 uppercase tracking-widest mb-6">Scientific Methodology & Valuation Framework</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10 text-[12px] text-stone-600 leading-relaxed">
+                <div class="space-y-4">
+                    <h3 class="font-black text-stone-800 uppercase text-[10px]">I. Allometric Biomass Equations</h3>
+                    <p>
+                        Estimates of total aboveground biomass (<em>bm</em>) are derived using species-specific regressions from <strong>Jenkins et al. (2003)</strong>. This model is preferred for campus-wide assessments as it provides a standardized national-scale framework for North American forest types.
+                    </p>
+                    <p>
+                        The calculation utilizes the natural log-transformed diameter: 
+                        <span class="block bg-white p-2 border border-stone-200 rounded my-2 font-mono text-center">bm = exp(b0 + b1 * ln(dbh_cm))</span>
+                        where <em>dbh_cm</em> is the diameter at breast height in centimeters.
+                    </p>
+                </div>
+                <div class="space-y-4">
+                    <h3 class="font-black text-stone-800 uppercase text-[10px]">II. Carbon Sequestration & CO2e</h3>
+                    <p>
+                        Biomass is converted to carbon (C) by applying a mass fraction of <strong>0.50</strong>, representing the average dry-weight carbon content of hardwood and softwood tissues. To determine Carbon Dioxide Equivalent (CO2e), a molecular weight ratio of <strong>3.6663</strong> (44/12) is applied.
+                    </p>
+                    <h3 class="font-black text-stone-800 uppercase text-[10px]">III. Social Cost of Carbon (SCC)</h3>
+                    <p>
+                        Asset valuation is based on the <strong>Social Cost of Carbon</strong> (SCC) per the <strong>U.S. EPA (2023)</strong>. We utilize the 2026 central estimate of <strong>$210 per metric ton</strong> (2% discount rate), quantifying the avoided global economic damages including human health, agricultural shifts, and infrastructure risk.
+                    </p>
+                </div>
             </div>
-            <div class="pt-4 border-t border-stone-200 text-[10px] text-stone-400 italic">
-                Citations: Jenkins, J.C., et al. (2003). US Forestry Science. | U.S. EPA (2023). Report on SCC. | Gemini (Google AI) (2026). Technical Architecture.
+
+            <div class="pt-8 border-t border-stone-200 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="text-[10px] text-stone-500">
+                    <strong>Citation (Forestry):</strong><br>
+                    Jenkins, J. C., Chojnacky, D. C., Heath, L. S., & Birdsey, R. A. (2003). National-scale biomass estimators for United States tree species. <em>Forest Science</em>, 49(1), 12-35.
+                </div>
+                <div class="text-[10px] text-stone-500">
+                    <strong>Citation (Economic):</strong><br>
+                    U.S. EPA. (2023). Report on the Social Cost of Greenhouse Gases: Estimates Incorporating Recent Scientific Advances. <em>Supplementary Material for RIA</em>.
+                </div>
+                <div class="text-[10px] text-stone-500">
+                    <strong>Citation (Technical):</strong><br>
+                    Gemini (Google AI). (2026). <em>NCSU Strategic Investment Survey Tool: Technical Integration & Handshake Logic.</em> Custom AI Implementation.
+                </div>
             </div>
         </div>
     </div>
 
     <script>
+        // SCRIPT REMAINS THE SAME TO PROTECT FUNCTIONALITY
         const jenkinsData = {
             "mixed_hardwood": { b0: -2.4800, b1: 2.4835 },
             "pine": { b0: -2.5356, b1: 2.4349 },
@@ -146,7 +174,7 @@
             const formData = new FormData(e.target);
             try {
                 await fetch(SHEET_URL, { method: 'POST', body: formData, mode: 'no-cors' });
-                alert("SUCCESS: Logged to Asset Sheet");
+                alert("SUCCESS: Logged to Asset Registry");
                 e.target.reset();
                 document.getElementById('display-co2').innerText = "0";
                 document.getElementById('display-value').innerText = "0.00";
