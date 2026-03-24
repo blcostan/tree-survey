@@ -6,51 +6,54 @@
     <title>NCSU Tree Survey Tool</title>
     <style>
         body { font-family: 'Roboto', Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 400px; margin: auto; border-top: 5px solid #CC0000; }
-        h2 { color: #CC0000; text-align: center; margin-top: 0; }
-        label { display: block; margin: 10px 0 5px; font-weight: bold; color: #333; }
-        input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background-color: #CC0000; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); max-width: 450px; margin: auto; border-top: 6px solid #CC0000; }
+        h2 { color: #CC0000; text-align: center; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        label { display: block; margin: 12px 0 5px; font-weight: bold; color: #222; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 15px; background-color: #CC0000; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
         button:hover { background-color: #990000; }
-        .location-btn { background-color: #222; margin-bottom: 15px; }
+        .location-btn { background-color: #222; margin-bottom: 20px; margin-top: 5px; }
+        .location-btn:hover { background-color: #444; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>NCSU Tree Survey</h2>
+    <h2>Tree Asset Survey</h2>
     
-    <form action="YOUR_SHEET_MONKEY_URL_HERE" method="POST">
+    <form action="https://api.sheetmonkey.io/form/mZ11v9GzZ89o45Yx9f9q" method="POST">
         
         <label for="tree_id">Tree ID (Tag Number)</label>
-        <input type="text" id="tree_id" name="tree_id" placeholder="e.g. OAK-101" required>
+        <input type="text" id="tree_id" name="tree_id" placeholder="e.g. OAK-72" required>
 
         <label for="dbh">DBH (Diameter in Inches)</label>
-        <input type="number" id="dbh" name="dbh" step="0.1" placeholder="e.g. 15.5" required>
+        <input type="number" id="dbh" name="dbh" step="0.1" placeholder="e.g. 24.5" required>
 
         <label for="species">Species Group</label>
-        <select id="species" name="species">
-            <option value="hard_maple">Hardwood (Maple/Oak/Hickory)</option>
+        <select id="species" name="species" required>
+            <option value="" disabled selected>Select species...</option>
+            <option value="hard_maple">Hardwood (Oak/Maple/Hickory)</option>
             <option value="soft_maple">Soft Hardwood (Poplar/Gum)</option>
-            <option value="pine">Softwood (Pine/Cedar)</option>
+            <option value="pine">Softwood (Pine/Cedar/Cypress)</option>
         </select>
 
         <label for="condition">Tree Condition</label>
         <select id="condition" name="condition" required>
             <option value="Unknown">Unknown</option>
-            <option value="Poor">Poor</option>
-            <option value="Fair">Fair</option>
-            <option value="Good">Good</option>
-            <option value="Dead/Dying">Dead/Dying</option>
             <option value="Excellent">Excellent</option>
+            <option value="Good">Good</option>
+            <option value="Fair">Fair</option>
+            <option value="Poor">Poor</option>
+            <option value="Dead/Dying">Dead/Dying</option>
         </select>
 
-        <label for="gps">GPS Coordinates</label>
-        <input type="text" id="gps" name="gps" placeholder="Click button below" readonly>
-        <button type="button" class="location-btn" onclick="getLocation()">📍 Get Current Location</button>
+        <label for="gps">GPS Location</label>
+        <input type="text" id="gps" name="gps" placeholder="Awaiting Coordinates..." readonly>
+        <button type="button" class="location-btn" onclick="getLocation()">📍 Tap to Get GPS Location</button>
 
         <input type="hidden" name="Created" value="x-sheetmonkey-current-date-time" />
-        <button type="submit">Submit Tree Data</button>
+        
+        <button type="submit">Submit to Dashboard</button>
     </form>
 </div>
 
@@ -59,6 +62,8 @@
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position) {
                 document.getElementById('gps').value = position.coords.latitude + ", " + position.coords.longitude;
+            }, function(error) {
+                alert("Error getting location. Please ensure GPS is enabled.");
             });
         } else {
             alert("Geolocation is not supported by this browser.");
