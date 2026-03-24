@@ -3,120 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NCSU Tree Logger</title>
+    <title>NCSU | Tree Asset Survey</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8f8f8; color: #222; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
         .ncsu-red { background-color: #CC0000; }
-        .card { background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-top: 8px solid #CC0000; }
-        .input-style { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 6px; margin-top: 4px; font-weight: 600; }
-        .input-style:focus { border-color: #CC0000; outline: none; }
-        label { font-size: 11px; font-weight: 900; color: #666; text-transform: uppercase; letter-spacing: 1px; }
-        .btn-main { background: #CC0000; color: white; padding: 18px; width: 100%; border-radius: 6px; font-weight: 900; text-transform: uppercase; cursor: pointer; border: none; margin-top: 15px; transition: 0.2s; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-top: 8px solid #CC0000; overflow: hidden; }
+        .input-style { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 6px; margin-top: 4px; font-weight: 600; font-size: 16px; }
+        .input-style:focus { border-color: #CC0000; outline: none; ring: 2px ring-red-100; }
+        label { font-size: 11px; font-weight: 900; color: #4b5563; text-transform: uppercase; letter-spacing: 1px; display: block; margin-top: 10px; }
+        .btn-main { background: #CC0000; color: white; padding: 18px; width: 100%; border-radius: 6px; font-weight: 900; text-transform: uppercase; cursor: pointer; border: none; margin-top: 20px; transition: 0.2s; font-size: 16px; }
         .btn-main:hover { background: #000; transform: translateY(-2px); }
+        .btn-gps { background: #f3f4f6; color: #374151; padding: 10px; width: 100%; border-radius: 6px; font-weight: 700; font-size: 12px; border: 1px dashed #d1d5db; margin-top: 10px; }
     </style>
 </head>
-<body class="p-4 md:p-10">
+<body>
 
-    <div class="max-w-2xl mx-auto card p-8">
-        <div class="text-center mb-8">
-            <img src="https://brand.ncsu.edu/img/logo/ncstate-brick-red-white.png" alt="NCSU" class="mx-auto h-16 mb-4">
-            <h1 class="text-3xl font-black tracking-tighter">TREE ASSET LOGGER</h1>
-            <p class="text-gray-400 font-bold text-xs tracking-widest uppercase">Strategic Investment & Carbon Sync</p>
+    <div class="max-w-xl mx-auto card">
+        <div class="p-8 text-center bg-white border-b border-gray-100">
+            <img src="https://brand.ncsu.edu/img/logo/ncstate-brick-red-white.png" alt="NCSU Mascot" class="mx-auto h-20 mb-4">
+            <h1 class="text-2xl font-black tracking-tighter text-gray-900 uppercase">Tree Asset Logger</h1>
+            <p class="text-red-600 font-bold text-[10px] tracking-[0.2em] uppercase">Strategic Investment & Carbon Sync</p>
         </div>
 
-        <form id="treeForm" class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label>Reference ID / Tag #</label>
-                    <input type="text" id="refId" class="input-style" placeholder="T-101" required>
+        <div class="p-8">
+            <form id="treeForm">
+                <label for="refId">Reference ID / Tag Number</label>
+                <input type="text" id="refId" class="input-style" placeholder="e.g. OAK-001" required>
+
+                <label for="species">Tree Species</label>
+                <select id="species" class="input-style">
+                    <option>Willow Oak</option>
+                    <option>Longleaf Pine</option>
+                    <option>Southern Magnolia</option>
+                    <option>Red Maple</option>
+                    <option>Loblolly Pine</option>
+                    <option>Dogwood</option>
+                </select>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="dbh">Diameter (DBH Inches)</label>
+                        <input type="number" id="dbh" step="0.1" class="input-style" placeholder="24" required>
+                    </div>
+                    <div>
+                        <label for="condition">Tree Condition</label>
+                        <select id="condition" class="input-style">
+                            <option value="1.0">Excellent (100%)</option>
+                            <option value="0.8">Good (80%)</option>
+                            <option value="0.5">Fair (50%)</option>
+                            <option value="0.2">Poor (20%)</option>
+                        </select>
+                    </div>
                 </div>
-                <div>
-                    <label>Tree Species</label>
-                    <select id="species" class="input-style">
-                        <option>Willow Oak</option>
-                        <option>Longleaf Pine</option>
-                        <option>Southern Magnolia</option>
-                        <option>Red Maple</option>
-                        <option>Loblolly Pine</option>
-                    </select>
-                </div>
+
+                <button type="button" onclick="getLocation()" id="gpsBtn" class="btn-gps">
+                    📍 CAPTURE GPS COORDINATES
+                </button>
+
+                <button type="submit" id="submitBtn" class="btn-main shadow-lg shadow-red-100">
+                    Sync to Wolfpack Cloud
+                </button>
+            </form>
+
+            <div id="resultBox" class="mt-8 p-6 bg-red-50 rounded-lg border border-red-100 hidden text-center">
+                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Calculated Environmental Value</p>
+                <div id="valDisp" class="text-5xl font-black text-gray-900 my-1">$0.00</div>
+                <p id="massDisp" class="text-xs font-bold text-red-700 italic uppercase"></p>
             </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label>Diameter (DBH Inches)</label>
-                    <input type="number" id="dbh" step="0.1" class="input-style" placeholder="24" required>
-                </div>
-                <div>
-                    <label>Condition</label>
-                    <select id="condition" class="input-style">
-                        <option value="1.0">Excellent (100%)</option>
-                        <option value="0.8">Good (80%)</option>
-                        <option value="0.5">Fair (50%)</option>
-                        <option value="0.2">Poor (20%)</option>
-                    </select>
-                </div>
-            </div>
-
-            <button type="button" onclick="getLocation()" id="gpsBtn" class="w-full py-3 bg-gray-100 text-[10px] font-black text-gray-500 rounded border border-dashed border-gray-300 hover:bg-gray-200">
-                📍 CAPTURE GPS COORDINATES
-            </button>
-
-            <button type="submit" class="btn-main shadow-xl shadow-red-100">Sync to NCSU Database</button>
-        </form>
-
-        <div id="result" class="mt-8 p-6 bg-gray-50 rounded-lg border-l-4 border-red-600 hidden text-center">
-            <p class="text-[10px] font-black text-gray-400 uppercase">Current Asset Value</p>
-            <div id="valDisp" class="text-5xl font-black text-gray-900">$0.00</div>
-            <p id="massDisp" class="text-sm font-bold text-red-600 mt-2 italic"></p>
         </div>
     </div>
 
     <script>
-        let lat = "N/A", lon = "N/A";
-        const SHEET_URL = 'PASTE_YOUR_SHEET_MONKEY_URL_HERE';
+        let lat = "Pending", lon = "Pending";
+        // YOUR SHEET MONKEY URL INTEGRATED BELOW
+        const SHEET_URL = 'https://api.sheetmonkey.io/m/6873528766579203642';
 
         function getLocation() {
+            const btn = document.getElementById('gpsBtn');
             if (navigator.geolocation) {
-                document.getElementById('gpsBtn').innerText = "LOCATING...";
+                btn.innerText = "SATELLITE SYNCING...";
                 navigator.geolocation.getCurrentPosition(p => {
-                    lat = p.coords.latitude.toFixed(5);
-                    lon = p.coords.longitude.toFixed(5);
-                    document.getElementById('gpsBtn').innerText = `LOCKED: ${lat}, ${lon}`;
-                    document.getElementById('gpsBtn').classList.add('text-red-600', 'border-red-300');
+                    lat = p.coords.latitude.toFixed(6);
+                    lon = p.coords.longitude.toFixed(6);
+                    btn.innerText = `LOCKED: ${lat}, ${lon}`;
+                    btn.style.background = "#def7ec";
+                    btn.style.color = "#03543f";
+                    btn.style.borderColor = "#84e1bc";
+                }, () => {
+                    btn.innerText = "GPS BLOCKED BY BROWSER";
                 });
             }
         }
 
         document.getElementById('treeForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const dbh = parseFloat(document.getElementById('dbh').value);
-            const cond = parseFloat(document.getElementById('condition').value);
-            
-            // Jenkins Hardwood Formula approx
-            const carbonKG = (Math.exp(-2.48 + 2.4835 * Math.log(dbh)) * 0.5) * cond;
-            const dollarValue = carbonKG * 0.15;
-
-            document.getElementById('result').classList.remove('hidden');
-            document.getElementById('valDisp').innerText = `$${dollarValue.toFixed(2)}`;
-            document.getElementById('massDisp').innerText = `${carbonKG.toFixed(2)} kg Carbon Sequestration`;
-
-            fetch(SHEET_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    RefID: document.getElementById('refId').value,
-                    Species: document.getElementById('species').value,
-                    Condition: document.getElementById('condition').options[document.getElementById('condition').selectedIndex].text,
-                    DBH: dbh,
-                    Lat: lat, Lon: lon,
-                    Value: dollarValue.toFixed(2),
-                    Carbon: carbonKG.toFixed(2),
-                    Timestamp: new Date().toLocaleString()
-                })
-            }).then(() => alert("Asset Registered."));
-        });
-    </script>
-</body>
-</html>
+            const submitBtn = document.
