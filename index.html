@@ -36,7 +36,7 @@
 
         <div class="p-8 grid grid-cols-1 lg:grid-cols-12 gap-10">
             
-            <div class="lg:col-span-5 space-y-6 border-r border-stone-100 pr-0 lg:pr-10 text-center">
+            <div class="lg:col-span-5 space-y-6 border-r border-stone-100 pr-0 lg:pr-10">
                 
                 <div class="space-y-4 text-left">
                     <div>
@@ -75,11 +75,11 @@
                         <label class="block text-[10px] font-black text-stone-500 uppercase mb-1 tracking-widest">Spatial Data</label>
                         <div class="flex gap-2">
                             <input type="text" id="coords" readonly class="flex-1 bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 text-[11px] text-stone-500 font-mono" placeholder="Lat, Lon">
-                            <button onclick="getLocation()" class="ncsu-dark text-white px-5 py-2 rounded-lg text-[10px] font-black hover:bg-black transition uppercase tracking-widest">Capture GPS</button>
+                            <button type="button" onclick="getLocation()" class="ncsu-dark text-white px-5 py-2 rounded-lg text-[10px] font-black hover:bg-black transition uppercase tracking-widest">Capture GPS</button>
                         </div>
                     </div>
 
-                    <button onclick="logData()" id="submitBtn" class="w-full ncsu-red text-white font-black py-5 rounded-xl shadow-xl btn-wolfpack transition-all uppercase tracking-[0.15em] mt-4 active:scale-95 text-sm">
+                    <button type="button" onclick="logData()" id="submitBtn" class="w-full ncsu-red text-white font-black py-5 rounded-xl shadow-xl btn-wolfpack transition-all uppercase tracking-[0.15em] mt-4 active:scale-95 text-sm">
                         Submit Log Entry
                     </button>
                 </div>
@@ -120,7 +120,7 @@
                 <div class="max-w-2xl text-left">
                     <p class="text-[10px] font-black text-stone-400 uppercase mb-2 tracking-[0.2em]">Methodology Reference</p>
                     <p class="text-[11px] text-stone-500 leading-relaxed bg-white p-4 rounded-lg border border-stone-200 shadow-sm">
-                        <strong>Jenkins, J.C., Chojnacky, D.C., Heath, L.S., & Birdsey, R.A. (2003).</strong> National-scale biomass estimators for United States tree species. <em>Forest Science</em>, 49(1), 12-35. Biomass values are converted to Carbon (C) and CO2 equivalent using standard coefficients (0.5 biomass to C, 3.66 C to CO2).
+                        <strong>Jenkins, J.C., et al. (2003).</strong> National-scale biomass estimators for United States tree species. <em>Forest Science</em>, 49(1), 12-35. Biomass converted to CO2 equivalent.
                     </p>
                 </div>
                 <div class="text-right">
@@ -129,3 +129,106 @@
                 </div>
             </div>
         </footer>
+    </div>
+
+    <script>
+        const jenkinsData = {
+            "hard_maple": { b0: -2.0127, b1: 2.4342 }, 
+            "pine": { b0: -2.5356, b1: 2.4349 },
+            "mixed_hardwood": { b0: -2.4800, b1: 2.4835 }, 
+            "soft_maple": { b0: -1.9123, b1: 2.3651 },
+            "cedar": { b0: -2.0336, b1: 2.2592 }
+        };
+
+        const SHEET_URL = "https://api.sheetmonkey.io/form/38UXSMPRKwdshUDaCwDnHk";
+        let surveyCount = 0;
+        let myChart;
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    document.getElementById('coords').value = `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
+                }, (err) => { alert("Please enable GPS permissions."); });
+            } else { alert("GPS not supported."); }
+        }
+
+        function calcCO2(dbhIn, b0, b1, healthFactor = 1.0) {
+            if (!dbhIn || dbhIn <= 0) return 0;
+            const dbhCm = dbhIn * 2.54;
+            const biomassKg = Math.exp(b0 + b1 * Math.log(dbhCm));
+            return (biomassKg * 0.5) * 3.6663 * 2.20462 * healthFactor;
+        }
+
+        async function logData() {
+            const id = document.getElementById('tree_id').value;
+            const dbhInput = document.getElementById('dbh').value;
+            const dbh = parseFloat(dbhInput);
+            const group = document.getElementById('species_group').value;
+            const groupText = document.getElementById('species_group').options[document.getElementById('species_group').selectedIndex].text;
+            const health = parseFloat(document.getElementById('condition').value);
+            const conditionText = document.getElementById('condition').options[document.getElementById('condition').selectedIndex].text;
+            const coords = document.getElementById('coords').value;
+
+            if (!id || isNaN(dbh)) { 
+                alert("Please enter both Tree ID and DBH."); 
+                return; 
+            }
+
+            const { b0, b1 } = jenkinsData[group];
+            const co2 = calcCO2(dbh, b0, b1, health);
+            const co2Fixed = co2.toFixed(1);
+
+            document.getElementById('sync-status').innerText = "Syncing with Google Sheets...";
+
+            try {
+                const response = await fetch(SHEET_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        "Tree ID": id,
+                        "DBH (Inches)": dbh,
+                        "Species Group": groupText,
+                        "Condition": conditionText,
+                        "GPS Coords": coords,
+                        "CO2 Storage (lbs)": co2Fixed,
+                        "Timestamp": new Date().toLocaleString()
+                    })
+                });
+
+                if (response.ok) {
+                    document.getElementById('sync-status').innerText = "✅ Successfully Synced.";
+                    document.getElementById('current-co2').innerText = co2Fixed;
+                    surveyCount++;
+                    document.getElementById('entry-count').innerText = surveyCount;
+                    updateChart(dbh, b0, b1, health);
+                    document.getElementById('tree_id').value = ""; 
+                }
+            } catch (err) {
+                document.getElementById('sync-status').innerText = "❌ Sync Error.";
+            }
+        }
+
+        function updateChart(dbh, b0, b1, health) {
+            const years = [0, 5, 10, 15, 20];
+            const projection = years.map(y => calcCO2(dbh + (y * 0.25), b0, b1, health));
+
+            if (myChart) myChart.destroy();
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Now', '+5yr', '+10yr', '+15yr', '+20yr'],
+                    datasets: [{
+                        label: 'Projected Lbs CO2',
+                        data: projection,
+                        borderColor: '#CC0000',
+                        backgroundColor: 'rgba(204, 0, 0, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 4,
+                        pointBackgroundColor: '#222'
+                    }]
+                },
+                options: { 
+                    responsive: true,
+                    plugins: { legend
