@@ -21,9 +21,9 @@
                 <h1 class="text-xl font-black italic uppercase tracking-tight">NC STATE UNIVERSITY</h1>
                 <p class="text-red-500 text-[10px] font-bold tracking-widest uppercase mt-1">Campus Planning & Strategic Investment</p>
             </div>
-            <div class="text-[10px] font-bold text-red-700 bg-white px-3 py-1.5 rounded uppercase flex items-center gap-2">
+            <div class="text-[10px] font-bold text-red-700 bg-white px-3 py-1.5 rounded uppercase flex items-center gap-2 shadow-sm">
                 <div class="w-2.5 h-2.5 ncsu-red rounded-full animate-pulse"></div>
-                LIVE ASSET SYNC
+                VALUATION SYNC ACTIVE
             </div>
         </div>
 
@@ -84,17 +84,17 @@
             <div class="lg:col-span-7 space-y-6">
                 <div class="grid grid-cols-2 gap-4">
                     <div class="bg-stone-900 text-white p-6 rounded-2xl shadow-lg border-b-4 border-red-600">
-                        <p class="text-red-500 font-bold text-[10px] uppercase tracking-widest">CO2 Storage</p>
+                        <p class="text-red-500 font-bold text-[10px] uppercase tracking-widest">CO2 Storage Stock</p>
                         <p class="text-4xl font-black italic mt-1"><span id="display-co2">0</span> <span class="text-xs text-stone-500 uppercase font-normal">lbs</span></p>
                     </div>
                     <div class="bg-stone-900 text-white p-6 rounded-2xl shadow-lg border-b-4 border-green-500">
-                        <p class="text-green-500 font-bold text-[10px] uppercase tracking-widest">Ecosystem Value</p>
+                        <p class="text-green-500 font-bold text-[10px] uppercase tracking-widest">Ecosystem Asset Value</p>
                         <p class="text-4xl font-black italic mt-1">$<span id="display-value">0.00</span></p>
                     </div>
                 </div>
 
                 <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-inner">
-                    <h3 class="text-[10px] font-black text-stone-400 uppercase mb-4 text-center tracking-widest">20-Year Growth Projection (CO2 Lbs)</h3>
+                    <h3 class="text-[10px] font-black text-stone-400 uppercase mb-4 text-center tracking-widest">Growth Projection (Cumulative CO2)</h3>
                     <canvas id="growthChart" height="140"></canvas>
                 </div>
 
@@ -104,18 +104,26 @@
                         <p class="text-2xl font-black text-stone-900" id="entry-count">0</p>
                     </div>
                     <div class="text-center flex-1">
-                        <p id="sync-status" class="text-[11px] text-red-700 font-bold uppercase tracking-widest animate-pulse">Ready</p>
+                        <p id="sync-status" class="text-[11px] text-red-700 font-bold uppercase tracking-widest">System Ready</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <footer class="bg-stone-50 border-t border-stone-200 p-8">
-            <div class="max-w-4xl">
-                <p class="text-[10px] font-black text-stone-400 uppercase mb-2">Valuation Methodology</p>
-                <p class="text-[11px] text-stone-600 leading-relaxed italic">
-                    Biomass calculated via Jenkins et al. (2003). Sequestration value based on a Social Cost of Carbon (SCC) of $190/metric ton CO2e per 2026 EPA guidelines. 
-                </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl">
+                <div>
+                    <p class="text-[10px] font-black text-stone-400 uppercase mb-2">Biomass Methodology</p>
+                    <p class="text-[11px] text-stone-500 leading-relaxed italic">
+                        <strong>Jenkins, J.C., et al. (2003).</strong> National-scale biomass estimators for United States tree species. <em>Forest Science</em>, 49(1), 12-35. Carbon fraction set at 0.5; CO2e conversion at 3.6663.
+                    </p>
+                </div>
+                <div>
+                    <p class="text-[10px] font-black text-stone-400 uppercase mb-2">Economic Valuation</p>
+                    <p class="text-[11px] text-stone-500 leading-relaxed italic">
+                        <strong>U.S. Environmental Protection Agency (2023).</strong> Supplementary Material for the Regulatory Impact Analysis: Report on the Social Cost of Greenhouse Gases. Valuation reflects 2026 central estimate ($210/metric ton CO2e) at a 2% discount rate.
+                    </p>
+                </div>
             </div>
         </footer>
     </div>
@@ -157,13 +165,12 @@
                 const { b0, b1 } = jenkinsData[group];
                 const co2 = calcCO2(dbh, b0, b1, health);
                 
-                // Value calc: (lbs / 2204.62) * $190
-                const dollarValue = (co2 / 2204.62) * 190;
+                // Value calc: (lbs / 2204.62) * $210 (2026 EPA Central Estimate)
+                const dollarValue = (co2 / 2204.62) * 210;
 
                 document.getElementById('display-co2').innerText = co2;
-                document.getElementById('display-value').innerText = dollarValue.toFixed(2);
+                document.getElementById('display-value').innerText = dollarValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
                 
-                // Prep hidden fields for Google Sheets
                 document.getElementById('hidden_co2').value = co2;
                 document.getElementById('hidden_value').value = dollarValue.toFixed(2);
                 
@@ -216,7 +223,7 @@
                 data: {
                     labels: ['Now', '+5yr', '+10yr', '+15yr', '+20yr'],
                     datasets: [{
-                        label: 'Lbs CO2',
+                        label: 'Lbs CO2 Stock',
                         data: projection,
                         borderColor: '#CC0000',
                         backgroundColor: 'rgba(204, 0, 0, 0.1)',
@@ -229,14 +236,11 @@
                 options: { 
                     responsive: true,
                     plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: false, title: { display: true, text: 'Lbs CO2', font: { size: 10, weight: 'bold' } } } }
+                    scales: { y: { beginAtZero: false } }
                 }
             });
         }
-        window.onload = () => {
-            updateChart(0, -2.48, 2.48, 1);
-            statusBox.innerText = "READY";
-        };
+        window.onload = () => updateChart(0, -2.48, 2.48, 1);
     </script>
 </body>
 </html>
