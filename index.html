@@ -3,100 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NCSU | Tree Asset Survey</title>
+    <title>NCSU | Strategic Investment Tree Survey</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f1f1f1; 
+            background-image: radial-gradient(#d1d1d1 0.5px, transparent 0.5px); 
+            background-size: 20px 20px; 
+        }
         .ncsu-red { background-color: #CC0000; }
-        .card { background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-top: 8px solid #CC0000; overflow: hidden; }
-        .input-style { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 6px; margin-top: 4px; font-weight: 600; font-size: 16px; }
-        .input-style:focus { border-color: #CC0000; outline: none; ring: 2px ring-red-100; }
-        label { font-size: 11px; font-weight: 900; color: #4b5563; text-transform: uppercase; letter-spacing: 1px; display: block; margin-top: 10px; }
-        .btn-main { background: #CC0000; color: white; padding: 18px; width: 100%; border-radius: 6px; font-weight: 900; text-transform: uppercase; cursor: pointer; border: none; margin-top: 20px; transition: 0.2s; font-size: 16px; }
-        .btn-main:hover { background: #000; transform: translateY(-2px); }
-        .btn-gps { background: #f3f4f6; color: #374151; padding: 10px; width: 100%; border-radius: 6px; font-weight: 700; font-size: 12px; border: 1px dashed #d1d5db; margin-top: 10px; }
+        .ncsu-dark { background-color: #222222; }
+        .btn-wolfpack:hover { background-color: #990000; transform: translateY(-1px); }
+        input:focus, select:focus { border-color: #CC0000 !important; outline: none; box-shadow: 0 0 0 2px rgba(204, 0, 0, 0.2); }
     </style>
 </head>
-<body>
+<body class="min-h-screen p-4 pb-20">
 
-    <div class="max-w-xl mx-auto card">
-        <div class="p-8 text-center bg-white border-b border-gray-100">
-            <img src="https://brand.ncsu.edu/img/logo/ncstate-brick-red-white.png" alt="NCSU Mascot" class="mx-auto h-20 mb-4">
-            <h1 class="text-2xl font-black tracking-tighter text-gray-900 uppercase">Tree Asset Logger</h1>
-            <p class="text-red-600 font-bold text-[10px] tracking-[0.2em] uppercase">Strategic Investment & Carbon Sync</p>
+    <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-2xl overflow-hidden border-t-8 border-red-600">
+        <div class="ncsu-dark p-6 text-white flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-black italic tracking-tighter uppercase">NC STATE <span class="font-light not-italic text-stone-400">UNIVERSITY</span></h1>
+                <p class="text-red-500 text-[10px] font-bold tracking-widest uppercase mt-1">Campus Planning & Strategic Investment</p>
+            </div>
+            <div class="text-[10px] font-bold text-red-700 bg-white px-3 py-1.5 rounded uppercase flex items-center gap-2 shadow-sm">
+                <div class="w-2.5 h-2.5 ncsu-red rounded-full animate-pulse"></div>
+                SYNC ACTIVE
+            </div>
         </div>
 
-        <div class="p-8">
-            <form id="treeForm">
-                <label for="refId">Reference ID / Tag Number</label>
-                <input type="text" id="refId" class="input-style" placeholder="e.g. OAK-001" required>
+        <div class="p-8 grid grid-cols-1 lg:grid-cols-12 gap-10">
+            
+            <div class="lg:col-span-5 space-y-6 border-r border-stone-100 pr-0 lg:pr-10 text-center">
+                
+                <img src="https://brand.ncsu.edu/img/logo/ncstate-brick-red-white.png" alt="NCSU Logo" class="w-full max-w-[320px] mx-auto object-contain drop-shadow-xl mb-2">
 
-                <label for="species">Tree Species</label>
-                <select id="species" class="input-style">
-                    <option>Willow Oak</option>
-                    <option>Longleaf Pine</option>
-                    <option>Southern Magnolia</option>
-                    <option>Red Maple</option>
-                    <option>Loblolly Pine</option>
-                    <option>Dogwood</option>
-                </select>
-
-                <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-4 text-left">
                     <div>
-                        <label for="dbh">Diameter (DBH Inches)</label>
-                        <input type="number" id="dbh" step="0.1" class="input-style" placeholder="24" required>
+                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1 tracking-widest">Tree Identification</label>
+                        <input type="text" id="tree_id" class="w-full bg-white border border-stone-300 rounded-lg px-4 py-3 outline-none font-bold text-lg shadow-sm" placeholder="Tree ID #">
                     </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-black text-stone-500 uppercase mb-1 tracking-widest">DBH (Inches)</label>
+                            <input type="number" id="dbh" inputmode="decimal" step="0.1" class="w-full bg-stone-50 border border-stone-300 rounded-lg px-4 py-3 outline-none font-bold shadow-sm" placeholder="0.0">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-stone-500 uppercase mb-1 tracking-widest">Species Group</label>
+                            <select id="species_group" class="w-full bg-stone-50 border border-stone-300 rounded-lg px-4 py-3 text-xs font-semibold shadow-sm">
+                                <option value="hard_maple">High-Density (Oak/Hickory)</option>
+                                <option value="pine">Pine (Loblolly/Shortleaf)</option>
+                                <option value="mixed_hardwood">Mixed Hardwood</option>
+                                <option value="soft_maple">Med-Density (Maple/Poplar)</option>
+                                <option value="cedar">Low-Density (Cedar/Cypress)</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div>
-                        <label for="condition">Tree Condition</label>
-                        <select id="condition" class="input-style">
-                            <option value="1.0">Excellent (100%)</option>
-                            <option value="0.8">Good (80%)</option>
-                            <option value="0.5">Fair (50%)</option>
-                            <option value="0.2">Poor (20%)</option>
+                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1 tracking-widest">Tree Condition (Health)</label>
+                        <select id="condition" class="w-full bg-stone-50 border border-stone-300 rounded-lg px-4 py-3 text-xs font-semibold shadow-sm">
+                            <option value="1.0">Excellent (100% Value)</option>
+                            <option value="0.8">Good (80% Value)</option>
+                            <option value="0.6">Fair (60% Value)</option>
+                            <option value="0.4">Poor (40% Value)</option>
                         </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1 tracking-widest">Spatial Data</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="coords" readonly class="flex-1 bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 text-[11px] text-stone-500 font-mono" placeholder="Lat, Lon">
+                            <button onclick="getLocation()" class="ncsu-dark text-white px-5 py-2 rounded-lg text-[10px] font-black hover:bg-black transition uppercase tracking-widest">Capture GPS</button>
+                        </div>
+                    </div>
+
+                    <button onclick="logData()" id="submitBtn" class="w-full ncsu-red text-white font-black py-5 rounded-xl shadow-xl btn-wolfpack transition-all uppercase tracking-[0.15em] mt-4 active:scale-95 text-sm">
+                        Submit Log Entry
+                    </button>
+                </div>
+            </div>
+
+            <div class="lg:col-span-7 space-y-6">
+                <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-inner">
+                    <h3 class="text-[10px] font-black text-stone-400 uppercase mb-4 tracking-widest text-center lg:text-left">Sequestration Growth Curve (20-Year Projection)</h3>
+                    <canvas id="growthChart" height="180"></canvas>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="bg-stone-900 text-white p-6 rounded-2xl flex items-center justify-between shadow-lg">
+                        <div>
+                            <p class="text-red-500 font-bold text-[10px] uppercase tracking-widest">Current Storage</p>
+                            <p class="text-5xl font-black italic mt-1"><span id="current-co2">0.0</span><span class="text-sm ml-1 text-stone-500 uppercase">lbs</span></p>
+                        </div>
+                        <div class="text-5xl opacity-20">🌳</div>
+                    </div>
+                    <div class="bg-white border-2 border-stone-900 p-6 rounded-2xl flex items-center justify-between shadow-lg">
+                        <div>
+                            <p class="text-stone-400 font-bold text-[10px] uppercase tracking-widest">Survey Session</p>
+                            <p class="text-5xl font-black italic mt-1 text-stone-900"><span id="entry-count">0</span><span class="text-sm ml-1 text-stone-400 uppercase">qty</span></p>
+                        </div>
+                        <div class="text-5xl opacity-10">📋</div>
                     </div>
                 </div>
 
-                <button type="button" onclick="getLocation()" id="gpsBtn" class="btn-gps">
-                    📍 CAPTURE GPS COORDINATES
-                </button>
-
-                <button type="submit" id="submitBtn" class="btn-main shadow-lg shadow-red-100">
-                    Sync to Wolfpack Cloud
-                </button>
-            </form>
-
-            <div id="resultBox" class="mt-8 p-6 bg-red-50 rounded-lg border border-red-100 hidden text-center">
-                <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Calculated Environmental Value</p>
-                <div id="valDisp" class="text-5xl font-black text-gray-900 my-1">$0.00</div>
-                <p id="massDisp" class="text-xs font-bold text-red-700 italic uppercase"></p>
+                <div class="bg-red-50 border border-red-100 p-4 rounded-xl">
+                    <p class="text-[10px] font-bold text-red-800 uppercase tracking-widest mb-1">Sheet Sync Status</p>
+                    <p id="sync-status" class="text-xs text-red-700 font-medium italic">Syncing to Master Survey Sheet.</p>
+                </div>
             </div>
         </div>
-    </div>
 
-    <script>
-        let lat = "Pending", lon = "Pending";
-        // YOUR SHEET MONKEY URL INTEGRATED BELOW
-        const SHEET_URL = 'https://api.sheetmonkey.io/m/6873528766579203642';
-
-        function getLocation() {
-            const btn = document.getElementById('gpsBtn');
-            if (navigator.geolocation) {
-                btn.innerText = "SATELLITE SYNCING...";
-                navigator.geolocation.getCurrentPosition(p => {
-                    lat = p.coords.latitude.toFixed(6);
-                    lon = p.coords.longitude.toFixed(6);
-                    btn.innerText = `LOCKED: ${lat}, ${lon}`;
-                    btn.style.background = "#def7ec";
-                    btn.style.color = "#03543f";
-                    btn.style.borderColor = "#84e1bc";
-                }, () => {
-                    btn.innerText = "GPS BLOCKED BY BROWSER";
-                });
-            }
-        }
-
-        document.getElementById('treeForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const submitBtn = document.
+        <footer class="bg-stone-50 border-t border-stone-200 p-8">
+            <div class="flex flex-col md:flex-row justify-between items-end gap-6">
+                <div class="max-w-2xl text-left">
+                    <p class="text-[10px] font-black text-stone-400 uppercase mb-2 tracking-[0.2em]">Methodology Reference</p>
+                    <p class="text-[11px] text-stone-500 leading-relaxed bg-white p-4 rounded-lg border border-stone-200 shadow-sm">
+                        <strong>Jenkins, J.C., et al. (2003).</strong> Comprehensive Database of Diameter-based Biomass Regressions for North American Tree Species. <em>Forest Science</em>, 49
