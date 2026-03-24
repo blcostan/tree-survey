@@ -114,12 +114,32 @@
                 }, () => { alert("Check GPS permissions."); });
             }
         }
+<script>
+        const jenkinsData = {
+            "hard_maple": { b0: -2.0127, b1: 2.4342 },
+            "pine": { b0: -2.5356, b1: 2.4349 },
+            "mixed_hardwood": { b0: -2.4800, b1: 2.4835 },
+            "soft_maple": { b0: -1.9123, b1: 2.3651 },
+            "cedar": { b0: -2.0336, b1: 2.2592 }
+        };
+
+        // YOUR UNIQUE SHEET MONKEY ENDPOINT
+        const SHEET_URL = "https://api.sheetmonkey.io/form/38UXSMPRKwdshUDaCwDnHk";
+        let surveyCount = 0;
+        let myChart;
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    document.getElementById('coords').value = `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
+                }, () => { alert("Check GPS permissions."); });
+            }
+        }
 
         function calcCO2(dbhIn, b0, b1, health = 1.0) {
             if (!dbhIn || dbhIn <= 0) return 0;
             const dbhCm = dbhIn * 2.54;
             const biomassKg = Math.exp(b0 + b1 * Math.log(dbhCm));
-            // Rounding to nearest whole number
             return Math.round((biomassKg * 0.5) * 3.6663 * 2.20462 * health);
         }
 
@@ -141,23 +161,26 @@
 
         async function logData() {
             const id = document.getElementById('tree_id').value;
-            const dbh = Math.round(parseFloat(document.getElementById('dbh').value));
+            const dbhValue = document.getElementById('dbh').value;
             const groupText = document.getElementById('species_group').options[document.getElementById('species_group').selectedIndex].text;
             const conditionText = document.getElementById('condition').options[document.getElementById('condition').selectedIndex].text;
             const co2 = document.getElementById('current-co2').innerText;
             const coords = document.getElementById('coords').value;
 
-            if (!id || isNaN(dbh)) { alert("Enter ID and DBH"); return; }
+            if (!id || !dbhValue) { alert("Please enter Tree ID and DBH"); return; }
             
-            document.getElementById('sync-status').innerText = "Syncing...";
+            const statusBox = document.getElementById('sync-status');
+            statusBox.innerText = "Syncing...";
 
+            // THE FIX: Simplified fetch with no-cors mode
             try {
-                const response = await fetch(SHEET_URL, {
+                await fetch(SHEET_URL, {
                     method: 'POST',
+                    mode: 'no-cors', 
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         "Tree ID": id,
-                        "DBH": dbh,
+                        "DBH": dbhValue,
                         "Species Group": groupText,
                         "Condition": conditionText,
                         "GPS": coords,
@@ -166,21 +189,22 @@
                     })
                 });
 
-                if (response.ok) {
-                    document.getElementById('sync-status').innerText = "✅ Synced to Google Sheets";
-                    surveyCount++;
-                    document.getElementById('entry-count').innerText = surveyCount;
-                    document.getElementById('tree_id').value = "";
-                }
+                // In no-cors mode, we assume success if the browser doesn't throw an error
+                statusBox.innerText = "✅ Data Sent to Google Sheets";
+                surveyCount++;
+                document.getElementById('entry-count').innerText = surveyCount;
+                document.getElementById('tree_id').value = ""; 
+                document.getElementById('dbh').value = "";
+                
             } catch (err) {
-                document.getElementById('sync-status').innerText = "❌ Sync Error";
+                statusBox.innerText = "❌ Sync Error. Check Connection.";
+                console.error(err);
             }
         }
 
         function updateChart(dbh, b0, b1, health) {
             const years = [0, 5, 10, 15, 20];
             const projection = years.map(y => calcCO2(dbh + (y * 0.25), b0, b1, health));
-
             if (myChart) myChart.destroy();
             const ctx = document.getElementById('growthChart').getContext('2d');
             myChart = new Chart(ctx, {
@@ -207,5 +231,3 @@
         }
         window.onload = () => updateChart(0, -2.48, 2.48, 1);
     </script>
-</body>
-</html>
