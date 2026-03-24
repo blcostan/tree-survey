@@ -11,15 +11,16 @@
         body { font-family: 'Inter', sans-serif; background-color: #f1f1f1; }
         .ncsu-red { background-color: #CC0000; }
         .ncsu-dark { background-color: #222222; }
+        .btn-wolfpack:hover { background-color: #990000; transform: translateY(-1px); }
     </style>
 </head>
-<body class="min-h-screen p-4">
+<body class="min-h-screen p-4 pb-20">
 
     <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-2xl overflow-hidden border-t-8 border-red-600">
         <div class="ncsu-dark p-6 text-white flex justify-between items-center">
             <div>
-                <h1 class="text-xl font-black italic uppercase text-white">NC STATE UNIVERSITY</h1>
-                <p class="text-red-500 text-[10px] font-bold tracking-widest uppercase">Campus Planning & Strategic Investment</p>
+                <h1 class="text-xl font-black italic uppercase">NC STATE UNIVERSITY</h1>
+                <p class="text-red-500 text-[10px] font-bold tracking-widest uppercase mt-1">Campus Planning & Strategic Investment</p>
             </div>
             <div class="text-[10px] font-bold text-red-700 bg-white px-3 py-1.5 rounded uppercase flex items-center gap-2">
                 <div class="w-2.5 h-2.5 ncsu-red rounded-full animate-pulse"></div>
@@ -28,19 +29,21 @@
         </div>
 
         <div class="p-8 grid grid-cols-1 lg:grid-cols-12 gap-10">
-            <div class="lg:col-span-5 space-y-6">
+            
+            <div class="lg:col-span-5 space-y-6 border-r border-stone-100 pr-0 lg:pr-10">
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Tree ID #</label>
-                        <input type="text" id="tree_id" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold" placeholder="Ex: OAK-01">
+                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1 tracking-widest">Tree Identification</label>
+                        <input type="text" id="tree_id" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold" placeholder="Tree ID #">
                     </div>
+
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">DBH (Whole Inches)</label>
+                            <label class="block text-[10px] font-black text-stone-500 uppercase mb-1 tracking-widest">DBH (Whole Inches)</label>
                             <input type="number" id="dbh" step="1" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold" placeholder="0">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Species Group</label>
+                            <label class="block text-[10px] font-black text-stone-500 uppercase mb-1 tracking-widest">Species Group</label>
                             <select id="species_group" class="w-full border border-stone-300 rounded-lg px-4 py-3 text-xs font-semibold">
                                 <option value="hard_maple">Hardwood (Oak/Hickory)</option>
                                 <option value="pine">Softwood (Pine/Loblolly)</option>
@@ -50,8 +53,9 @@
                             </select>
                         </div>
                     </div>
+
                     <div>
-                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Condition</label>
+                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1 tracking-widest">Condition</label>
                         <select id="condition" class="w-full border border-stone-300 rounded-lg px-4 py-3 text-xs font-semibold">
                             <option value="1.0">Excellent (100%)</option>
                             <option value="0.8">Good (80%)</option>
@@ -59,48 +63,59 @@
                             <option value="0.4">Poor (40%)</option>
                         </select>
                     </div>
-                    <div class="flex gap-2">
-                        <input type="text" id="coords" readonly class="flex-1 bg-stone-100 border border-stone-300 rounded-lg px-4 py-2 text-[10px] font-mono" placeholder="GPS Lat, Lon">
-                        <button type="button" onclick="getLocation()" class="ncsu-dark text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase">GPS</button>
+
+                    <div>
+                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1 tracking-widest">Spatial Data</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="coords" readonly class="flex-1 bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 text-[11px] text-stone-500 font-mono" placeholder="Lat, Lon">
+                            <button type="button" onclick="getLocation()" class="ncsu-dark text-white px-5 py-2 rounded-lg text-[10px] font-black uppercase">Capture GPS</button>
+                        </div>
                     </div>
-                    <button type="button" onclick="logData()" id="submitBtn" class="w-full ncsu-red text-white font-black py-4 rounded-xl shadow-xl uppercase tracking-widest mt-4 hover:bg-red-700 active:scale-95 transition-all">
+
+                    <button type="button" onclick="logData()" id="submitBtn" class="w-full ncsu-red text-white font-black py-5 rounded-xl shadow-xl btn-wolfpack transition-all uppercase tracking-widest mt-4">
                         Submit Log Entry
                     </button>
                 </div>
             </div>
 
             <div class="lg:col-span-7 space-y-6">
-                <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-inner">
-                    <h3 class="text-[10px] font-black text-red-600 uppercase mb-4 text-center">Jenkins 20-Year Growth Projection</h3>
+                <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-inner text-center">
+                    <h3 class="text-[10px] font-black text-red-600 uppercase mb-4 tracking-widest">Jenkins 20-Year Growth Curve</h3>
                     <canvas id="growthChart" height="150"></canvas>
                 </div>
+                
                 <div class="grid grid-cols-2 gap-6">
-                    <div class="bg-stone-900 text-white p-6 rounded-2xl">
-                        <p class="text-red-500 font-bold text-[10px] uppercase tracking-wider">CO2 Storage</p>
-                        <p class="text-5xl font-black italic mt-1"><span id="current-co2">0</span> <span class="text-xs uppercase text-stone-500">lbs</span></p>
+                    <div class="bg-stone-900 text-white p-6 rounded-2xl shadow-lg">
+                        <p class="text-red-500 font-bold text-[10px] uppercase tracking-widest">CO2 Sequestration</p>
+                        <p class="text-5xl font-black italic mt-1"><span id="current-co2">0</span><span class="text-sm ml-1 text-stone-500 uppercase">lbs</span></p>
                     </div>
-                    <div class="bg-white border-2 border-stone-900 p-6 rounded-2xl">
-                        <p class="text-stone-400 font-bold text-[10px] uppercase tracking-wider">Session Qty</p>
-                        <p class="text-5xl font-black italic mt-1 text-stone-900"><span id="entry-count">0</span></p>
+                    <div class="bg-white border-2 border-stone-900 p-6 rounded-2xl shadow-lg text-stone-900">
+                        <p class="text-stone-400 font-bold text-[10px] uppercase tracking-widest">Session Count</p>
+                        <p class="text-5xl font-black italic mt-1"><span id="entry-count">0</span><span class="text-sm ml-1 text-stone-400 uppercase">qty</span></p>
                     </div>
                 </div>
-                <div class="bg-red-50 p-4 rounded-xl border border-red-100">
-                    <p id="sync-status" class="text-xs text-red-700 font-bold italic text-center uppercase tracking-widest">System Ready</p>
+
+                <div class="bg-red-50 border border-red-100 p-4 rounded-xl text-center">
+                    <p id="sync-status" class="text-[11px] text-red-700 font-bold uppercase tracking-widest">System Ready</p>
                 </div>
             </div>
         </div>
 
-        <footer class="bg-stone-50 p-6 border-t border-stone-200 text-center">
-            <p class="text-[10px] text-stone-500 italic">Methodology: Jenkins, J.C., et al. (2003). Biomass Regressions for North American Tree Species.</p>
-            <p class="text-[10px] font-black text-red-700 uppercase mt-2">Go Pack! 🐺</p>
+        <footer class="bg-stone-50 border-t border-stone-200 p-8">
+            <div class="max-w-3xl">
+                <p class="text-[10px] font-black text-stone-400 uppercase mb-2 tracking-widest">Methodology Reference</p>
+                <p class="text-[11px] text-stone-500 leading-relaxed bg-white p-4 rounded-lg border border-stone-200 shadow-sm">
+                    <strong>Jenkins, J.C., Chojnacky, D.C., Heath, L.S., & Birdsey, R.A. (2003).</strong> National-scale biomass estimators for United States tree species. <em>Forest Science</em>, 49(1), 12-35. Biomass converted to CO2 equivalent via carbon fraction (0.5) and molecular weight ratio (3.6663).
+                </p>
+            </div>
         </footer>
     </div>
 
     <script>
         const jenkinsData = {
-            "hard_maple": { b0: -2.0127, b1: 2.4342 },
+            "hard_maple": { b0: -2.0127, b1: 2.4342 }, 
             "pine": { b0: -2.5356, b1: 2.4349 },
-            "mixed_hardwood": { b0: -2.4800, b1: 2.4835 },
+            "mixed_hardwood": { b0: -2.4800, b1: 2.4835 }, 
             "soft_maple": { b0: -1.9123, b1: 2.3651 },
             "cedar": { b0: -2.0336, b1: 2.2592 }
         };
@@ -113,7 +128,7 @@
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition((pos) => {
                     document.getElementById('coords').value = `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
-                }, () => { alert("Check GPS permissions."); });
+                });
             }
         }
 
@@ -125,8 +140,7 @@
         }
 
         function runLiveCalc() {
-            const dbhInput = document.getElementById('dbh').value;
-            const dbh = parseFloat(dbhInput);
+            const dbh = parseFloat(document.getElementById('dbh').value);
             const group = document.getElementById('species_group').value;
             const health = parseFloat(document.getElementById('condition').value);
             
@@ -140,7 +154,7 @@
             }
         }
 
-        // Event Listeners for Live Math
+        // Attach listeners directly to input boxes
         document.getElementById('dbh').addEventListener('input', runLiveCalc);
         document.getElementById('species_group').addEventListener('change', runLiveCalc);
         document.getElementById('condition').addEventListener('change', runLiveCalc);
@@ -153,18 +167,14 @@
             const co2 = document.getElementById('current-co2').innerText;
             const coords = document.getElementById('coords').value;
 
-            if (!id || !dbh) { 
-                alert("Missing Tree ID or DBH."); 
-                return; 
-            }
+            if (!id || !dbh) { alert("Enter Tree ID and DBH."); return; }
             
-            const statusBox = document.getElementById('sync-status');
-            statusBox.innerText = "⏳ SENDING TO GOOGLE SHEETS...";
+            document.getElementById('sync-status').innerText = "⏳ SYNCING...";
 
             try {
                 await fetch(SHEET_URL, {
                     method: 'POST',
-                    mode: 'no-cors', 
+                    mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         "Tree ID": id,
@@ -177,24 +187,21 @@
                     })
                 });
 
-                statusBox.innerText = "✅ DATA SENT SUCCESSFULLY";
+                document.getElementById('sync-status').innerText = "✅ DATA SENT TO GOOGLE";
                 surveyCount++;
                 document.getElementById('entry-count').innerText = surveyCount;
-                
-                // Clear inputs for next entry
-                document.getElementById('tree_id').value = "";
+                document.getElementById('tree_id').value = ""; 
                 document.getElementById('dbh').value = "";
                 document.getElementById('current-co2').innerText = "0";
                 
             } catch (err) {
-                statusBox.innerText = "❌ SYNC ERROR";
+                document.getElementById('sync-status').innerText = "❌ ERROR";
             }
         }
 
         function updateChart(dbh, b0, b1, health) {
             const years = [0, 5, 10, 15, 20];
             const projection = years.map(y => calcCO2(dbh + (y * 0.25), b0, b1, health));
-
             if (myChart) myChart.destroy();
             const ctx = document.getElementById('growthChart').getContext('2d');
             myChart = new Chart(ctx, {
@@ -219,8 +226,6 @@
                 }
             });
         }
-        
-        // Initialize Chart on load
         window.onload = () => updateChart(0, -2.48, 2.48, 1);
     </script>
 </body>
