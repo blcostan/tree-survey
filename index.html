@@ -13,13 +13,12 @@
         .ncsu-dark { background-color: #222222; }
         .chart-container { position: relative; height: 300px; width: 100%; }
         
-        /* Pulse animation to draw eye to the helper */
         @keyframes subtle-pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.02); }
             100% { transform: scale(1); }
         }
-        .helper-active { animation: subtle-pulse 0.5s ease-in-out; }
+        .helper-active { animation: subtle-pulse 0.4s ease-in-out; }
     </style>
 </head>
 <body class="min-h-screen p-4 pb-12">
@@ -30,7 +29,7 @@
                 <h1 class="text-xl font-black italic uppercase">NC STATE UNIVERSITY</h1>
                 <p class="text-red-500 text-[10px] font-bold tracking-widest uppercase mt-1">Campus Planning & Strategic Investment</p>
             </div>
-            <div class="text-[10px] font-bold text-red-700 bg-white px-3 py-1.5 rounded uppercase">
+            <div class="text-[10px] font-bold text-red-700 bg-white px-3 py-1.5 rounded uppercase shadow-sm">
                 ACADEMIC REGISTRY ACTIVE
             </div>
         </div>
@@ -40,30 +39,29 @@
                 <form id="treeForm" class="space-y-4">
                     <div>
                         <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Tree ID Reference</label>
-                        <input type="text" name="Tree ID" id="tree_id" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold uppercase" placeholder="e.g. OAK-01">
+                        <input type="text" name="Tree ID" id="tree_id" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold uppercase focus:ring-2 focus:ring-red-600 outline-none" placeholder="e.g. OAK-01">
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Circumference (Inches)</label>
-                            <input type="number" name="Circumference" id="circ_input" step="0.1" min="0" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold" placeholder="Measure @ 4.5ft" required>
+                            <input type="number" name="Circumference" id="circ_input" step="0.1" min="0" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold focus:ring-2 focus:ring-red-600 outline-none" placeholder="Tape Measure" required>
                         </div>
                         <div>
                             <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Species Group</label>
-                            <select name="Species Group" id="species_group" class="w-full border border-stone-300 rounded-lg px-4 py-3 text-xs font-semibold" required>
+                            <select name="Species Group" id="species_group" class="w-full border border-stone-300 rounded-lg px-4 py-3 text-xs font-semibold focus:ring-2 focus:ring-red-600 outline-none" required>
                                 <option value="" disabled selected>Select Group</option>
-                                <option value="mixed_hardwood">Mixed Hardwood</option>
-                                <option value="pine">Softwood (Pine)</option>
+                                <option value="mixed_hardwood">Mixed Hardwood (Poplar/Gum)</option>
+                                <option value="pine">Softwood (Pine/Conifer)</option>
                                 <option value="hard_maple">Hardwood (Oak/Sugar Maple)</option>
                                 <option value="soft_maple">Soft Maple (Red/Silver)</option>
                             </select>
                         </div>
                     </div>
 
-                    <div id="species-helper" class="p-4 bg-red-50 border-2 border-red-200 rounded-xl hidden transition-all duration-300">
+                    <div id="species-helper" class="p-4 bg-red-50 border-2 border-red-200 rounded-xl hidden transition-all">
                         <div class="flex items-center gap-2 mb-2">
-                            <span class="bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase">Arborist Tip</span>
-                            <p class="text-[10px] font-black text-red-800 uppercase tracking-widest">Identification Guide</p>
+                            <span class="bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase">Arborist ID Tip</span>
                         </div>
                         <p id="helper-text" class="text-[12px] text-stone-800 leading-snug italic font-medium"></p>
                     </div>
@@ -82,7 +80,7 @@
                     <div>
                         <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">GPS Location</label>
                         <div class="flex gap-2">
-                            <input type="text" name="GPS" id="coords" readonly class="flex-1 bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 text-[11px] font-mono" placeholder="Click Capture">
+                            <input type="text" name="GPS" id="coords" readonly class="flex-1 bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 text-[11px] font-mono" placeholder="Capture Coordinates">
                             <button type="button" onclick="getLocation()" class="ncsu-dark text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase hover:bg-black transition">Capture</button>
                         </div>
                     </div>
@@ -92,7 +90,7 @@
                     <input type="hidden" name="Asset_Value" id="hidden_value">
                     <input type="hidden" name="Timestamp" id="timestamp">
 
-                    <button type="submit" class="w-full ncsu-red text-white font-black py-5 rounded-xl shadow-xl uppercase tracking-widest mt-4 hover:brightness-110 active:scale-95 transition-all">Log to Asset Registry</button>
+                    <button type="submit" class="w-full ncsu-red text-white font-black py-5 rounded-xl shadow-xl uppercase tracking-widest mt-4 hover:brightness-110 active:scale-95 transition-all">Submit to Registry</button>
                 </form>
             </div>
 
@@ -100,7 +98,7 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div class="bg-stone-900 text-white p-6 rounded-2xl shadow-lg border-b-4 border-red-600">
                         <p class="text-red-500 font-bold text-[10px] uppercase tracking-widest">Est. CO2 Storage</p>
-                        <p class="text-4xl font-black italic mt-1"><span id="display-co2">0</span> <span class="text-xs text-stone-500 uppercase">lbs</span></p>
+                        <p class="text-4xl font-black italic mt-1"><span id="display-co2">0</span> <span class="text-xs text-stone-500 uppercase text-stone-400">lbs</span></p>
                     </div>
                     <div class="bg-stone-900 text-white p-6 rounded-2xl shadow-lg border-b-4 border-green-500">
                         <p class="text-green-500 font-bold text-[10px] uppercase tracking-widest">Natural Capital Value</p>
@@ -109,7 +107,7 @@
                 </div>
                 
                 <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-inner h-[400px]">
-                    <p class="text-[10px] font-bold text-stone-400 uppercase mb-4 text-center">20-Year Carbon Accumulation Forecast</p>
+                    <p class="text-[10px] font-bold text-stone-400 uppercase mb-4 text-center tracking-widest">20-Year Growth Projection</p>
                     <div class="chart-container">
                         <canvas id="growthChart"></canvas>
                     </div>
@@ -118,10 +116,38 @@
         </div>
 
         <div class="bg-stone-50 p-8 border-t border-stone-200">
-            <h2 class="text-sm font-black text-stone-900 uppercase tracking-widest mb-4">Scientific Methodology</h2>
-            <p class="text-[11px] text-stone-600 leading-relaxed">
-                Diameter at Breast Height (DBH) derived via $d = C / \pi$. Biomass calculated using <strong>Jenkins et al. (2003)</strong>. Valuation via <strong>U.S. EPA (2023)</strong> Social Cost of Carbon ($210/metric ton).
-            </p>
+            <h2 class="text-sm font-black text-stone-900 uppercase tracking-widest mb-6 border-b border-stone-300 pb-2">Scientific Methodology & Valuation Framework</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 text-[12px] text-stone-600 leading-relaxed">
+                <div class="space-y-4">
+                    <h3 class="font-black text-stone-800 uppercase text-[10px] flex items-center gap-2">
+                        <span class="w-4 h-4 bg-stone-800 text-white rounded-full flex items-center justify-center text-[8px]">1</span>
+                        Field Measurements & DBH
+                    </h3>
+                    <p>
+                        Field measurement of <strong>Circumference ($C$)</strong> is captured at 4.5ft (breast height). The system converts this to <strong>Diameter ($d$)</strong> via:
+                        <span class="block bg-white p-2 border border-stone-200 rounded my-2 font-mono text-center text-stone-900">$d = C / \pi$</span>
+                        Total dry biomass is then calculated using the natural log regression models from <strong>Jenkins et al. (2003)</strong>.
+                    </p>
+                </div>
+
+                <div class="space-y-4">
+                    <h3 class="font-black text-stone-800 uppercase text-[10px] flex items-center gap-2">
+                        <span class="w-4 h-4 bg-stone-800 text-white rounded-full flex items-center justify-center text-[8px]">2</span>
+                        Sequestration & Valuation
+                    </h3>
+                    <p>
+                        Carbon ($C$) constitutes ~50% of total dry biomass. To find <strong>CO2 Equivalent ($CO_2e$)</strong>, a molecular ratio of 3.6663 is applied. 
+                        Asset valuation is derived from the <strong>U.S. EPA (2023)</strong> Social Cost of Carbon central estimate of <strong>$210 per metric ton</strong>.
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-8 border-t border-stone-200 grid grid-cols-1 md:grid-cols-3 gap-6 text-[9px] text-stone-400 italic">
+                <p><strong>Forestry:</strong> Jenkins, J. C., et al. (2003). Comprehensive Database of Diameter-based Biomass Regressions for North American Tree Species. USDA Forest Service.</p>
+                <p><strong>Economics:</strong> U.S. Environmental Protection Agency (2023). Supplementary Material for the Social Cost of Greenhouse Gases.</p>
+                <p><strong>Software:</strong> Strategic Investment Registry Logic (v5.0) for North Carolina State University Academic Use.</p>
+            </div>
         </div>
     </div>
 
@@ -134,10 +160,10 @@
         };
 
         const speciesTips = {
-            "hard_maple": "Look for <strong>'U' shaped notches</strong> between leaf lobes (rounded like a cup). Common for Sugar Maples and Oaks (High Density).",
-            "soft_maple": "Look for <strong>'V' shaped notches</strong> with jagged, saw-toothed edges. Common for Red/Silver Maples (Medium Density).",
-            "pine": "Needle-leaved evergreens. Includes Loblolly and Longleaf pines common in NC.",
-            "mixed_hardwood": "Broadleaf trees like Sweetgum (star leaf) or Poplar (tulip leaf). General standard density."
+            "hard_maple": "Look for <strong>'U' shaped sinuses</strong> (rounded like a cup) and acorns. High-density storage typical of Sugar Maples and Oaks.",
+            "soft_maple": "Look for <strong>'V' shaped sinuses</strong> with jagged/toothed leaf edges. Typical of Red and Silver Maples.",
+            "pine": "Needle-leaved evergreens. Generalized pine model for standard conifer biomass scaling.",
+            "mixed_hardwood": "Standard density broadleaf trees like Yellow Poplar (Tulip leaf) or Sweetgum (Star leaf)."
         };
 
         const SHEET_URL = "https://api.sheetmonkey.io/form/38UXSMPRKwdshUDaCwDnHk";
@@ -164,7 +190,6 @@
             const groupSelect = document.getElementById('species_group');
             const group = groupSelect.value;
             
-            // Helper Box Logic
             const helper = document.getElementById('species-helper');
             const helperText = document.getElementById('helper-text');
             
@@ -172,7 +197,6 @@
                 helper.classList.remove('hidden');
                 helper.classList.add('helper-active');
                 helperText.innerHTML = speciesTips[group];
-                // Remove animation class so it can re-trigger
                 setTimeout(() => helper.classList.remove('helper-active'), 500);
             }
 
@@ -202,15 +226,16 @@
             myChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['Now', '+5yr', '+10yr', '+15yr', '+20yr'],
+                    labels: ['Current', '+5yr', '+10yr', '+15yr', '+20yr'],
                     datasets: [{
-                        label: 'Lbs CO2',
+                        label: 'Lbs CO2 Stored',
                         data: projection,
                         borderColor: '#CC0000',
                         backgroundColor: 'rgba(204, 0, 0, 0.1)',
                         fill: true,
                         tension: 0.3,
-                        pointRadius: 4
+                        pointRadius: 4,
+                        pointBackgroundColor: '#CC0000'
                     }]
                 },
                 options: { 
@@ -229,20 +254,20 @@
         document.getElementById('treeForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             if(!document.getElementById('coords').value) {
-                alert("Capture GPS first.");
+                alert("Please capture GPS location.");
                 return;
             }
             document.getElementById('timestamp').value = new Date().toLocaleString();
             const formData = new FormData(e.target);
             try {
                 await fetch(SHEET_URL, { method: 'POST', body: formData, mode: 'no-cors' });
-                alert("SUCCESS: TREE LOGGED");
+                alert("SUCCESS: TREE ASSET LOGGED");
                 e.target.reset();
                 document.getElementById('display-co2').innerText = "0";
                 document.getElementById('display-value').innerText = "0.00";
                 document.getElementById('species-helper').classList.add('hidden');
                 updateChart(0, -2.48, 2.48);
-            } catch (err) { alert("Error sending data."); }
+            } catch (err) { alert("Connectivity error. Please try again."); }
         });
 
         window.onload = () => updateChart(0, -2.48, 2.48);
