@@ -30,14 +30,14 @@
             <div class="lg:col-span-5 space-y-6">
                 <form id="treeForm" class="space-y-4">
                     <div>
-                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Tree ID (Optional/Reference)</label>
-                        <input type="text" name="Tree ID" id="tree_id" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold" placeholder="e.g. OAK-01">
+                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Tree ID Reference</label>
+                        <input type="text" name="Tree ID" id="tree_id" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold uppercase placeholder:font-normal" placeholder="e.g. OAK-01">
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Circumference (Inches)</label>
-                            <input type="number" name="Circumference" id="circ_input" step="0.1" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold" placeholder="Measure @ 4.5ft" required>
+                            <input type="number" name="Circumference" id="circ_input" step="0.1" min="1" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold" placeholder="Measure @ 4.5ft" required>
                         </div>
                         <div>
                             <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Species Group</label>
@@ -64,66 +64,66 @@
                     <div>
                         <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">GPS Location</label>
                         <div class="flex gap-2">
-                            <input type="text" name="GPS" id="coords" readonly class="flex-1 bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 text-[11px] font-mono" placeholder="Capture Lat, Lon">
+                            <input type="text" name="GPS" id="coords" readonly class="flex-1 bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 text-[11px] font-mono" placeholder="Click Capture">
                             <button type="button" onclick="getLocation()" class="ncsu-dark text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase hover:bg-black transition">Capture</button>
                         </div>
                     </div>
 
-                    <input type="hidden" name="Calculated_DBH_Inches" id="hidden_dbh">
+                    <input type="hidden" name="Calculated_DBH" id="hidden_dbh">
                     <input type="hidden" name="CO2_Lbs" id="hidden_co2">
                     <input type="hidden" name="Asset_Value" id="hidden_value">
                     <input type="hidden" name="Timestamp" id="timestamp">
 
-                    <button type="submit" class="w-full ncsu-red text-white font-black py-5 rounded-xl shadow-xl uppercase tracking-widest mt-4 hover:bg-red-700 transition">Log to Asset Registry</button>
+                    <button type="submit" class="w-full ncsu-red text-white font-black py-5 rounded-xl shadow-xl uppercase tracking-widest mt-4 hover:brightness-110 active:scale-95 transition-all">Log to Asset Registry</button>
                 </form>
             </div>
 
             <div class="lg:col-span-7 space-y-6">
                 <div class="grid grid-cols-2 gap-4">
                     <div class="bg-stone-900 text-white p-6 rounded-2xl shadow-lg border-b-4 border-red-600">
-                        <p class="text-red-500 font-bold text-[10px] uppercase tracking-widest">Est. CO2 Storage</p>
+                        <p class="text-red-500 font-bold text-[10px] uppercase tracking-widest">Calculated CO2 Stock</p>
                         <p class="text-4xl font-black italic mt-1"><span id="display-co2">0</span> <span class="text-xs text-stone-500 uppercase">lbs</span></p>
                     </div>
                     <div class="bg-stone-900 text-white p-6 rounded-2xl shadow-lg border-b-4 border-green-500">
-                        <p class="text-green-500 font-bold text-[10px] uppercase tracking-widest">Social Asset Value</p>
+                        <p class="text-green-500 font-bold text-[10px] uppercase tracking-widest">Natural Capital Value</p>
                         <p class="text-4xl font-black italic mt-1">$<span id="display-value">0.00</span></p>
                     </div>
                 </div>
-                <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-inner">
-                    <p class="text-[10px] font-bold text-stone-400 uppercase mb-4 text-center">20-Year Growth Projection (Carbon Accumulation)</p>
-                    <canvas id="growthChart" height="140"></canvas>
+                <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-inner relative min-h-[250px]">
+                    <p class="text-[10px] font-bold text-stone-400 uppercase mb-4 text-center">20-Year Carbon Accumulation Forecast</p>
+                    <canvas id="growthChart"></canvas>
                 </div>
             </div>
         </div>
 
         <div class="bg-stone-50 p-8 border-t border-stone-200">
-            <h2 class="text-sm font-black text-stone-900 uppercase tracking-widest mb-6">Scientific Methodology</h2>
+            <h2 class="text-sm font-black text-stone-900 uppercase tracking-widest mb-6">Scientific Methodology & Valuation Framework</h2>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-10 text-[12px] text-stone-600 leading-relaxed">
                 <div class="space-y-4">
-                    <h3 class="font-black text-stone-800 uppercase text-[10px]">I. Field-to-Lab Conversion</h3>
+                    <h3 class="font-black text-stone-800 uppercase text-[10px]">I. Biomass & DBH Conversion</h3>
                     <p>
-                        To ensure accessibility for citizen scientists, students measure <strong>circumference (C)</strong>. The system automatically derives <strong>Diameter at Breast Height (DBH)</strong> using the geometric constant $\pi$:
-                    </p>
-                    <p class="bg-white p-2 border border-stone-200 rounded font-mono text-center text-[10px]">
-                        $d = C / \pi$
-                    </p>
-                    <p>
-                        Biomass ($bm$) is then calculated using species-specific regressions from <strong>Jenkins et al. (2003)</strong> where $dbh_{cm} = d \times 2.54$.
+                        For field efficiency, <strong>circumference (C)</strong> is measured and converted to <strong>Diameter at Breast Height (d)</strong>:
+                        <span class="block bg-white p-2 border border-stone-200 rounded my-2 font-mono text-center">$d = C / \pi$</span>
+                        Biomass is estimated using species regressions from <strong>Jenkins et al. (2003)</strong> where $dbh_{cm} = d \times 2.54$.
                     </p>
                 </div>
                 <div class="space-y-4">
-                    <h3 class="font-black text-stone-800 uppercase text-[10px]">II. Economic Valuation</h3>
+                    <h3 class="font-black text-stone-800 uppercase text-[10px]">II. Sequestration & Economic Cost</h3>
                     <p>
-                        Valuation is based on the <strong>Social Cost of Carbon</strong> (U.S. EPA, 2023), currently modeled at <strong>$210 per metric ton</strong>.
+                        Carbon (C) represents ~50% of dry biomass. <strong>CO2 Equivalent</strong> is derived using a molecular weight ratio of 3.6663. Valuation follows the <strong>U.S. EPA (2023)</strong> Social Cost of Carbon central estimate of <strong>$210 per metric ton</strong>.
                     </p>
                 </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-stone-200 grid grid-cols-1 md:grid-cols-3 gap-4 text-[9px] text-stone-400 italic">
+                <p><strong>Forestry:</strong> Jenkins, J. C., et al. (2003). National-scale biomass estimators.</p>
+                <p><strong>Economics:</strong> U.S. EPA. (2023). Report on the Social Cost of Greenhouse Gases.</p>
+                <p><strong>Software:</strong> Gemini (2026). Strategic Investment Survey Logic.</p>
             </div>
         </div>
     </div>
 
     <script>
-        // Jenkins et al. (2003) Coefficients
         const jenkinsData = {
             "mixed_hardwood": { b0: -2.4800, b1: 2.4835 },
             "pine": { b0: -2.5356, b1: 2.4349 },
@@ -132,55 +132,40 @@
         };
 
         const SHEET_URL = "https://api.sheetmonkey.io/form/38UXSMPRKwdshUDaCwDnHk";
-        let myChart;
+        let myChart = null; // Global chart reference
 
         function getLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition((pos) => {
                     document.getElementById('coords').value = `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
-                });
-            } else {
-                alert("Geolocation not supported by this browser.");
+                }, (err) => alert("Allow location access to capture GPS."));
             }
         }
 
-        /**
-         * Core Biomass Calculation
-         * @param {number} dbhIn - Diameter in inches
-         */
         function calcCO2(dbhIn, b0, b1) {
             if (!dbhIn || dbhIn <= 0) return 0;
-            
-            // Step 1: Convert inches to centimeters (Jenkins uses metric)
             const dbhCm = dbhIn * 2.54;
-            
-            // Step 2: Jenkins Allometric Biomass Equation (Kg of Dry Biomass)
             const biomassKg = Math.exp(b0 + b1 * Math.log(dbhCm));
-            
-            // Step 3: Biomass to Carbon (50%) to CO2e (3.6663) to Lbs (2.20462)
+            // Conversion: kg to C (0.5) to CO2e (3.6663) to lbs (2.20462)
             return Math.round((biomassKg * 0.5) * 3.6663 * 2.20462);
         }
 
         function updateMath() {
-            const circ = parseFloat(document.getElementById('circ_input').value) || 0;
-            
-            // KEY CONVERSION: Circumference to DBH
-            const dbh = circ / Math.PI; 
-            
+            const circInput = document.getElementById('circ_input');
+            const circ = parseFloat(circInput.value) || 0;
+            const dbh = circ / Math.PI; // CRITICAL: C / PI = DBH
             const group = document.getElementById('species_group').value;
 
             if (circ > 0) {
                 const { b0, b1 } = jenkinsData[group];
                 const co2 = calcCO2(dbh, b0, b1);
-                
-                // Convert Lbs to Metric Tons for Valuation ($210/ton)
                 const dollarValue = (co2 / 2204.62) * 210;
 
-                // Update UI Display
+                // UI Updates
                 document.getElementById('display-co2').innerText = co2.toLocaleString();
                 document.getElementById('display-value').innerText = dollarValue.toLocaleString(undefined, {minimumFractionDigits: 2});
                 
-                // Set Hidden Values for Google Sheets
+                // Set Hidden values for Google Sheets
                 document.getElementById('hidden_dbh').value = dbh.toFixed(2);
                 document.getElementById('hidden_co2').value = co2;
                 document.getElementById('hidden_value').value = dollarValue.toFixed(2);
@@ -189,67 +174,71 @@
             }
         }
 
-        // Event Listeners
-        document.getElementById('circ_input').addEventListener('input', updateMath);
-        document.getElementById('species_group').addEventListener('change', updateMath);
-
-        document.getElementById('treeForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            // Ensure GPS is captured
-            if (!document.getElementById('coords').value) {
-                alert("Please capture GPS location before submitting.");
-                return;
-            }
-
-            document.getElementById('timestamp').value = new Date().toLocaleString();
-            const formData = new FormData(e.target);
-            
-            try {
-                await fetch(SHEET_URL, { method: 'POST', body: formData, mode: 'no-cors' });
-                alert("SUCCESS: Logged to NCSU Asset Registry");
-                e.target.reset();
-                document.getElementById('display-co2').innerText = "0";
-                document.getElementById('display-value').innerText = "0.00";
-                updateChart(0, -2.48, 2.48);
-            } catch (err) { 
-                alert("Submission Error. Check internet connection."); 
-            }
-        });
-
         function updateChart(dbh, b0, b1) {
-            // Predict growth: Assume 0.25" diameter increase per year
             const years = [0, 5, 10, 15, 20];
-            const projection = years.map(y => calcCO2(dbh + (y * 0.25), b0, b1));
-            
-            if (myChart) myChart.destroy();
+            // Projection assumes a growth rate of 0.2 inch diameter per year
+            const projection = years.map(y => calcCO2(dbh + (y * 0.20), b0, b1));
+
             const ctx = document.getElementById('growthChart').getContext('2d');
+
+            // CRITICAL FIX: Destroy existing chart before creating a new one to prevent crashing
+            if (myChart) {
+                myChart.destroy();
+            }
+
             myChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['Current', '+5yrs', '+10yrs', '+15yrs', '+20yrs'],
+                    labels: ['Now', '+5yr', '+10yr', '+15yr', '+20yr'],
                     datasets: [{
-                        label: 'Lbs CO2 Stored',
+                        label: 'Lbs CO2',
                         data: projection,
                         borderColor: '#CC0000',
                         backgroundColor: 'rgba(204, 0, 0, 0.1)',
                         fill: true,
-                        tension: 0.4,
-                        pointRadius: 4,
+                        tension: 0.3,
+                        pointRadius: 5,
                         pointBackgroundColor: '#CC0000'
                     }]
                 },
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false,
+                    animation: false, // Disabling animation stops the "jitter" during typing
                     plugins: { legend: { display: false } },
                     scales: { y: { beginAtZero: true } }
                 }
             });
         }
 
-        // Initialize empty chart
-        window.onload = () => updateChart(0, -2.48, 2.48);
+        // Listeners
+        document.getElementById('circ_input').addEventListener('input', updateMath);
+        document.getElementById('species_group').addEventListener('change', updateMath);
+
+        // Submit Logic
+        document.getElementById('treeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(!document.getElementById('coords').value) {
+                alert("Capture GPS coordinates first.");
+                return;
+            }
+            document.getElementById('timestamp').value = new Date().toLocaleString();
+            const formData = new FormData(e.target);
+            try {
+                await fetch(SHEET_URL, { method: 'POST', body: formData, mode: 'no-cors' });
+                alert("ASSET LOGGED SUCCESSFULLY");
+                e.target.reset();
+                document.getElementById('display-co2').innerText = "0";
+                document.getElementById('display-value').innerText = "0.00";
+                if(myChart) myChart.destroy(); // Clear chart on success
+            } catch (err) { alert("Sync failed. Check connection."); }
+        });
+
+        // Initialize with empty view
+        window.onload = () => {
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            updateChart(0, -2.48, 2.48);
+        };
     </script>
 </body>
 </html>
