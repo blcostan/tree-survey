@@ -152,7 +152,11 @@
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition((pos) => {
                     document.getElementById('coords').value = pos.coords.latitude.toFixed(5) + ", " + pos.coords.longitude.toFixed(5);
-                }, (err) => alert("Please enable GPS."));
+                }, (err) => {
+                    alert("GPS Error: Please ensure Location Services are enabled for your browser.");
+                });
+            } else {
+                alert("Geolocation not supported on this browser.");
             }
         }
 
@@ -199,13 +203,31 @@
                 type: 'line',
                 data: {
                     labels: ['Now', '+5y', '+10y', '+15y', '+20y'],
-                    datasets: [{ label: 'Lbs CO2', data: projection, borderColor: '#CC0000', fill: true, backgroundColor: 'rgba(204, 0, 0, 0.1)' }]
+                    datasets: [{ 
+                        label: 'Lbs CO2', 
+                        data: projection, 
+                        borderColor: '#CC0000', 
+                        fill: true, 
+                        backgroundColor: 'rgba(204, 0, 0, 0.1)',
+                        tension: 0.1
+                    }]
                 },
-                options: { responsive: true, maintainAspectRatio: false }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } }
+                }
             });
         }
 
-        document.getElementById('treeForm').addEventListener('input', updateMath);
+        // Improved listeners for mobile responsiveness
+        const inputs = ['circ_input', 'species_group', 'tree_condition'];
+        inputs.forEach(id => {
+            const el = document.getElementById(id);
+            el.addEventListener('change', updateMath);
+            el.addEventListener('keyup', updateMath);
+        });
+
         document.getElementById('treeForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             document.getElementById('timestamp').value = new Date().toLocaleString();
@@ -215,5 +237,10 @@
                 e.target.reset();
                 document.getElementById('species-helper').classList.add('hidden');
                 updateChart(0, -2.48, 2.48, 0.8);
-            } catch (err) { alert("Error."); }
+            } catch (err) { alert("Submission Error."); }
         });
+
+        window.onload = () => updateChart(0, -2.48, 2.48, 0.8);
+    </script>
+</body>
+</html>
