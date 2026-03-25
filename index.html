@@ -135,4 +135,117 @@
 
         const speciesTips = {
             "hard_maple": "Look for <strong>'U' shaped notches</strong> between leaf lobes (rounded like a cup). Common for Sugar Maples and Oaks (High Density).",
-            "soft_maple": "Look for <strong>'V' shaped notches</strong> with
+            "soft_maple": "Look for <strong>'V' shaped notches</strong> with jagged, saw-toothed edges. Common for Red/Silver Maples (Medium Density).",
+            "pine": "Needle-leaved evergreens. Includes Loblolly and Longleaf pines common in NC.",
+            "mixed_hardwood": "Broadleaf trees like Sweetgum (star leaf) or Poplar (tulip leaf). General standard density."
+        };
+
+        const SHEET_URL = "https://api.sheetmonkey.io/form/38UXSMPRKwdshUDaCwDnHk";
+        let myChart = null;
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    document.getElementById('coords').value = pos.coords.latitude.toFixed(5) + ", " + pos.coords.longitude.toFixed(5);
+                }, (err) => alert("Please enable GPS."));
+            }
+        }
+
+        function calcCO2(dbhIn, b0, b1) {
+            if (!dbhIn || dbhIn <= 0) return 0;
+            const dbhCm = dbhIn * 2.54;
+            const biomassKg = Math.exp(b0 + b1 * Math.log(dbhCm));
+            return Math.round((biomassKg * 0.5) * 3.6663 * 2.20462);
+        }
+
+        function updateMath() {
+            const circ = parseFloat(document.getElementById('circ_input').value) || 0;
+            const dbh = circ / Math.PI;
+            const groupSelect = document.getElementById('species_group');
+            const group = groupSelect.value;
+            
+            // Helper Box Logic
+            const helper = document.getElementById('species-helper');
+            const helperText = document.getElementById('helper-text');
+            
+            if(group) {
+                helper.classList.remove('hidden');
+                helper.classList.add('helper-active');
+                helperText.innerHTML = speciesTips[group];
+                // Remove animation class so it can re-trigger
+                setTimeout(() => helper.classList.remove('helper-active'), 500);
+            }
+
+            if (circ > 0 && group) {
+                const { b0, b1 } = jenkinsData[group];
+                const co2 = calcCO2(dbh, b0, b1);
+                const dollarValue = (co2 / 2204.62) * 210;
+
+                document.getElementById('display-co2').innerText = co2.toLocaleString();
+                document.getElementById('display-value').innerText = dollarValue.toLocaleString(undefined, {minimumFractionDigits: 2});
+                
+                document.getElementById('hidden_dbh').value = dbh.toFixed(2);
+                document.getElementById('hidden_co2').value = co2;
+                document.getElementById('hidden_value').value = dollarValue.toFixed(2);
+                
+                updateChart(dbh, b0, b1);
+            }
+        }
+
+        function updateChart(dbh, b0, b1) {
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            const years = [0, 5, 10, 15, 20];
+            const projection = years.map(y => calcCO2(dbh + (y * 0.20), b0, b1));
+
+            if (myChart) { myChart.destroy(); }
+
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Now', '+5yr', '+10yr', '+15yr', '+20yr'],
+                    datasets: [{
+                        label: 'Lbs CO2',
+                        data: projection,
+                        borderColor: '#CC0000',
+                        backgroundColor: 'rgba(204, 0, 0, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 4
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    animation: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        document.getElementById('circ_input').addEventListener('input', updateMath);
+        document.getElementById('species_group').addEventListener('change', updateMath);
+
+        document.getElementById('treeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(!document.getElementById('coords').value) {
+                alert("Capture GPS first.");
+                return;
+            }
+            document.getElementById('timestamp').value = new Date().toLocaleString();
+            const formData = new FormData(e.target);
+            try {
+                await fetch(SHEET_URL, { method: 'POST', body: formData, mode: 'no-cors' });
+                alert("SUCCESS: TREE LOGGED");
+                e.target.reset();
+                document.getElementById('display-co2').innerText = "0";
+                document.getElementById('display-value').innerText = "0.00";
+                document.getElementById('species-helper').classList.add('hidden');
+                updateChart(0, -2.48, 2.48);
+            } catch (err) { alert("Error sending data."); }
+        });
+
+        window.onload = () => updateChart(0, -2.48, 2.48);
+    </script>
+</body>
+</html>
