@@ -12,12 +12,6 @@
         .ncsu-red { background-color: #CC0000; }
         .ncsu-dark { background-color: #222222; }
         .chart-container { position: relative; height: 300px; width: 100%; }
-        @keyframes subtle-pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
-        }
-        .helper-active { animation: subtle-pulse 0.4s ease-in-out; }
     </style>
 </head>
 <body class="min-h-screen p-4 pb-12">
@@ -58,19 +52,17 @@
                         </div>
                     </div>
 
-                    <div id="species-helper" class="p-4 bg-red-50 border-2 border-red-200 rounded-xl hidden transition-all">
-                        <p class="text-[9px] font-black text-red-800 uppercase mb-1 tracking-widest">Arborist ID Tip</p>
-                        <p id="helper-text" class="text-[12px] text-stone-800 leading-snug italic font-medium"></p>
+                    <div id="species-helper" class="p-4 bg-red-50 border-2 border-red-200 rounded-xl hidden">
+                        <p id="helper-text" class="text-[12px] text-stone-800 italic font-medium"></p>
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Tree Condition (Vitality Factor)</label>
+                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Tree Condition</label>
                         <select name="Condition" id="tree_condition" class="w-full border border-stone-300 rounded-lg px-4 py-3 text-xs font-semibold focus:ring-2 focus:ring-red-600 outline-none">
-                            <option value="1.0">Excellent (100% Value)</option>
-                            <option value="0.8" selected>Good (80% Value)</option>
-                            <option value="0.6">Fair (60% Value)</option>
-                            <option value="0.4">Poor (40% Value)</option>
-                            <option value="0.1">Dead/Dying (10% Value)</option>
+                            <option value="1.0">Excellent (100%)</option>
+                            <option value="0.8" selected>Good (80%)</option>
+                            <option value="0.6">Fair (60%)</option>
+                            <option value="0.4">Poor (40%)</option>
                         </select>
                     </div>
 
@@ -95,4 +87,99 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div class="bg-stone-900 text-white p-6 rounded-2xl shadow-lg border-b-4 border-red-600">
                         <p class="text-red-500 font-bold text-[10px] uppercase tracking-widest">Adjusted CO2 Storage</p>
-                        <p class="text-4xl font-black italic mt-1"><span id="display-co2">0</span> <span
+                        <p class="text-4xl font-black italic mt-1"><span id="display-co2">0</span> <span class="text-xs text-stone-500 uppercase">lbs</span></p>
+                    </div>
+                    <div class="bg-stone-900 text-white p-6 rounded-2xl shadow-lg border-b-4 border-green-500">
+                        <p class="text-green-500 font-bold text-[10px] uppercase tracking-widest">EPA Social Value (2023)</p>
+                        <p class="text-4xl font-black italic mt-1">$<span id="display-value">0.00</span></p>
+                    </div>
+                </div>
+                
+                <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-inner h-[400px]">
+                    <div class="chart-container">
+                        <canvas id="growthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const jenkinsData = {
+            "mixed_hardwood": { b0: -2.4800, b1: 2.4835 },
+            "pine": { b0: -2.5356, b1: 2.4349 },
+            "hard_maple": { b0: -2.0127, b1: 2.4342 },
+            "soft_maple": { b0: -1.9123, b1: 2.3651 }
+        };
+
+        const SHEET_URL = "https://api.sheetmonkey.io/form/38UXSMPRKwdshUDaCwDnHk";
+        const EPA_RATE = 0.09; 
+        let myChart = null;
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    document.getElementById('coords').value = pos.coords.latitude.toFixed(5) + ", " + pos.coords.longitude.toFixed(5);
+                }, (err) => alert("Please enable GPS."));
+            }
+        }
+
+        function calcCO2(dbhIn, b0, b1, multiplier) {
+            if (!dbhIn || dbhIn <= 0) return 0;
+            const dbhCm = dbhIn * 2.54;
+            const biomassKg = Math.exp(b0 + b1 * Math.log(dbhCm));
+            return Math.round((biomassKg * 0.5) * 3.6663 * 2.20462 * multiplier);
+        }
+
+        function updateMath() {
+            const circ = parseFloat(document.getElementById('circ_input').value) || 0;
+            const dbh = circ / Math.PI;
+            const group = document.getElementById('species_group').value;
+            const multiplier = parseFloat(document.getElementById('tree_condition').value);
+            
+            if (circ > 0 && group) {
+                const { b0, b1 } = jenkinsData[group];
+                const co2 = calcCO2(dbh, b0, b1, multiplier);
+                const dollarValue = co2 * EPA_RATE;
+
+                document.getElementById('display-co2').innerText = co2.toLocaleString();
+                document.getElementById('display-value').innerText = dollarValue.toLocaleString(undefined, {minimumFractionDigits: 2});
+                
+                document.getElementById('hidden_dbh').value = dbh.toFixed(2);
+                document.getElementById('hidden_co2').value = co2;
+                document.getElementById('hidden_value').value = dollarValue.toFixed(2);
+                
+                updateChart(dbh, b0, b1, multiplier);
+            }
+        }
+
+        function updateChart(dbh, b0, b1, multiplier) {
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            const projection = [0, 5, 10, 15, 20].map(y => calcCO2(dbh + (y * 0.20), b0, b1, multiplier));
+            if (myChart) myChart.destroy();
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Now', '+5y', '+10y', '+15y', '+20y'],
+                    datasets: [{ label: 'Lbs CO2', data: projection, borderColor: '#CC0000', fill: true, backgroundColor: 'rgba(204, 0, 0, 0.1)' }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        document.getElementById('treeForm').addEventListener('input', updateMath);
+        document.getElementById('treeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            document.getElementById('timestamp').value = new Date().toLocaleString();
+            try {
+                await fetch(SHEET_URL, { method: 'POST', body: new FormData(e.target), mode: 'no-cors' });
+                alert("SUCCESS: DATA SYNCED");
+                e.target.reset();
+                updateChart(0, -2.48, 2.48, 0.8);
+            } catch (err) { alert("Error."); }
+        });
+
+        window.onload = () => updateChart(0, -2.48, 2.48, 0.8);
+    </script>
+</body>
+</html>
