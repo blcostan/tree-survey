@@ -22,9 +22,6 @@
                 <h1 class="text-xl font-black italic uppercase">NC STATE UNIVERSITY</h1>
                 <p class="text-red-500 text-[10px] font-bold tracking-widest uppercase mt-1">Campus Planning & Strategic Investment</p>
             </div>
-            <div class="text-[10px] font-bold text-red-700 bg-white px-3 py-1.5 rounded uppercase">
-                EPA (2023) COMPLIANT
-            </div>
         </div>
 
         <div class="p-8 grid grid-cols-1 lg:grid-cols-12 gap-10">
@@ -52,17 +49,13 @@
                         </div>
                     </div>
 
-                    <div id="species-helper" class="p-4 bg-red-50 border-2 border-red-200 rounded-xl hidden">
-                        <p id="helper-text" class="text-[12px] text-stone-800 italic font-medium"></p>
-                    </div>
-
                     <div>
                         <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Tree Condition</label>
                         <select name="Condition" id="tree_condition" class="w-full border border-stone-300 rounded-lg px-4 py-3 text-xs font-semibold focus:ring-2 focus:ring-red-600 outline-none">
-                            <option value="1.0">Excellent (100%)</option>
-                            <option value="0.8" selected>Good (80%)</option>
-                            <option value="0.6">Fair (60%)</option>
-                            <option value="0.4">Poor (40%)</option>
+                            <option value="1.0">Excellent (100% Value)</option>
+                            <option value="0.8" selected>Good (80% Value)</option>
+                            <option value="0.6">Fair (60% Value)</option>
+                            <option value="0.4">Poor (40% Value)</option>
                         </select>
                     </div>
 
@@ -90,7 +83,7 @@
                         <p class="text-4xl font-black italic mt-1"><span id="display-co2">0</span> <span class="text-xs text-stone-500 uppercase">lbs</span></p>
                     </div>
                     <div class="bg-stone-900 text-white p-6 rounded-2xl shadow-lg border-b-4 border-green-500">
-                        <p class="text-green-500 font-bold text-[10px] uppercase tracking-widest">EPA Social Value (2023)</p>
+                        <p class="text-green-500 font-bold text-[10px] uppercase tracking-widest">Social Value</p>
                         <p class="text-4xl font-black italic mt-1">$<span id="display-value">0.00</span></p>
                     </div>
                 </div>
@@ -128,7 +121,8 @@
             if (!dbhIn || dbhIn <= 0) return 0;
             const dbhCm = dbhIn * 2.54;
             const biomassKg = Math.exp(b0 + b1 * Math.log(dbhCm));
-            return Math.round((biomassKg * 0.5) * 3.6663 * 2.20462 * multiplier);
+            const rawCO2 = (biomassKg * 0.5) * 3.6663 * 2.20462;
+            return Math.round(rawCO2 * multiplier);
         }
 
         function updateMath() {
@@ -156,27 +150,42 @@
         function updateChart(dbh, b0, b1, multiplier) {
             const ctx = document.getElementById('growthChart').getContext('2d');
             const projection = [0, 5, 10, 15, 20].map(y => calcCO2(dbh + (y * 0.20), b0, b1, multiplier));
-            if (myChart) myChart.destroy();
+
+            if (myChart) { myChart.destroy(); }
+
             myChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['Now', '+5y', '+10y', '+15y', '+20y'],
-                    datasets: [{ label: 'Lbs CO2', data: projection, borderColor: '#CC0000', fill: true, backgroundColor: 'rgba(204, 0, 0, 0.1)' }]
+                    labels: ['Current', '+5yr', '+10yr', '+15yr', '+20yr'],
+                    datasets: [{
+                        label: 'Lbs CO2',
+                        data: projection,
+                        borderColor: '#CC0000',
+                        backgroundColor: 'rgba(204, 0, 0, 0.1)',
+                        fill: true,
+                    }]
                 },
-                options: { responsive: true, maintainAspectRatio: false }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false
+                }
             });
         }
 
-        document.getElementById('treeForm').addEventListener('input', updateMath);
+        document.getElementById('circ_input').addEventListener('input', updateMath);
+        document.getElementById('species_group').addEventListener('change', updateMath);
+        document.getElementById('tree_condition').addEventListener('change', updateMath);
+
         document.getElementById('treeForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             document.getElementById('timestamp').value = new Date().toLocaleString();
+            const formData = new FormData(e.target);
             try {
-                await fetch(SHEET_URL, { method: 'POST', body: new FormData(e.target), mode: 'no-cors' });
+                await fetch(SHEET_URL, { method: 'POST', body: formData, mode: 'no-cors' });
                 alert("SUCCESS: DATA SYNCED");
                 e.target.reset();
                 updateChart(0, -2.48, 2.48, 0.8);
-            } catch (err) { alert("Error."); }
+            } catch (err) { alert("Error sending data."); }
         });
 
         window.onload = () => updateChart(0, -2.48, 2.48, 0.8);
