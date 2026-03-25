@@ -11,7 +11,15 @@
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         .ncsu-red { background-color: #CC0000; }
         .ncsu-dark { background-color: #222222; }
-        .chart-container { position: relative; height: 280px; width: 100%; }
+        .chart-container { position: relative; height: 300px; width: 100%; }
+        
+        /* Pulse animation to draw eye to the helper */
+        @keyframes subtle-pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        .helper-active { animation: subtle-pulse 0.5s ease-in-out; }
     </style>
 </head>
 <body class="min-h-screen p-4 pb-12">
@@ -42,7 +50,7 @@
                         </div>
                         <div>
                             <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Species Group</label>
-                            <select name="Species Group" id="species_group" class="w-full border border-stone-300 rounded-lg px-4 py-3 text-xs font-semibold">
+                            <select name="Species Group" id="species_group" class="w-full border border-stone-300 rounded-lg px-4 py-3 text-xs font-semibold" required>
                                 <option value="" disabled selected>Select Group</option>
                                 <option value="mixed_hardwood">Mixed Hardwood</option>
                                 <option value="pine">Softwood (Pine)</option>
@@ -52,9 +60,12 @@
                         </div>
                     </div>
 
-                    <div id="species-helper" class="p-3 bg-red-50 border border-red-100 rounded-lg hidden transition-all">
-                        <p class="text-[9px] font-black text-red-800 uppercase mb-1 tracking-tighter">Arborist Identification Tip:</p>
-                        <p id="helper-text" class="text-[11px] text-stone-700 leading-tight italic"></p>
+                    <div id="species-helper" class="p-4 bg-red-50 border-2 border-red-200 rounded-xl hidden transition-all duration-300">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase">Arborist Tip</span>
+                            <p class="text-[10px] font-black text-red-800 uppercase tracking-widest">Identification Guide</p>
+                        </div>
+                        <p id="helper-text" class="text-[12px] text-stone-800 leading-snug italic font-medium"></p>
                     </div>
 
                     <div>
@@ -97,7 +108,7 @@
                     </div>
                 </div>
                 
-                <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-inner h-[380px]">
+                <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-inner h-[400px]">
                     <p class="text-[10px] font-bold text-stone-400 uppercase mb-4 text-center">20-Year Carbon Accumulation Forecast</p>
                     <div class="chart-container">
                         <canvas id="growthChart"></canvas>
@@ -107,22 +118,10 @@
         </div>
 
         <div class="bg-stone-50 p-8 border-t border-stone-200">
-            <h2 class="text-sm font-black text-stone-900 uppercase tracking-widest mb-6">Scientific Methodology & Valuation Framework</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 text-[12px] text-stone-600 leading-relaxed">
-                <div class="space-y-4">
-                    <h3 class="font-black text-stone-800 uppercase text-[10px]">I. Biomass & DBH Conversion</h3>
-                    <p>
-                        Circumference (C) is measured in the field and converted to Diameter at Breast Height (d) via $d = C / \pi$.
-                        Biomass is estimated using species regressions from <strong>Jenkins et al. (2003)</strong> where dbh_cm = d &times; 2.54.
-                    </p>
-                </div>
-                <div class="space-y-4">
-                    <h3 class="font-black text-stone-800 uppercase text-[10px]">II. Sequestration & Economic Cost</h3>
-                    <p>
-                        CO2 Equivalent is derived using a molecular weight ratio of 3.6663. Valuation follows the <strong>U.S. EPA (2023)</strong> Social Cost of Carbon central estimate of <strong>$210 per metric ton</strong>.
-                    </p>
-                </div>
-            </div>
+            <h2 class="text-sm font-black text-stone-900 uppercase tracking-widest mb-4">Scientific Methodology</h2>
+            <p class="text-[11px] text-stone-600 leading-relaxed">
+                Diameter at Breast Height (DBH) derived via $d = C / \pi$. Biomass calculated using <strong>Jenkins et al. (2003)</strong>. Valuation via <strong>U.S. EPA (2023)</strong> Social Cost of Carbon ($210/metric ton).
+            </p>
         </div>
     </div>
 
@@ -135,114 +134,5 @@
         };
 
         const speciesTips = {
-            "hard_maple": "<strong>Hardwoods (Oak/Sugar Maple):</strong> Look for 'U' shaped notches between leaf lobes (like a cup) or acorns. These are high-density carbon stores.",
-            "soft_maple": "<strong>Soft Maples (Red/Silver):</strong> Look for 'V' shaped, jagged notches. Often have red leaf stems or silver leaf-backs. These grow fast but have lower wood density.",
-            "pine": "<strong>Softwood (Pine):</strong> Needle-leaved trees. Jenkins model assumes generalized pine/conifer biomass scaling.",
-            "mixed_hardwood": "<strong>Mixed Hardwood:</strong> Use for Poplar (Tulip leaf), Sweetgum (Star leaf), or Birch. Standard density broadleaf trees."
-        };
-
-        const SHEET_URL = "https://api.sheetmonkey.io/form/38UXSMPRKwdshUDaCwDnHk";
-        let myChart = null;
-
-        function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((pos) => {
-                    document.getElementById('coords').value = pos.coords.latitude.toFixed(5) + ", " + pos.coords.longitude.toFixed(5);
-                }, (err) => alert("Please enable GPS in browser settings."));
-            }
-        }
-
-        function calcCO2(dbhIn, b0, b1) {
-            if (!dbhIn || dbhIn <= 0) return 0;
-            const dbhCm = dbhIn * 2.54;
-            const biomassKg = Math.exp(b0 + b1 * Math.log(dbhCm));
-            return Math.round((biomassKg * 0.5) * 3.6663 * 2.20462);
-        }
-
-        function updateMath() {
-            const circ = parseFloat(document.getElementById('circ_input').value) || 0;
-            const dbh = circ / Math.PI;
-            const groupSelect = document.getElementById('species_group');
-            const group = groupSelect.value;
-            
-            // Show/Hide Helper Box
-            const helper = document.getElementById('species-helper');
-            const helperText = document.getElementById('helper-text');
-            if(group) {
-                helper.classList.remove('hidden');
-                helperText.innerHTML = speciesTips[group];
-            }
-
-            if (circ > 0 && group) {
-                const { b0, b1 } = jenkinsData[group];
-                const co2 = calcCO2(dbh, b0, b1);
-                const dollarValue = (co2 / 2204.62) * 210;
-
-                document.getElementById('display-co2').innerText = co2.toLocaleString();
-                document.getElementById('display-value').innerText = dollarValue.toLocaleString(undefined, {minimumFractionDigits: 2});
-                
-                document.getElementById('hidden_dbh').value = dbh.toFixed(2);
-                document.getElementById('hidden_co2').value = co2;
-                document.getElementById('hidden_value').value = dollarValue.toFixed(2);
-                
-                updateChart(dbh, b0, b1);
-            }
-        }
-
-        function updateChart(dbh, b0, b1) {
-            const ctx = document.getElementById('growthChart').getContext('2d');
-            const years = [0, 5, 10, 15, 20];
-            const projection = years.map(y => calcCO2(dbh + (y * 0.20), b0, b1));
-
-            if (myChart) { myChart.destroy(); }
-
-            myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Now', '+5yr', '+10yr', '+15yr', '+20yr'],
-                    datasets: [{
-                        label: 'Lbs CO2',
-                        data: projection,
-                        borderColor: '#CC0000',
-                        backgroundColor: 'rgba(204, 0, 0, 0.1)',
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 4
-                    }]
-                },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false,
-                    animation: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true } }
-                }
-            });
-        }
-
-        document.getElementById('circ_input').addEventListener('input', updateMath);
-        document.getElementById('species_group').addEventListener('change', updateMath);
-
-        document.getElementById('treeForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if(!document.getElementById('coords').value) {
-                alert("Capture GPS location before logging.");
-                return;
-            }
-            document.getElementById('timestamp').value = new Date().toLocaleString();
-            const formData = new FormData(e.target);
-            try {
-                await fetch(SHEET_URL, { method: 'POST', body: formData, mode: 'no-cors' });
-                alert("TREE LOGGED: Asset data synced to Academic Registry.");
-                e.target.reset();
-                document.getElementById('display-co2').innerText = "0";
-                document.getElementById('display-value').innerText = "0.00";
-                document.getElementById('species-helper').classList.add('hidden');
-                updateChart(0, -2.48, 2.48);
-            } catch (err) { alert("Network Error. Check internet connection."); }
-        });
-
-        window.onload = () => updateChart(0, -2.48, 2.48);
-    </script>
-</body>
-</html>
+            "hard_maple": "Look for <strong>'U' shaped notches</strong> between leaf lobes (rounded like a cup). Common for Sugar Maples and Oaks (High Density).",
+            "soft_maple": "Look for <strong>'V' shaped notches</strong> with
