@@ -2,19 +2,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>NCSU | Strategic Investment Tree Survey</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; -webkit-tap-highlight-color: transparent; }
         .ncsu-red { background-color: #CC0000; }
         .ncsu-dark { background-color: #222222; }
         .chart-container { position: relative; height: 300px; width: 100%; }
+        input, select, button { font-size: 16px !important; } /* Prevents iOS zoom on focus */
     </style>
 </head>
-<body class="min-h-screen p-4 pb-12">
+<body class="min-h-screen p-2 md:p-4 pb-12">
 
     <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-2xl overflow-hidden border-t-8 border-red-600">
         <div class="ncsu-dark p-6 text-white flex justify-between items-center">
@@ -22,12 +23,12 @@
                 <h1 class="text-xl font-black italic uppercase">NC STATE UNIVERSITY</h1>
                 <p class="text-red-500 text-[10px] font-bold tracking-widest uppercase mt-1">Campus Planning & Strategic Investment</p>
             </div>
-            <div class="text-[10px] font-bold text-red-700 bg-white px-3 py-1.5 rounded uppercase">
+            <div class="hidden md:block text-[10px] font-bold text-red-700 bg-white px-3 py-1.5 rounded uppercase">
                 EPA (2023) COMPLIANT
             </div>
         </div>
 
-        <div class="p-8 grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
             <div class="lg:col-span-5 space-y-6">
                 <form id="treeForm" class="space-y-4">
                     <div>
@@ -38,7 +39,7 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Circumference (Inches)</label>
-                            <input type="number" name="Circumference" id="circ_input" step="0.1" min="0" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold focus:ring-2 focus:ring-red-600 outline-none" placeholder="Measure @ 4.5ft" required>
+                            <input type="number" name="Circumference" id="circ_input" step="0.1" min="0" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold focus:ring-2 focus:ring-red-600 outline-none" placeholder="Inches" required>
                         </div>
                         <div>
                             <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Species Group</label>
@@ -71,7 +72,7 @@
                         <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">GPS Location</label>
                         <div class="flex gap-2">
                             <input type="text" name="GPS" id="coords" readonly class="flex-1 bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 text-[11px] font-mono" placeholder="Capture Coordinates" required>
-                            <button type="button" onclick="getLocation()" class="ncsu-dark text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase hover:bg-black transition">Capture</button>
+                            <button type="button" id="gpsBtn" class="ncsu-dark text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase hover:bg-black transition active:scale-95">Capture</button>
                         </div>
                     </div>
 
@@ -86,17 +87,17 @@
 
             <div class="lg:col-span-7 space-y-6">
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-stone-900 text-white p-6 rounded-2xl shadow-lg border-b-4 border-red-600">
+                    <div class="bg-stone-900 text-white p-4 md:p-6 rounded-2xl shadow-lg border-b-4 border-red-600">
                         <p class="text-red-500 font-bold text-[10px] uppercase tracking-widest">Adjusted CO2 Storage</p>
-                        <p class="text-4xl font-black italic mt-1"><span id="display-co2">0</span> <span class="text-xs text-stone-500 uppercase">lbs</span></p>
+                        <p class="text-3xl md:text-4xl font-black italic mt-1"><span id="display-co2">0</span> <span class="text-xs text-stone-500 uppercase">lbs</span></p>
                     </div>
-                    <div class="bg-stone-900 text-white p-6 rounded-2xl shadow-lg border-b-4 border-green-500">
+                    <div class="bg-stone-900 text-white p-4 md:p-6 rounded-2xl shadow-lg border-b-4 border-green-500">
                         <p class="text-green-500 font-bold text-[10px] uppercase tracking-widest">Social Value</p>
-                        <p class="text-4xl font-black italic mt-1">$<span id="display-value">0.00</span></p>
+                        <p class="text-3xl md:text-4xl font-black italic mt-1">$<span id="display-value">0.00</span></p>
                     </div>
                 </div>
                 
-                <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-inner h-[400px]">
+                <div class="bg-white border border-stone-200 rounded-2xl p-4 md:p-6 shadow-inner">
                     <div class="chart-container">
                         <canvas id="growthChart"></canvas>
                     </div>
@@ -104,9 +105,9 @@
             </div>
         </div>
 
-        <div class="bg-stone-50 p-8 border-t border-stone-200">
+        <div class="bg-stone-50 p-6 md:p-8 border-t border-stone-200">
             <h2 class="text-sm font-black text-stone-900 uppercase tracking-widest mb-6">Scientific Methodology & Valuation Framework</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 text-[12px] text-stone-600 leading-relaxed">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 text-[12px] text-stone-600 leading-relaxed">
                 <div class="space-y-4">
                     <h3 class="font-black text-stone-800 uppercase text-[10px]">I. Biomass & Condition Factor</h3>
                     <p>
@@ -148,62 +149,14 @@
         const EPA_RATE = 0.09; 
         let myChart = null;
 
-        function getLocation() {
+        // MOBILE-FRIENDLY GPS CAPTURE
+        document.getElementById('gpsBtn').addEventListener('click', function() {
             const coordInput = document.getElementById('coords');
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition((pos) => {
                     coordInput.value = pos.coords.latitude.toFixed(5) + ", " + pos.coords.longitude.toFixed(5);
                 }, (err) => {
-                    console.error("GPS Error:", err);
-                    alert("GPS Error: Check if your browser is blocking location on insecure (HTTP) sites.");
-                }, { enableHighAccuracy: true });
-            } else {
-                alert("Geolocation not supported on this browser.");
+                    alert("GPS Error: Please ensure Location Services are enabled in your browser settings.");
+                }, { enableHighAccuracy: true, timeout: 5000 });
             }
-        }
-
-        function calcCO2(dbhIn, b0, b1, multiplier) {
-            if (!dbhIn || dbhIn <= 0) return 0;
-            const dbhCm = dbhIn * 2.54;
-            const biomassKg = Math.exp(b0 + b1 * Math.log(dbhCm));
-            const rawCO2 = (biomassKg * 0.5) * 3.6663 * 2.20462;
-            return Math.round(rawCO2 * multiplier);
-        }
-
-        function updateMath() {
-            const circ = parseFloat(document.getElementById('circ_input').value) || 0;
-            const dbh = circ / Math.PI;
-            const group = document.getElementById('species_group').value;
-            const multiplier = parseFloat(document.getElementById('tree_condition').value);
-            
-            if(group) {
-                document.getElementById('species-helper').classList.remove('hidden');
-                document.getElementById('helper-text').innerHTML = speciesTips[group];
-            }
-
-            if (circ > 0 && group) {
-                const { b0, b1 } = jenkinsData[group];
-                const co2 = calcCO2(dbh, b0, b1, multiplier);
-                const dollarValue = co2 * EPA_RATE;
-
-                document.getElementById('display-co2').innerText = co2.toLocaleString();
-                document.getElementById('display-value').innerText = dollarValue.toLocaleString(undefined, {minimumFractionDigits: 2});
-                
-                document.getElementById('hidden_dbh').value = dbh.toFixed(2);
-                document.getElementById('hidden_co2').value = co2;
-                document.getElementById('hidden_value').value = dollarValue.toFixed(2);
-                
-                updateChart(dbh, b0, b1, multiplier);
-            }
-        }
-
-        function updateChart(dbh, b0, b1, multiplier) {
-            const ctx = document.getElementById('growthChart').getContext('2d');
-            const projection = [0, 5, 10, 15, 20].map(y => calcCO2(dbh + (y * 0.20), b0, b1, multiplier));
-            if (myChart) myChart.destroy();
-            myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Now', '+5y', '+10y', '+15y', '+20y'],
-                    datasets: [{ 
-                        label:
+        });
