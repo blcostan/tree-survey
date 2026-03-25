@@ -118,22 +118,21 @@
                 <div class="space-y-4">
                     <h3 class="font-black text-stone-800 uppercase text-[10px]">I. Biomass & Condition Factor</h3>
                     <p>
-                        Base biomass ($B$) is calculated via <strong>Jenkins et al. (2003)</strong>. However, storage capacity and capital value are adjusted by the <strong>Condition Factor ($C_f$)</strong>. This represents the tree's health and structural integrity; a tree in "Poor" condition has a reduced capacity for sequestration and a higher risk of carbon release through decay.
+                        Base biomass ($B$) is calculated via <strong>Jenkins et al. (2003)</strong>. However, storage capacity and capital value are adjusted by the <strong>Condition Factor ($C_f$)</strong>. This represents the tree's health and structural integrity.
                     </p>
-                    <p class="font-mono text-[10px] bg-white p-2 border border-stone-200 rounded">Adjusted Carbon = $B \times 0.5 \times 3.6663 \times C_f$</p>
                 </div>
                 <div class="space-y-4">
                     <h3 class="font-black text-stone-800 uppercase text-[10px]">II. Sequestration & Economic Cost</h3>
                     <p>
-                        CO2 Equivalent molecular ratio is 3.6663. Valuation follows the <strong>U.S. EPA (2023)</strong> Social Cost of Carbon central estimate of <strong>$190 per metric ton</strong> ($0.086 per lb).
+                        Valuation follows the <strong>U.S. EPA (2023)</strong> Social Cost of Carbon central estimate of <strong>$190 per metric ton</strong> ($0.086 per lb).
                     </p>
                 </div>
             </div>
 
             <div class="mt-8 pt-8 border-t border-stone-200 grid grid-cols-1 md:grid-cols-3 gap-6 text-[9px] text-stone-400 italic">
-                <p><strong>Forestry:</strong> Jenkins, J. C., et al. (2003). Comprehensive Database of Diameter-based Biomass Regressions for North American Tree Species. USDA Forest Service.</p>
-                <p><strong>Economics:</strong> U.S. Environmental Protection Agency (2023). Supplementary Material for the Social Cost of Greenhouse Gases.</p>
-                <p><strong>Registry:</strong> Strategic Investment Registry Logic (v5.2) for North Carolina State University Academic Use.</p>
+                <p><strong>Forestry:</strong> Jenkins, J. C., et al. (2003). USDA Forest Service.</p>
+                <p><strong>Economics:</strong> U.S. EPA (2023) Social Cost of Carbon.</p>
+                <p><strong>Registry:</strong> NCSU Strategic Investment Logic v5.2.</p>
             </div>
         </div>
     </div>
@@ -147,14 +146,14 @@
         };
 
         const speciesTips = {
-            "hard_maple": "Look for <strong>'U' shaped sinuses</strong> (rounded like a cup). Common for Sugar Maples and Oaks.",
+            "hard_maple": "Look for <strong>'U' shaped sinuses</strong> (rounded). Common for Sugar Maples and Oaks.",
             "soft_maple": "Look for <strong>'V' shaped sinuses</strong> with jagged leaf edges. Typical of Red and Silver Maples.",
-            "pine": "Needle-leaved evergreens. Standard conifer biomass scaling.",
+            "pine": "Needle-leaved evergreens.",
             "mixed_hardwood": "Standard density trees like Yellow Poplar or Sweetgum."
         };
 
         const SHEET_URL = "https://api.sheetmonkey.io/form/38UXSMPRKwdshUDaCwDnHk";
-        const EPA_RATE = 0.086; // $190 per metric ton converted to lbs
+        const EPA_RATE = 0.086; 
         let myChart = null;
 
         function getLocation() {
@@ -180,14 +179,10 @@
             const group = groupSelect.value;
             const multiplier = parseFloat(document.getElementById('tree_condition').value);
             
-            const helper = document.getElementById('species-helper');
-            const helperText = document.getElementById('helper-text');
-            
             if(group) {
+                const helper = document.getElementById('species-helper');
                 helper.classList.remove('hidden');
-                helper.classList.add('helper-active');
-                helperText.innerHTML = speciesTips[group];
-                setTimeout(() => helper.classList.remove('helper-active'), 500);
+                document.getElementById('helper-text').innerHTML = speciesTips[group];
             }
 
             if (circ > 0 && group) {
@@ -243,10 +238,6 @@
 
         document.getElementById('treeForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            if(!document.getElementById('coords').value) {
-                alert("Please capture GPS location.");
-                return;
-            }
             document.getElementById('timestamp').value = new Date().toLocaleString();
             const formData = new FormData(e.target);
             try {
