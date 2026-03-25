@@ -124,7 +124,7 @@
             <div class="mt-8 pt-8 border-t border-stone-200 grid grid-cols-1 md:grid-cols-3 gap-6 text-[9px] text-stone-400 italic">
                 <p><strong>Forestry:</strong> Jenkins, J. C., et al. (2003). USDA Forest Service.</p>
                 <p><strong>Economics:</strong> U.S. EPA (2023) Social Cost of Carbon.</p>
-                <p><strong>Registry:</strong> NCSU Strategic Investment Logic v5.2.</p>
+                <p><strong>Registry:</strong> Gemini AI & NCSU (2026). Strategic Investment Logic v6.0.</p>
             </div>
         </div>
     </div>
@@ -149,12 +149,14 @@
         let myChart = null;
 
         function getLocation() {
+            const coordInput = document.getElementById('coords');
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition((pos) => {
-                    document.getElementById('coords').value = pos.coords.latitude.toFixed(5) + ", " + pos.coords.longitude.toFixed(5);
+                    coordInput.value = pos.coords.latitude.toFixed(5) + ", " + pos.coords.longitude.toFixed(5);
                 }, (err) => {
-                    alert("GPS Error: Please ensure Location Services are enabled for your browser.");
-                });
+                    console.error("GPS Error:", err);
+                    alert("GPS Error: Check if your browser is blocking location on insecure (HTTP) sites.");
+                }, { enableHighAccuracy: true });
             } else {
                 alert("Geolocation not supported on this browser.");
             }
@@ -204,43 +206,4 @@
                 data: {
                     labels: ['Now', '+5y', '+10y', '+15y', '+20y'],
                     datasets: [{ 
-                        label: 'Lbs CO2', 
-                        data: projection, 
-                        borderColor: '#CC0000', 
-                        fill: true, 
-                        backgroundColor: 'rgba(204, 0, 0, 0.1)',
-                        tension: 0.1
-                    }]
-                },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true } }
-                }
-            });
-        }
-
-        // Improved listeners for mobile responsiveness
-        const inputs = ['circ_input', 'species_group', 'tree_condition'];
-        inputs.forEach(id => {
-            const el = document.getElementById(id);
-            el.addEventListener('change', updateMath);
-            el.addEventListener('keyup', updateMath);
-        });
-
-        document.getElementById('treeForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            document.getElementById('timestamp').value = new Date().toLocaleString();
-            try {
-                await fetch(SHEET_URL, { method: 'POST', body: new FormData(e.target), mode: 'no-cors' });
-                alert("SUCCESS: DATA SYNCED");
-                e.target.reset();
-                document.getElementById('species-helper').classList.add('hidden');
-                updateChart(0, -2.48, 2.48, 0.8);
-            } catch (err) { alert("Submission Error."); }
-        });
-
-        window.onload = () => updateChart(0, -2.48, 2.48, 0.8);
-    </script>
-</body>
-</html>
+                        label:
