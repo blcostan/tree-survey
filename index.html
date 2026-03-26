@@ -34,11 +34,11 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Circumference (Inches)</label>
-                            <input type="number" name="Circumference" id="circ_input" step="0.1" min="0" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold focus:ring-2 focus:ring-red-600 outline-none" placeholder="Inches" required>
+                            <input type="number" name="B:Circumference" id="circ_input" step="0.1" min="0" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold focus:ring-2 focus:ring-red-600 outline-none" placeholder="Inches" required>
                         </div>
                         <div>
                             <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Species Group</label>
-                            <select name="Species Group" id="species_group" class="w-full border border-stone-300 rounded-lg px-4 py-3 text-xs font-semibold focus:ring-2 focus:ring-red-600 outline-none" required>
+                            <select name="C:Species Group" id="species_group" class="w-full border border-stone-300 rounded-lg px-4 py-3 text-xs font-semibold focus:ring-2 focus:ring-red-600 outline-none" required>
                                 <option value="" disabled selected>Select Group</option>
                                 <option value="mixed_hardwood">Mixed Hardwood (Poplar/Gum)</option>
                                 <option value="pine">Softwood (Pine/Conifer)</option>
@@ -55,7 +55,7 @@
 
                     <div>
                         <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Tree Condition</label>
-                        <select name="Condition" id="tree_condition" class="w-full border border-stone-300 rounded-lg px-4 py-3 text-xs font-semibold focus:ring-2 focus:ring-red-600 outline-none">
+                        <select name="D:Condition" id="tree_condition" class="w-full border border-stone-300 rounded-lg px-4 py-3 text-xs font-semibold focus:ring-2 focus:ring-red-600 outline-none">
                             <option value="1.0">Excellent (100% Value)</option>
                             <option value="0.8" selected>Good (80% Value)</option>
                             <option value="0.6">Fair (60% Value)</option>
@@ -66,15 +66,15 @@
                     <div>
                         <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">GPS Location</label>
                         <div class="flex gap-2">
-                            <input type="text" name="GPS" id="coords" readonly class="flex-1 bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 text-[11px] font-mono" placeholder="Tap Capture..." required>
+                            <input type="text" name="E:GPS" id="coords" readonly class="flex-1 bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 text-[11px] font-mono" placeholder="Tap Capture..." required>
                             <button type="button" onclick="handleGPS()" class="ncsu-dark text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase">Capture</button>
                         </div>
                     </div>
 
-                    <input type="hidden" name="Calculated_DBH" id="hidden_dbh">
-                    <input type="hidden" name="CO2_Lbs" id="hidden_co2">
-                    <input type="hidden" name="Asset_Value" id="hidden_value">
-                    <input type="hidden" name="Timestamp" id="timestamp">
+                    <input type="hidden" name="F:Calculated_DBH" id="hidden_dbh">
+                    <input type="hidden" name="G:CO2_Lbs" id="hidden_co2">
+                    <input type="hidden" name="H:Asset_Value" id="hidden_value">
+                    <input type="hidden" name="I:Timestamp" id="timestamp">
 
                     <button type="submit" class="w-full ncsu-red text-white font-black py-5 rounded-xl shadow-xl uppercase tracking-widest mt-4 active:scale-95 transition-all">Log to Asset Registry</button>
                 </form>
