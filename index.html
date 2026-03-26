@@ -229,38 +229,8 @@
         // Initialize empty chart on load
         window.onload = () => renderChart(0, -2.48, 2.48, 0.8);
 
-       // --- REPLACE YOUR OLD ONSUBMIT WITH THIS ---
-        document.getElementById('treeForm').onsubmit = async (e) => {
-            e.preventDefault();
-            
-            // 1. Get coordinates from the input field
-            const coordsText = document.getElementById('coords').value;
-            const coordsArray = coordsText.split(',').map(Number);
-            const lat = coordsArray[0];
-            const lng = coordsArray[1];
-
-            // 2. NCSU Boundary Check (Main + Centennial)
-            const minLat = 35.750, maxLat = 35.795;
-            const minLng = -78.710, maxLng = -78.660;
-
-            if (isNaN(lat) || lat < minLat || lat > maxLat || lng < minLng || lng > maxLng) {
-                alert("OUT OF BOUNDS: This tool is restricted to NCSU Campus properties. Data not recorded.");
-                return; // This stops the code here so nothing is sent to the sheet
-            }
-
-            // 3. If location is valid, proceed with submission
-            document.getElementById('timestamp').value = new Date().toLocaleString();
-            try {
-                const SHEET_URL = "https://api.sheetmonkey.io/form/38UXSMPRKwdshUDaCwDnHk";
-                await fetch(SHEET_URL, { method: 'POST', body: new FormData(e.target), mode: 'no-cors' });
-                alert("SUCCESS: DATA SYNCED TO NCSU REGISTRY");
-                e.target.reset();
-                document.getElementById('species-helper').classList.add('hidden');
-                renderChart(0, -2.48, 2.48, 0.8);
-            } catch (err) { 
-                alert("Submission Error. Check connection."); 
-            }
-        };
+      document.getElementById('treeForm').onsubmit = async (e) => {
+          
             e.preventDefault();
             document.getElementById('timestamp').value = new Date().toLocaleString();
             try {
