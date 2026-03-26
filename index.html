@@ -11,8 +11,8 @@
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; -webkit-tap-highlight-color: transparent; }
         .ncsu-red { background-color: #CC0000; }
         .ncsu-dark { background-color: #222222; }
-        .chart-container { position: relative; height: 300px; width: 100%; }
-        input, select, button { font-size: 16px !important; } /* Prevents iOS zoom on focus */
+        .chart-box { position: relative; height: 300px !important; width: 100%; }
+        input, select, button { font-size: 16px !important; } 
     </style>
 </head>
 <body class="min-h-screen p-2 md:p-4 pb-12">
@@ -71,8 +71,8 @@
                     <div>
                         <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">GPS Location</label>
                         <div class="flex gap-2">
-                            <input type="text" name="GPS" id="coords" readonly class="flex-1 bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 text-[11px] font-mono" placeholder="Capture Coordinates" required>
-                            <button type="button" id="gpsBtn" class="ncsu-dark text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase hover:bg-black transition active:scale-95">Capture</button>
+                            <input type="text" name="GPS" id="coords" readonly class="flex-1 bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 text-[11px] font-mono" placeholder="Coordinates" required>
+                            <button type="button" id="gpsBtn" class="ncsu-dark text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase active:bg-red-700 transition-colors">Capture</button>
                         </div>
                     </div>
 
@@ -97,8 +97,8 @@
                     </div>
                 </div>
                 
-                <div class="bg-white border border-stone-200 rounded-2xl p-4 md:p-6 shadow-inner">
-                    <div class="chart-container">
+                <div class="bg-white border border-stone-200 rounded-2xl p-2 shadow-inner">
+                    <div class="chart-box">
                         <canvas id="growthChart"></canvas>
                     </div>
                 </div>
@@ -110,18 +110,13 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 text-[12px] text-stone-600 leading-relaxed">
                 <div class="space-y-4">
                     <h3 class="font-black text-stone-800 uppercase text-[10px]">I. Biomass & Condition Factor</h3>
-                    <p>
-                        Base biomass calculation is derived from <strong>Jenkins et al. (2003)</strong>. Storage capacity and capital value are adjusted by the tree's health condition multiplier.
-                    </p>
+                    <p>Base biomass calculation is derived from <strong>Jenkins et al. (2003)</strong>. Storage capacity and capital value are adjusted by the tree's health condition multiplier.</p>
                 </div>
                 <div class="space-y-4">
                     <h3 class="font-black text-stone-800 uppercase text-[10px]">II. Sequestration & Economic Cost</h3>
-                    <p>
-                        Valuation follows the <strong>U.S. EPA (2023)</strong> Social Cost of Carbon central estimate of <strong>$190 per metric ton</strong> ($0.09 per lb).
-                    </p>
+                    <p>Valuation follows the <strong>U.S. EPA (2023)</strong> Social Cost of Carbon central estimate of <strong>$190 per metric ton</strong> ($0.09 per lb).</p>
                 </div>
             </div>
-
             <div class="mt-8 pt-8 border-t border-stone-200 grid grid-cols-1 md:grid-cols-3 gap-6 text-[9px] text-stone-400 italic">
                 <p><strong>Forestry:</strong> Jenkins, J. C., et al. (2003). USDA Forest Service.</p>
                 <p><strong>Economics:</strong> U.S. EPA (2023) Social Cost of Carbon.</p>
@@ -149,14 +144,88 @@
         const EPA_RATE = 0.09; 
         let myChart = null;
 
-        // MOBILE-FRIENDLY GPS CAPTURE
-        document.getElementById('gpsBtn').addEventListener('click', function() {
-            const coordInput = document.getElementById('coords');
+        // FIXED GPS HANDLER
+        document.getElementById('gpsBtn').onclick = function(e) {
+            e.preventDefault();
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition((pos) => {
-                    coordInput.value = pos.coords.latitude.toFixed(5) + ", " + pos.coords.longitude.toFixed(5);
+                    document.getElementById('coords').value = pos.coords.latitude.toFixed(5) + ", " + pos.coords.longitude.toFixed(5);
                 }, (err) => {
-                    alert("GPS Error: Please ensure Location Services are enabled in your browser settings.");
+                    alert("GPS Error: Please enable location in browser settings.");
                 }, { enableHighAccuracy: true, timeout: 5000 });
             }
+        };
+
+        function calcCO2(dbhIn, b0, b1, multiplier) {
+            if (!dbhIn || dbhIn <= 0) return 0;
+            const dbhCm = dbhIn * 2.54;
+            const biomassKg = Math.exp(b0 + b1 * Math.log(dbhCm));
+            return Math.round((biomassKg * 0.5) * 3.6663 * 2.20462 * multiplier);
+        }
+
+        function updateMath() {
+            const circ = parseFloat(document.getElementById('circ_input').value) || 0;
+            const dbh = circ / Math.PI;
+            const group = document.getElementById('species_group').value;
+            const multiplier = parseFloat(document.getElementById('tree_condition').value);
+            
+            if(group) {
+                document.getElementById('species-helper').classList.remove('hidden');
+                document.getElementById('helper-text').innerHTML = speciesTips[group];
+            }
+
+            if (circ > 0 && group) {
+                const { b0, b1 } = jenkinsData[group];
+                const co2 = calcCO2(dbh, b0, b1, multiplier);
+                const dollarValue = co2 * EPA_RATE;
+
+                document.getElementById('display-co2').innerText = co2.toLocaleString();
+                document.getElementById('display-value').innerText = dollarValue.toLocaleString(undefined, {minimumFractionDigits: 2});
+                
+                document.getElementById('hidden_dbh').value = dbh.toFixed(2);
+                document.getElementById('hidden_co2').value = co2;
+                document.getElementById('hidden_value').value = dollarValue.toFixed(2);
+                
+                updateChart(dbh, b0, b1, multiplier);
+            }
+        }
+
+        function updateChart(dbh, b0, b1, multiplier) {
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            const projection = [0, 5, 10, 15, 20].map(y => calcCO2(dbh + (y * 0.20), b0, b1, multiplier));
+            if (myChart) myChart.destroy();
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Now', '+5y', '+10y', '+15y', '+20y'],
+                    datasets: [{ 
+                        label: 'Lbs CO2', 
+                        data: projection, 
+                        borderColor: '#CC0000', 
+                        fill: true, 
+                        backgroundColor: 'rgba(204, 0, 0, 0.1)',
+                        tension: 0.1 
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        ['circ_input', 'species_group', 'tree_condition'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updateMath);
         });
+
+        document.getElementById('treeForm').onsubmit = async (e) => {
+            e.preventDefault();
+            document.getElementById('timestamp').value = new Date().toLocaleString();
+            try {
+                await fetch(SHEET_URL, { method: 'POST', body: new FormData(e.target), mode: 'no-cors' });
+                alert("SUCCESS: DATA SYNCED");
+                e.target.reset();
+                document.getElementById('species-helper').classList.add('hidden');
+                updateChart(0, -2.48, 2.48, 0.8);
+            } catch (err) { alert("Error."); }
