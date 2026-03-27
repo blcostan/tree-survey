@@ -125,7 +125,6 @@
     </div>
 
     <script>
-        // Data Objects
         const jenkinsData = {
             "mixed_hardwood": { b0: -2.4800, b1: 2.4835 },
             "pine": { b0: -2.5356, b1: 2.4349 },
@@ -143,13 +142,16 @@
         const EPA_RATE = 0.09; 
         let myChart = null;
 
-        // Sync Logic
+        // SYNC LOGIC FIXED
         document.getElementById('circ_input').addEventListener('input', (e) => {
             const circ = parseFloat(e.target.value) || 0;
             if (circ > 0) {
-                document.getElementById('dbh_input').value = (circ / Math.PI).toFixed(1);
+                const dbhValue = (circ / Math.PI).toFixed(2);
+                document.getElementById('dbh_input').value = dbhValue;
+                document.getElementById('hidden_dbh').value = dbhValue;
             } else {
                 document.getElementById('dbh_input').value = "";
+                document.getElementById('hidden_dbh').value = "";
             }
             updateMath();
         });
@@ -157,25 +159,24 @@
         document.getElementById('dbh_input').addEventListener('input', (e) => {
             const dbh = parseFloat(e.target.value) || 0;
             if (dbh > 0) {
-                document.getElementById('circ_input').value = (dbh * Math.PI).toFixed(1);
+                document.getElementById('circ_input').value = (dbh * Math.PI).toFixed(2);
+                document.getElementById('hidden_dbh').value = dbh.toFixed(2);
             } else {
                 document.getElementById('circ_input').value = "";
+                document.getElementById('hidden_dbh').value = "";
             }
             updateMath();
         });
 
-        // GPS Handler
         window.handleGPS = function() {
             if ("geolocation" in navigator) {
                 navigator.geolocation.getCurrentPosition(
                     (pos) => {
                         document.getElementById('coords').value = pos.coords.latitude.toFixed(5) + ", " + pos.coords.longitude.toFixed(5);
                     },
-                    (err) => alert("GPS Error: Please ensure you are using HTTPS and have enabled Location Services."),
+                    (err) => alert("GPS Error: Enable location services."),
                     { enableHighAccuracy: true, timeout: 8000 }
                 );
-            } else {
-                alert("GPS hardware not detected.");
             }
         };
 
@@ -204,13 +205,13 @@
                 document.getElementById('display-co2').innerText = co2.toLocaleString();
                 document.getElementById('display-value').innerText = dollarValue.toLocaleString(undefined, {minimumFractionDigits: 2});
                 
+                // Final safeguard to ensure hidden field matches what is visible
                 document.getElementById('hidden_dbh').value = dbh.toFixed(2);
                 document.getElementById('hidden_co2').value = co2;
                 document.getElementById('hidden_value').value = dollarValue.toFixed(2);
                 
                 renderChart(dbh, b0, b1, multiplier);
             } else {
-                // Clear displays if input is invalid
                 document.getElementById('display-co2').innerText = "0";
                 document.getElementById('display-value').innerText = "0.00";
                 if(myChart) renderChart(0, -2.48, 2.48, 0.8);
@@ -222,9 +223,7 @@
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
             const projection = [0, 5, 10, 15, 20].map(y => calcCO2(dbh + (y * 0.20), b0, b1, multiplier));
-            
             if (myChart) myChart.destroy();
-            
             myChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -238,15 +237,10 @@
                         tension: 0.1 
                     }]
                 },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true } }
-                }
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
             });
         }
 
-        // Attach Listeners to remaining fields
         ['species_group', 'tree_condition'].forEach(id => {
             document.getElementById(id).addEventListener('change', updateMath);
         });
@@ -258,12 +252,12 @@
             document.getElementById('timestamp').value = new Date().toLocaleString();
             try {
                 const SHEET_URL = "https://api.sheetmonkey.io/form/38UXSMPRKwdshUDaCwDnHk";
-                await fetch(SHEET_URL, { method: 'POST', body: new FormData(e.target), mode: 'no-cors' });
+                const formData = new FormData(e.target);
+                await fetch(SHEET_URL, { method: 'POST', body: formData, mode: 'no-cors' });
                 alert("SUCCESS: DATA SYNCED");
                 e.target.reset();
                 document.getElementById('species-helper').classList.add('hidden');
                 renderChart(0, -2.48, 2.48, 0.8);
-                // Clear numeric displays
                 document.getElementById('display-co2').innerText = "0";
                 document.getElementById('display-value').innerText = "0.00";
             } catch (err) { alert("Submission Error."); }
