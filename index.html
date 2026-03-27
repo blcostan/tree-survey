@@ -23,29 +23,32 @@
                 <h1 class="text-xl font-black italic uppercase">NC STATE UNIVERSITY</h1>
                 <p class="text-red-500 text-[10px] font-bold tracking-widest uppercase mt-1">Campus Planning & Strategic Investment</p>
             </div>
-           
         </div>
 
         <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
             <div class="lg:col-span-5 space-y-6">
                 <form id="treeForm" class="space-y-4">
-                   
                     
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Circumference (Inches)</label>
-                            <input type="number" name="B:Circumference" id="circ_input" step="0.1" min="0" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold focus:ring-2 focus:ring-red-600 outline-none" placeholder="Inches" required>
+                            <input type="number" name="B:Circumference" id="circ_input" step="0.1" min="0" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold focus:ring-2 focus:ring-red-600 outline-none" placeholder="Inches">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Species Group</label>
-                            <select name="C:Species Group" id="species_group" class="w-full border border-stone-300 rounded-lg px-4 py-3 text-xs font-semibold focus:ring-2 focus:ring-red-600 outline-none" required>
-                                <option value="" disabled selected>Select Group</option>
-                                <option value="mixed_hardwood">Mixed Hardwood (Poplar/Gum)</option>
-                                <option value="pine">Softwood (Pine/Conifer)</option>
-                                <option value="hard_maple">Hardwood (Oak/Sugar Maple)</option>
-                                <option value="soft_maple">Soft Maple (Red/Silver)</option>
-                            </select>
+                            <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">DBH (Inches)</label>
+                            <input type="number" id="dbh_input" step="0.1" min="0" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold focus:ring-2 focus:ring-red-600 outline-none" placeholder="Inches">
                         </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Species Group</label>
+                        <select name="C:Species Group" id="species_group" class="w-full border border-stone-300 rounded-lg px-4 py-3 text-xs font-semibold focus:ring-2 focus:ring-red-600 outline-none" required>
+                            <option value="" disabled selected>Select Group</option>
+                            <option value="mixed_hardwood">Mixed Hardwood (Poplar/Gum)</option>
+                            <option value="pine">Softwood (Pine/Conifer)</option>
+                            <option value="hard_maple">Hardwood (Oak/Sugar Maple)</option>
+                            <option value="soft_maple">Soft Maple (Red/Silver)</option>
+                        </select>
                     </div>
 
                     <div id="species-helper" class="p-4 bg-red-50 border-2 border-red-200 rounded-xl hidden">
@@ -140,14 +143,35 @@
         const EPA_RATE = 0.09; 
         let myChart = null;
 
-        // EMERGENCY GPS HANDLER
+        // Sync Logic
+        document.getElementById('circ_input').addEventListener('input', (e) => {
+            const circ = parseFloat(e.target.value) || 0;
+            if (circ > 0) {
+                document.getElementById('dbh_input').value = (circ / Math.PI).toFixed(1);
+            } else {
+                document.getElementById('dbh_input').value = "";
+            }
+            updateMath();
+        });
+
+        document.getElementById('dbh_input').addEventListener('input', (e) => {
+            const dbh = parseFloat(e.target.value) || 0;
+            if (dbh > 0) {
+                document.getElementById('circ_input').value = (dbh * Math.PI).toFixed(1);
+            } else {
+                document.getElementById('circ_input').value = "";
+            }
+            updateMath();
+        });
+
+        // GPS Handler
         window.handleGPS = function() {
             if ("geolocation" in navigator) {
                 navigator.geolocation.getCurrentPosition(
                     (pos) => {
                         document.getElementById('coords').value = pos.coords.latitude.toFixed(5) + ", " + pos.coords.longitude.toFixed(5);
                     },
-                    (err) => alert("GPS Error: Please ensure you are using HTTPS and have enabled Location Services for this browser."),
+                    (err) => alert("GPS Error: Please ensure you are using HTTPS and have enabled Location Services."),
                     { enableHighAccuracy: true, timeout: 8000 }
                 );
             } else {
@@ -163,8 +187,7 @@
         }
 
         function updateMath() {
-            const circ = parseFloat(document.getElementById('circ_input').value) || 0;
-            const dbh = circ / Math.PI;
+            const dbh = parseFloat(document.getElementById('dbh_input').value) || 0;
             const group = document.getElementById('species_group').value;
             const multiplier = parseFloat(document.getElementById('tree_condition').value);
             
@@ -173,7 +196,7 @@
                 document.getElementById('helper-text').innerHTML = speciesTips[group];
             }
 
-            if (circ > 0 && group) {
+            if (dbh > 0 && group) {
                 const { b0, b1 } = jenkinsData[group];
                 const co2 = calcCO2(dbh, b0, b1, multiplier);
                 const dollarValue = co2 * EPA_RATE;
@@ -186,6 +209,11 @@
                 document.getElementById('hidden_value').value = dollarValue.toFixed(2);
                 
                 renderChart(dbh, b0, b1, multiplier);
+            } else {
+                // Clear displays if input is invalid
+                document.getElementById('display-co2').innerText = "0";
+                document.getElementById('display-value').innerText = "0.00";
+                if(myChart) renderChart(0, -2.48, 2.48, 0.8);
             }
         }
 
@@ -218,17 +246,14 @@
             });
         }
 
-        // Attach Listeners
-        ['circ_input', 'species_group', 'tree_condition'].forEach(id => {
-            document.getElementById(id).addEventListener('input', updateMath);
+        // Attach Listeners to remaining fields
+        ['species_group', 'tree_condition'].forEach(id => {
             document.getElementById(id).addEventListener('change', updateMath);
         });
 
-        // Initialize empty chart on load
         window.onload = () => renderChart(0, -2.48, 2.48, 0.8);
 
-      document.getElementById('treeForm').onsubmit = async (e) => {
-          
+        document.getElementById('treeForm').onsubmit = async (e) => {
             e.preventDefault();
             document.getElementById('timestamp').value = new Date().toLocaleString();
             try {
@@ -238,6 +263,9 @@
                 e.target.reset();
                 document.getElementById('species-helper').classList.add('hidden');
                 renderChart(0, -2.48, 2.48, 0.8);
+                // Clear numeric displays
+                document.getElementById('display-co2').innerText = "0";
+                document.getElementById('display-value').innerText = "0.00";
             } catch (err) { alert("Submission Error."); }
         };
     </script>
