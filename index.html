@@ -13,7 +13,6 @@
         .ncsu-dark { background-color: #222222; }
         #chart-wrapper { height: 320px !important; width: 100%; position: relative; }
         input, select, button { font-size: 16px !important; } 
-        /* Ensure the bottom content is always reachable */
         .content-container { min-height: 100vh; display: flex; flex-direction: column; }
     </style>
 </head>
@@ -33,7 +32,6 @@
         <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
             <div class="lg:col-span-5 space-y-6">
                 <form id="treeForm" class="space-y-4">
-                    
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Circumference (In)</label>
@@ -100,7 +98,6 @@
                         <p class="text-3xl md:text-4xl font-black italic mt-1">$<span id="display-value">0.00</span></p>
                     </div>
                 </div>
-                
                 <div class="bg-white border border-stone-200 rounded-2xl p-2 shadow-inner">
                     <div id="chart-wrapper">
                         <canvas id="growthChart"></canvas>
@@ -110,21 +107,16 @@
         </div>
 
         <div class="bg-stone-50 p-6 md:p-8 border-t border-stone-200 mt-auto">
-            <h2 class="text-sm font-black text-stone-900 uppercase tracking-widest mb-6">Scientific Methodology & Valuation Framework</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 text-[12px] text-stone-600 leading-relaxed">
-                <div class="space-y-4">
+            <h2 class="text-sm font-black text-stone-900 uppercase tracking-widest mb-6">Scientific Methodology</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-[12px] text-stone-600 leading-relaxed">
+                <div>
                     <h3 class="font-black text-stone-800 uppercase text-[10px]">I. Biomass & Condition Factor</h3>
-                    <p>Base biomass calculation is derived from <strong>Jenkins et al. (2003)</strong>. Storage capacity and capital value are adjusted by the tree's health condition multiplier.</p>
+                    <p>Base biomass calculation is derived from <strong>Jenkins et al. (2003)</strong>.</p>
                 </div>
-                <div class="space-y-4">
+                <div>
                     <h3 class="font-black text-stone-800 uppercase text-[10px]">II. Sequestration & Economic Cost</h3>
-                    <p>Valuation follows the <strong>U.S. EPA (2023)</strong> Social Cost of Carbon central estimate of <strong>$190 per metric ton</strong> ($0.09 per lb). These values are based on 2020 dollars. </p>
+                    <p>Valuation follows <strong>U.S. EPA (2023)</strong> Social Cost of Carbon ($0.09 per lb).</p>
                 </div>
-            </div>
-            <div class="mt-8 pt-8 border-t border-stone-200 grid grid-cols-1 md:grid-cols-3 gap-6 text-[9px] text-stone-400 italic">
-                <p><strong>Forestry:</strong> Jenkins, J. C., et al. (2003). USDA Forest Service.</p>
-                <p><strong>Economics:</strong> U.S. EPA (2023) Social Cost of Carbon.</p>
-                <p><strong>Registry:</strong> Gemini AI & NCSU (2026). Strategic Investment Logic v6.0.</p>
             </div>
         </div>
     </div>
@@ -138,10 +130,10 @@
         };
 
         const speciesTips = {
-            "hard_maple": "Look for <strong>'U' shaped sinuses</strong> (rounded). Common for Sugar Maples/Oaks.",
-            "soft_maple": "Look for <strong>'V' shaped sinuses</strong>. Typical of Red/Silver Maples.",
+            "hard_maple": "Look for <strong>'U' shaped sinuses</strong>.",
+            "soft_maple": "Look for <strong>'V' shaped sinuses</strong>.",
             "pine": "Needle-leaved evergreens.",
-            "mixed_hardwood": "Standard density trees like Yellow Poplar/Sweetgum."
+            "mixed_hardwood": "Poplar/Sweetgum."
         };
 
         const EPA_RATE = 0.09; 
@@ -151,15 +143,11 @@
             if ("geolocation" in navigator) {
                 navigator.geolocation.getCurrentPosition(
                     (pos) => {
-                        const lat = pos.coords.latitude.toFixed(5);
-                        const lng = pos.coords.longitude.toFixed(5);
-                        document.getElementById('coords').value = `${lat}, ${lng}`;
+                        document.getElementById('coords').value = `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
                     },
-                    (err) => alert("GPS Error: Ensure Location Services are ON and you are using HTTPS."),
+                    (err) => alert("GPS Error."),
                     { enableHighAccuracy: true, timeout: 8000 }
                 );
-            } else {
-                alert("GPS hardware not detected.");
             }
         };
 
@@ -185,4 +173,73 @@
                 const co2 = calcCO2(dbh, b0, b1, multiplier);
                 const dollarValue = co2 * EPA_RATE;
 
-                document.getElementById('display-co2').innerText = co2
+                document.getElementById('display-co2').innerText = co2.toLocaleString();
+                document.getElementById('display-value').innerText = dollarValue.toLocaleString(undefined, {minimumFractionDigits: 2});
+                
+                document.getElementById('hidden_dbh').value = dbh.toFixed(2);
+                document.getElementById('hidden_co2').value = co2;
+                document.getElementById('hidden_value').value = dollarValue.toFixed(2);
+                
+                renderChart(dbh, b0, b1, multiplier);
+            }
+        }
+
+        function renderChart(dbh, b0, b1, multiplier) {
+            const canvas = document.getElementById('growthChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const projection = [0, 5, 10, 15, 20].map(y => calcCO2(dbh + (y * 0.20), b0, b1, multiplier));
+            
+            if (myChart) myChart.destroy();
+            
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Now', '+5y', '+10y', '+15y', '+20y'],
+                    datasets: [{ 
+                        label: 'Lbs CO2', 
+                        data: projection, 
+                        borderColor: '#CC0000', 
+                        backgroundColor: 'rgba(204, 0, 0, 0.1)',
+                        fill: true,
+                        tension: 0.1 
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        document.getElementById('circ_input').addEventListener('input', function() {
+            const circ = parseFloat(this.value) || 0;
+            document.getElementById('dbh_input').value = circ > 0 ? (circ / Math.PI).toFixed(1) : "";
+            updateMath();
+        });
+
+        document.getElementById('dbh_input').addEventListener('input', function() {
+            const dbh = parseFloat(this.value) || 0;
+            document.getElementById('circ_input').value = dbh > 0 ? (dbh * Math.PI).toFixed(1) : "";
+            updateMath();
+        });
+
+        document.getElementById('species_group').addEventListener('change', updateMath);
+        document.getElementById('tree_condition').addEventListener('change', updateMath);
+        window.onload = () => renderChart(0, -2.48, 2.48, 0.8);
+
+        document.getElementById('treeForm').onsubmit = async (e) => {
+            e.preventDefault();
+            document.getElementById('timestamp').value = new Date().toLocaleString();
+            try {
+                const SHEET_URL = "https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG";
+                await fetch(SHEET_URL, { method: 'POST', body: new FormData(e.target), mode: 'no-cors' });
+                alert("SUCCESS: ASSET REGISTERED");
+                e.target.reset();
+                updateMath();
+            } catch (err) { alert("Submission Error."); }
+        };
+    </script>
+</body>
+</html>
