@@ -25,6 +25,9 @@
                 <h1 class="text-xl font-black italic uppercase">NC STATE UNIVERSITY</h1>
                 <p class="text-red-500 text-[10px] font-bold tracking-widest uppercase mt-1">Campus Planning & Strategic Investment</p>
             </div>
+            <a href="https://lookerstudio.google.com/reporting/d92171ad-111b-4cd0-8fce-09dd1835a50b" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all shadow-lg active:scale-95 flex items-center gap-2">
+                Results ↗
+            </a>
         </div>
 
         <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
@@ -182,90 +185,4 @@
                 const co2 = calcCO2(dbh, b0, b1, multiplier);
                 const dollarValue = co2 * EPA_RATE;
 
-                document.getElementById('display-co2').innerText = co2.toLocaleString();
-                document.getElementById('display-value').innerText = dollarValue.toLocaleString(undefined, {minimumFractionDigits: 2});
-                
-                document.getElementById('hidden_dbh').value = dbh.toFixed(2);
-                document.getElementById('hidden_co2').value = co2;
-                document.getElementById('hidden_value').value = dollarValue.toFixed(2);
-                
-                renderChart(dbh, b0, b1, multiplier);
-            } else {
-                document.getElementById('display-co2').innerText = "0";
-                document.getElementById('display-value').innerText = "0.00";
-                if(myChart) renderChart(0, -2.48, 2.48, 0.8);
-            }
-        }
-
-        function renderChart(dbh, b0, b1, multiplier) {
-            const canvas = document.getElementById('growthChart');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            const projection = [0, 5, 10, 15, 20].map(y => calcCO2(dbh + (y * 0.20), b0, b1, multiplier));
-            
-            if (myChart) myChart.destroy();
-            
-            myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Now', '+5y', '+10y', '+15y', '+20y'],
-                    datasets: [{ 
-                        label: 'Lbs CO2', 
-                        data: projection, 
-                        borderColor: '#CC0000', 
-                        backgroundColor: 'rgba(204, 0, 0, 0.1)',
-                        fill: true,
-                        tension: 0.1 
-                    }]
-                },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true } }
-                }
-            });
-        }
-
-        // AUTO-CALC & SYNC LISTENERS
-        document.getElementById('circ_input').addEventListener('input', function() {
-            const circ = parseFloat(this.value) || 0;
-            if (circ > 0) {
-                document.getElementById('dbh_input').value = (circ / Math.PI).toFixed(1);
-            } else {
-                document.getElementById('dbh_input').value = "";
-            }
-            updateMath();
-        });
-
-        document.getElementById('dbh_input').addEventListener('input', function() {
-            const dbh = parseFloat(this.value) || 0;
-            if (dbh > 0) {
-                document.getElementById('circ_input').value = (dbh * Math.PI).toFixed(1);
-            } else {
-                document.getElementById('circ_input').value = "";
-            }
-            updateMath();
-        });
-
-        document.getElementById('species_group').addEventListener('change', updateMath);
-        document.getElementById('tree_condition').addEventListener('change', updateMath);
-
-        window.onload = () => renderChart(0, -2.48, 2.48, 0.8);
-
-        document.getElementById('treeForm').onsubmit = async (e) => {
-            e.preventDefault();
-            document.getElementById('timestamp').value = new Date().toLocaleString();
-            try {
-                const SHEET_URL = "https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG";
-                await fetch(SHEET_URL, { method: 'POST', body: new FormData(e.target), mode: 'no-cors' });
-                alert("SUCCESS: ASSET REGISTERED");
-                e.target.reset();
-                document.getElementById('species-helper').classList.add('hidden');
-                document.getElementById('display-co2').innerText = "0";
-                document.getElementById('display-value').innerText = "0.00";
-                renderChart(0, -2.48, 2.48, 0.8);
-            } catch (err) { alert("Submission Error."); }
-        };
-    </script>
-</body>
-</html>
+                document.getElementById('display-co2').innerText = co2
