@@ -139,17 +139,51 @@
         const EPA_RATE = 0.09; 
         let myChart = null;
 
-        window.handleGPS = function() {
-            if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        document.getElementById('coords').value = `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
-                    },
-                    (err) => alert("GPS Error."),
-                    { enableHighAccuracy: true, timeout: 8000 }
-                );
+   window.handleGPS = function() {
+    const coordsInput = document.getElementById('coords');
+    coordsInput.value = "🛰️ Acquiring Satellites...";
+    coordsInput.style.background = "#fef3c7"; // Pale yellow while searching
+
+    if ("geolocation" in navigator) {
+        const watchId = navigator.geolocation.watchPosition(
+            (pos) => {
+                const acc = pos.coords.accuracy;
+                const lat = pos.coords.latitude.toFixed(6);
+                const lng = pos.coords.longitude.toFixed(6);
+                
+                // Show live accuracy so the user knows to wait
+                coordsInput.value = `${lat}, ${lng} (±${Math.round(acc)}m)`;
+
+                // Once accuracy is better than 10m (approx 30ft), lock it
+                if (acc < 10) {
+                    navigator.geolocation.clearWatch(watchId);
+                    coordsInput.value = `${lat}, ${lng}`;
+                    coordsInput.style.background = "#dcfce7"; // Green for "Locked"
+                }
+            },
+            (err) => {
+                alert("GPS Error: Ensure Location is ON");
+                navigator.geolocation.clearWatch(watchId);
+                coordsInput.value = "";
+                coordsInput.style.background = "#f3f4f6";
+            },
+            { 
+                enableHighAccuracy: true, 
+                timeout: 10000, 
+                maximumAge: 0 
             }
-        };
+        );
+
+        // Auto-stop searching after 12 seconds to save battery
+        setTimeout(() => {
+            navigator.geolocation.clearWatch(watchId);
+            if(coordsInput.value.includes("±")) {
+                coordsInput.value = coordsInput.value.split(' (')[0];
+                coordsInput.style.background = "#f3f4f6";
+            }
+        }, 12000);
+    }
+};
 
         function calcCO2(dbhIn, b0, b1, multiplier) {
             if (!dbhIn || dbhIn <= 0) return 0;
