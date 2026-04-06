@@ -179,26 +179,27 @@
         const EPA_RATE = 0.09; 
         let myChart = null;
 
-   window.handleGPS = function() {
+ window.handleGPS = function() {
     const coordsInput = document.getElementById('coords');
     coordsInput.value = "🛰️ Acquiring Satellites...";
-    coordsInput.style.background = "#fef3c7"; // Pale yellow while searching
+    coordsInput.style.background = "#fef3c7"; 
 
     if ("geolocation" in navigator) {
+        // watchPosition stays active and "hones in" on the best signal
         const watchId = navigator.geolocation.watchPosition(
             (pos) => {
                 const acc = pos.coords.accuracy;
                 const lat = pos.coords.latitude.toFixed(6);
                 const lng = pos.coords.longitude.toFixed(6);
                 
-                // Show live accuracy so the user knows to wait
+                // Show the user the progress with accuracy metadata
                 coordsInput.value = `${lat}, ${lng} (±${Math.round(acc)}m)`;
 
-                // Once accuracy is better than 10m (approx 30ft), lock it
-                if (acc < 10) {
+                // If accuracy hits 7 meters (very good), lock it immediately
+                if (acc < 7) {
                     navigator.geolocation.clearWatch(watchId);
-                    coordsInput.value = `${lat}, ${lng}`;
-                    coordsInput.style.background = "#dcfce7"; // Green for "Locked"
+                    coordsInput.value = `${lat}, ${lng}`; // Strip (±) for the DB
+                    coordsInput.style.background = "#dcfce7"; 
                 }
             },
             (err) => {
@@ -212,6 +213,20 @@
                 timeout: 10000, 
                 maximumAge: 0 
             }
+        );
+
+        // After 12 seconds, stop searching and save the BEST reading found so far
+        setTimeout(() => {
+            navigator.geolocation.clearWatch(watchId);
+            if(coordsInput.value.includes("±")) {
+                // This is the crucial fix: It splits the string at the space
+                // and keeps only the "Lat, Lng" part for your spreadsheet.
+                coordsInput.value = coordsInput.value.split(' (')[0];
+                coordsInput.style.background = "#f3f4f6";
+            }
+        }, 12000);
+    }
+};
         );
 
         // Auto-stop searching after 12 seconds to save battery
