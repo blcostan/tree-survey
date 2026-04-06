@@ -6,55 +6,40 @@
     <title>NCSU | Strategic Investment Tree Survey</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-   <style>
-    /* 1. MOVE THIS TO THE TOP */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
 
-    /* 2. BETA BUTTON STYLES */
-    .beta-bug-btn {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        z-index: 1000;
-        background-color: #616265; /* Wolfpack Gray */
-        color: white;
-        padding: 10px 16px;
-        border-radius: 50px;
-        font-size: 12px;
-        font-weight: 900;
-        text-transform: uppercase;
-        text-decoration: none; /* ADD THIS to remove link underline */
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        transition: all 0.2s;
-        /* Optional: ensures it sits above mobile home bars */
-        margin-bottom: env(safe-area-inset-bottom);
-    }
+        .beta-bug-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            background-color: #616265;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            margin-bottom: env(safe-area-inset-bottom);
+        }
 
-    .beta-bug-btn:hover { 
-        background-color: #222222; 
-        transform: translateY(-2px); 
-        color: white; /* Keeps text white on hover */
-    }
+        .beta-bug-btn:hover { background-color: #222222; transform: translateY(-2px); color: white; }
+        .beta-bug-btn:active { scale: 0.95; }
 
-    .beta-bug-btn:active { 
-        scale: 0.95; 
-    }
-
-    /* 3. APP STYLES */
-    body { 
-        font-family: 'Inter', sans-serif; 
-        background-color: #f3f4f6; 
-        -webkit-tap-highlight-color: transparent; 
-    }
-    .ncsu-red { background-color: #CC0000; }
-    .ncsu-dark { background-color: #222222; }
-    #chart-wrapper { height: 320px !important; width: 100%; position: relative; }
-    input, select, button { font-size: 16px !important; } 
-    .content-container { min-height: 100vh; display: flex; flex-direction: column; }
-</style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; -webkit-tap-highlight-color: transparent; }
+        .ncsu-red { background-color: #CC0000; }
+        .ncsu-dark { background-color: #222222; }
+        #chart-wrapper { height: 320px !important; width: 100%; position: relative; }
+        input, select, button { font-size: 16px !important; } 
+        .content-container { min-height: 100vh; display: flex; flex-direction: column; }
+    </style>
 </head>
 <body class="p-2 md:p-4 pb-20">
 
@@ -64,9 +49,7 @@
                 <h1 class="text-xl font-black italic uppercase">NC STATE UNIVERSITY</h1>
                 <p class="text-red-500 text-[10px] font-bold tracking-widest uppercase mt-1">Campus Planning & Strategic Investment</p>
             </div>
-            <a href="https://lookerstudio.google.com/reporting/d92171ad-111b-4cd0-8fce-09dd1835a50b" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all shadow-lg active:scale-95 flex items-center gap-2">
-                Results ↗
-            </a>
+            <a href="https://lookerstudio.google.com/reporting/d92171ad-111b-4cd0-8fce-09dd1835a50b" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all shadow-lg active:scale-95 flex items-center gap-2">Results ↗</a>
         </div>
 
         <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
@@ -179,66 +162,43 @@
         const EPA_RATE = 0.09; 
         let myChart = null;
 
- window.handleGPS = function() {
-    const coordsInput = document.getElementById('coords');
-    coordsInput.value = "🛰️ Acquiring Satellites...";
-    coordsInput.style.background = "#fef3c7"; 
+        window.handleGPS = function() {
+            const coordsInput = document.getElementById('coords');
+            coordsInput.value = "🛰️ Acquiring Satellites...";
+            coordsInput.style.background = "#fef3c7"; 
 
-    if ("geolocation" in navigator) {
-        // watchPosition stays active and "hones in" on the best signal
-        const watchId = navigator.geolocation.watchPosition(
-            (pos) => {
-                const acc = pos.coords.accuracy;
-                const lat = pos.coords.latitude.toFixed(6);
-                const lng = pos.coords.longitude.toFixed(6);
-                
-                // Show the user the progress with accuracy metadata
-                coordsInput.value = `${lat}, ${lng} (±${Math.round(acc)}m)`;
+            if ("geolocation" in navigator) {
+                const watchId = navigator.geolocation.watchPosition(
+                    (pos) => {
+                        const acc = pos.coords.accuracy;
+                        const lat = pos.coords.latitude.toFixed(6);
+                        const lng = pos.coords.longitude.toFixed(6);
+                        coordsInput.value = `${lat}, ${lng} (±${Math.round(acc)}m)`;
 
-                // If accuracy hits 7 meters (very good), lock it immediately
-                if (acc < 7) {
+                        if (acc < 7) {
+                            navigator.geolocation.clearWatch(watchId);
+                            coordsInput.value = `${lat}, ${lng}`;
+                            coordsInput.style.background = "#dcfce7"; 
+                        }
+                    },
+                    (err) => {
+                        alert("GPS Error: Ensure Location is ON");
+                        navigator.geolocation.clearWatch(watchId);
+                        coordsInput.value = "";
+                        coordsInput.style.background = "#f3f4f6";
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+
+                setTimeout(() => {
                     navigator.geolocation.clearWatch(watchId);
-                    coordsInput.value = `${lat}, ${lng}`; // Strip (±) for the DB
-                    coordsInput.style.background = "#dcfce7"; 
-                }
-            },
-            (err) => {
-                alert("GPS Error: Ensure Location is ON");
-                navigator.geolocation.clearWatch(watchId);
-                coordsInput.value = "";
-                coordsInput.style.background = "#f3f4f6";
-            },
-            { 
-                enableHighAccuracy: true, 
-                timeout: 10000, 
-                maximumAge: 0 
+                    if(coordsInput.value.includes("±")) {
+                        coordsInput.value = coordsInput.value.split(' (')[0];
+                        coordsInput.style.background = "#f3f4f6";
+                    }
+                }, 12000);
             }
-        );
-
-        // After 12 seconds, stop searching and save the BEST reading found so far
-        setTimeout(() => {
-            navigator.geolocation.clearWatch(watchId);
-            if(coordsInput.value.includes("±")) {
-                // This is the crucial fix: It splits the string at the space
-                // and keeps only the "Lat, Lng" part for your spreadsheet.
-                coordsInput.value = coordsInput.value.split(' (')[0];
-                coordsInput.style.background = "#f3f4f6";
-            }
-        }, 12000);
-    }
-};
-        );
-
-        // Auto-stop searching after 12 seconds to save battery
-        setTimeout(() => {
-            navigator.geolocation.clearWatch(watchId);
-            if(coordsInput.value.includes("±")) {
-                coordsInput.value = coordsInput.value.split(' (')[0];
-                coordsInput.style.background = "#f3f4f6";
-            }
-        }, 12000);
-    }
-};
+        };
 
         function calcCO2(dbhIn, b0, b1, multiplier) {
             if (!dbhIn || dbhIn <= 0) return 0;
@@ -294,11 +254,7 @@
                         tension: 0.1 
                     }]
                 },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true } }
-                }
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
             });
         }
 
@@ -330,8 +286,6 @@
             } catch (err) { alert("Submission Error."); }
         };
     </script>
-    <a href="https://forms.gle/92DfPQvUzDZ65Qn18" target="_blank" class="beta-bug-btn">
-    <span>🐞</span> Report Bug
-</a>
+    <a href="https://forms.gle/92DfPQvUzDZ65Qn18" target="_blank" class="beta-bug-btn"><span>🐞</span> Report Bug</a>
 </body>
 </html>
