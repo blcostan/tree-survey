@@ -6,15 +6,55 @@
     <title>NCSU | Strategic Investment Tree Survey</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; -webkit-tap-highlight-color: transparent; }
-        .ncsu-red { background-color: #CC0000; }
-        .ncsu-dark { background-color: #222222; }
-        #chart-wrapper { height: 320px !important; width: 100%; position: relative; }
-        input, select, button { font-size: 16px !important; } 
-        .content-container { min-height: 100vh; display: flex; flex-direction: column; }
-    </style>
+   <style>
+    /* 1. MOVE THIS TO THE TOP */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+    /* 2. BETA BUTTON STYLES */
+    .beta-bug-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        background-color: #616265; /* Wolfpack Gray */
+        color: white;
+        padding: 10px 16px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 900;
+        text-transform: uppercase;
+        text-decoration: none; /* ADD THIS to remove link underline */
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+        /* Optional: ensures it sits above mobile home bars */
+        margin-bottom: env(safe-area-inset-bottom);
+    }
+
+    .beta-bug-btn:hover { 
+        background-color: #222222; 
+        transform: translateY(-2px); 
+        color: white; /* Keeps text white on hover */
+    }
+
+    .beta-bug-btn:active { 
+        scale: 0.95; 
+    }
+
+    /* 3. APP STYLES */
+    body { 
+        font-family: 'Inter', sans-serif; 
+        background-color: #f3f4f6; 
+        -webkit-tap-highlight-color: transparent; 
+    }
+    .ncsu-red { background-color: #CC0000; }
+    .ncsu-dark { background-color: #222222; }
+    #chart-wrapper { height: 320px !important; width: 100%; position: relative; }
+    input, select, button { font-size: 16px !important; } 
+    .content-container { min-height: 100vh; display: flex; flex-direction: column; }
+</style>
 </head>
 <body class="p-2 md:p-4 pb-20">
 
@@ -275,5 +315,8 @@
             } catch (err) { alert("Submission Error."); }
         };
     </script>
+    <a href="https://forms.gle/92DfPQvUzDZ65Qn18" target="_blank" class="beta-bug-btn">
+    <span>🐞</span> Report Bug
+</a>
 </body>
 </html>
