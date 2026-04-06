@@ -8,31 +8,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-
-        .beta-bug-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-            background-color: #616265;
-            color: white;
-            padding: 10px 16px;
-            border-radius: 50px;
-            font-size: 12px;
-            font-weight: 900;
-            text-transform: uppercase;
-            text-decoration: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s;
-            margin-bottom: env(safe-area-inset-bottom);
-        }
-
+        .beta-bug-btn { position: fixed; bottom: 20px; right: 20px; z-index: 1000; background-color: #616265; color: white; padding: 10px 16px; border-radius: 50px; font-size: 12px; font-weight: 900; text-transform: uppercase; text-decoration: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 8px; transition: all 0.2s; margin-bottom: env(safe-area-inset-bottom); }
         .beta-bug-btn:hover { background-color: #222222; transform: translateY(-2px); color: white; }
-        .beta-bug-btn:active { scale: 0.95; }
-
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; -webkit-tap-highlight-color: transparent; }
         .ncsu-red { background-color: #CC0000; }
         .ncsu-dark { background-color: #222222; }
@@ -122,9 +99,7 @@
                     </div>
                 </div>
                 <div class="bg-white border border-stone-200 rounded-2xl p-2 shadow-inner">
-                    <div id="chart-wrapper">
-                        <canvas id="growthChart"></canvas>
-                    </div>
+                    <div id="chart-wrapper"><canvas id="growthChart"></canvas></div>
                 </div>
             </div>
         </div>
@@ -132,41 +107,21 @@
         <div class="bg-stone-50 p-6 md:p-8 border-t border-stone-200 mt-auto">
             <h2 class="text-sm font-black text-stone-900 uppercase tracking-widest mb-6">Scientific Methodology</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-[12px] text-stone-600 leading-relaxed">
-                <div>
-                    <h3 class="font-black text-stone-800 uppercase text-[10px]">I. Biomass & Condition Factor</h3>
-                    <p>Base biomass calculation is derived from <strong>Jenkins et al. (2003)</strong>.</p>
-                </div>
-                <div>
-                    <h3 class="font-black text-stone-800 uppercase text-[10px]">II. Sequestration & Economic Cost</h3>
-                    <p>Valuation follows <strong>U.S. EPA (2023)</strong> Social Cost of Carbon ($0.09 per lb).</p>
-                </div>
+                <div><h3 class="font-black text-stone-800 uppercase text-[10px]">I. Biomass & Condition</h3><p>Derived from <strong>Jenkins et al. (2003)</strong>.</p></div>
+                <div><h3 class="font-black text-stone-800 uppercase text-[10px]">II. Economic Cost</h3><p>Follows <strong>U.S. EPA (2023)</strong> ($0.09/lb).</p></div>
             </div>
         </div>
     </div>
 
     <script>
-        const jenkinsData = {
-            "mixed_hardwood": { b0: -2.4800, b1: 2.4835 },
-            "pine": { b0: -2.5356, b1: 2.4349 },
-            "hard_maple": { b0: -2.0127, b1: 2.4342 },
-            "soft_maple": { b0: -1.9123, b1: 2.3651 }
-        };
-
-        const speciesTips = {
-            "hard_maple": "Look for <strong>'U' shaped sinuses</strong>.",
-            "soft_maple": "Look for <strong>'V' shaped sinuses</strong>.",
-            "pine": "Needle-leaved evergreens.",
-            "mixed_hardwood": "Poplar/Sweetgum."
-        };
-
-        const EPA_RATE = 0.09; 
-        let myChart = null;
+        const jenkinsData = { "mixed_hardwood": { b0: -2.4800, b1: 2.4835 }, "pine": { b0: -2.5356, b1: 2.4349 }, "hard_maple": { b0: -2.0127, b1: 2.4342 }, "soft_maple": { b0: -1.9123, b1: 2.3651 } };
+        const speciesTips = { "hard_maple": "Look for <strong>'U' shaped sinuses</strong>.", "soft_maple": "Look for <strong>'V' shaped sinuses</strong>.", "pine": "Needle-leaved evergreens.", "mixed_hardwood": "Poplar/Sweetgum." };
+        const EPA_RATE = 0.09; let myChart = null;
 
         window.handleGPS = function() {
             const coordsInput = document.getElementById('coords');
             coordsInput.value = "🛰️ Acquiring Satellites...";
             coordsInput.style.background = "#fef3c7"; 
-
             if ("geolocation" in navigator) {
                 const watchId = navigator.geolocation.watchPosition(
                     (pos) => {
@@ -174,7 +129,6 @@
                         const lat = pos.coords.latitude.toFixed(6);
                         const lng = pos.coords.longitude.toFixed(6);
                         coordsInput.value = `${lat}, ${lng} (±${Math.round(acc)}m)`;
-
                         if (acc < 7) {
                             navigator.geolocation.clearWatch(watchId);
                             coordsInput.value = `${lat}, ${lng}`;
@@ -185,11 +139,9 @@
                         alert("GPS Error: Ensure Location is ON");
                         navigator.geolocation.clearWatch(watchId);
                         coordsInput.value = "";
-                        coordsInput.style.background = "#f3f4f6";
                     },
                     { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
                 );
-
                 setTimeout(() => {
                     navigator.geolocation.clearWatch(watchId);
                     if(coordsInput.value.includes("±")) {
@@ -211,24 +163,19 @@
             const dbh = parseFloat(document.getElementById('dbh_input').value) || 0;
             const group = document.getElementById('species_group').value;
             const multiplier = parseFloat(document.getElementById('tree_condition').value);
-            
             if(group) {
                 document.getElementById('species-helper').classList.remove('hidden');
                 document.getElementById('helper-text').innerHTML = speciesTips[group];
             }
-
             if (dbh > 0 && group) {
                 const { b0, b1 } = jenkinsData[group];
                 const co2 = calcCO2(dbh, b0, b1, multiplier);
                 const dollarValue = co2 * EPA_RATE;
-
                 document.getElementById('display-co2').innerText = co2.toLocaleString();
                 document.getElementById('display-value').innerText = dollarValue.toLocaleString(undefined, {minimumFractionDigits: 2});
-                
                 document.getElementById('hidden_dbh').value = dbh.toFixed(2);
                 document.getElementById('hidden_co2').value = co2;
                 document.getElementById('hidden_value').value = dollarValue.toFixed(2);
-                
                 renderChart(dbh, b0, b1, multiplier);
             }
         }
@@ -238,22 +185,10 @@
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
             const projection = [0, 5, 10, 15, 20].map(y => calcCO2(dbh + (y * 0.20), b0, b1, multiplier));
-            
             if (myChart) myChart.destroy();
-            
             myChart = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: ['Now', '+5y', '+10y', '+15y', '+20y'],
-                    datasets: [{ 
-                        label: 'Lbs CO2', 
-                        data: projection, 
-                        borderColor: '#CC0000', 
-                        backgroundColor: 'rgba(204, 0, 0, 0.1)',
-                        fill: true,
-                        tension: 0.1 
-                    }]
-                },
+                data: { labels: ['Now', '+5y', '+10y', '+15y', '+20y'], datasets: [{ label: 'Lbs CO2', data: projection, borderColor: '#CC0000', backgroundColor: 'rgba(204, 0, 0, 0.1)', fill: true, tension: 0.1 }] },
                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
             });
         }
@@ -276,10 +211,19 @@
 
         document.getElementById('treeForm').onsubmit = async (e) => {
             e.preventDefault();
+            
+            // --- FAIL SAFE SCRUB START ---
+            const gpsInput = document.getElementById('coords');
+            if (gpsInput.value.includes(" (")) {
+                gpsInput.value = gpsInput.value.split(" (")[0];
+            }
+            // --- FAIL SAFE SCRUB END ---
+
             document.getElementById('timestamp').value = new Date().toLocaleString();
             try {
                 const SHEET_URL = "https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG";
-                await fetch(SHEET_URL, { method: 'POST', body: new FormData(e.target), mode: 'no-cors' });
+                const formData = new FormData(e.target);
+                await fetch(SHEET_URL, { method: 'POST', body: formData, mode: 'no-cors' });
                 alert("SUCCESS: ASSET REGISTERED");
                 e.target.reset();
                 updateMath();
