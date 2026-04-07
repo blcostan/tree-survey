@@ -9,24 +9,22 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         .beta-bug-btn { position: fixed; bottom: 20px; right: 20px; z-index: 1000; background-color: #616265; color: white; padding: 10px 16px; border-radius: 50px; font-size: 12px; font-weight: 900; text-transform: uppercase; text-decoration: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 8px; transition: all 0.2s; margin-bottom: env(safe-area-inset-bottom); }
-        .beta-bug-btn:hover { background-color: #222222; transform: translateY(-2px); color: white; }
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; -webkit-tap-highlight-color: transparent; }
         .ncsu-red { background-color: #CC0000; }
         .ncsu-dark { background-color: #222222; }
         #chart-wrapper { height: 320px !important; width: 100%; position: relative; }
         input, select, button { font-size: 16px !important; } 
-        .content-container { min-height: 100vh; display: flex; flex-direction: column; }
     </style>
 </head>
 <body class="p-2 md:p-4 pb-20">
 
-    <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-2xl overflow-hidden border-t-8 border-red-600 content-container">
+    <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-2xl overflow-hidden border-t-8 border-red-600">
         <div class="ncsu-dark p-6 text-white flex justify-between items-center">
             <div>
                 <h1 class="text-xl font-black italic uppercase">NC STATE UNIVERSITY</h1>
                 <p class="text-red-500 text-[10px] font-bold tracking-widest uppercase mt-1">Campus Planning & Strategic Investment</p>
             </div>
-            <a href="https://lookerstudio.google.com/reporting/d92171ad-111b-4cd0-8fce-09dd1835a50b" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all shadow-lg active:scale-95 flex items-center gap-2">Results ↗</a>
+            <a href="https://lookerstudio.google.com/reporting/d92171ad-111b-4cd0-8fce-09dd1835a50b" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all shadow-lg flex items-center gap-2">Results ↗</a>
         </div>
 
         <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
@@ -34,8 +32,8 @@
                 <form id="treeForm" class="space-y-4">
                     
                     <div>
-                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Surveyor Name (For Leaderboard)</label>
-                        <input type="text" name="A:Surveyor" id="user_name" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold focus:ring-2 focus:ring-red-600 outline-none" placeholder="Enter your name" required>
+                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Unity ID</label>
+                        <input type="text" name="A:Surveyor" id="unity_id" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold focus:ring-2 focus:ring-red-600 outline-none" placeholder="e.g. jdoe2" required>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -125,147 +123,13 @@
             </div>
         </div>
 
-        <div class="bg-stone-50 p-6 md:p-8 border-t border-stone-200 mt-auto">
+        <div class="bg-stone-50 p-6 md:p-8 border-t border-stone-200">
             <h2 class="text-sm font-black text-stone-900 uppercase tracking-widest mb-6">Scientific Methodology</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-[12px] text-stone-600 leading-relaxed">
                 <div>
                     <h3 class="font-black text-stone-800 uppercase text-[10px] mb-2">I. Biomass & Condition Factor</h3>
-                    <p>Base biomass calculation is derived from <strong>Jenkins et al. (2003)</strong> using the generalized regression equation $$BM = Exp(b0 + b1 * ln(DBH_{cm}))$$. The Condition Factor acts as a multiplier to discount carbon storage for decaying specimens.</p>
+                    <p>Base biomass calculation is derived from <strong>Jenkins et al. (2003)</strong> using generalized regression models. The Condition Factor acts as a multiplier to discount carbon storage for decaying specimens.</p>
                 </div>
                 <div>
                     <h3 class="font-black text-stone-800 uppercase text-[10px] mb-2">II. Sequestration & Economic Cost</h3>
-                    <p>Carbon-to-CO2 conversion utilizes a 3.66x molecular weight ratio. Asset valuation follows the <strong>U.S. EPA (2023)</strong> updated Social Cost of Carbon, valued at approximately $0.09 per lb of sequestered CO2.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // 1. DATA & TIPS
-        const jenkinsData = { 
-            "hardwood": { b0: -2.0127, b1: 2.4342 },       
-            "soft_hardwood": { b0: -2.4800, b1: 2.4835 },  
-            "evergreen": { b0: -2.5356, b1: 2.4349 },      
-            "small_ornate": { b0: -0.7152, b1: 1.7029 }    
-        };
-
-        const speciesTips = { 
-            "hardwood": "<strong>ID:</strong> Broad leaves. Thick, rough, or 'blocky' bark. (e.g., White Oak, Shagbark Hickory).", 
-            "soft_hardwood": "<strong>ID:</strong> Broad leaves. Very tall, straight trunk. (e.g., Tulip Poplar, Sweetgum, Red Maple).", 
-            "evergreen": "<strong>ID:</strong> Has needles or scales. Stays green all year. (e.g., Loblolly Pine, Red Cedar).", 
-            "small_ornate": "<strong>ID:</strong> Small landscape tree (under 25ft). Often flowering. (e.g., Dogwood, Crepe Myrtle, Holly)." 
-        };
-
-        const EPA_RATE = 0.09; 
-        let myChart = null;
-
-        // 2. PAGE INITIALIZATION (Memory Logic)
-        window.onload = () => {
-            const savedName = localStorage.getItem('surveyorName');
-            if (savedName) {
-                document.getElementById('user_name').value = savedName;
-            }
-            renderChart(0, -2.01, 2.43); 
-        };
-
-        // Save name to memory whenever changed
-        document.getElementById('user_name').addEventListener('input', function() {
-            localStorage.setItem('surveyorName', this.value);
-        });
-
-        // 3. CORE LOGIC
-        window.handleGPS = function() {
-            const coordsInput = document.getElementById('coords');
-            coordsInput.value = "🛰️ Acquiring...";
-            if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition((pos) => {
-                    coordsInput.value = `${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`;
-                    coordsInput.style.background = "#dcfce7";
-                }, () => { alert("GPS Error"); coordsInput.value = ""; });
-            }
-        };
-
-        function updateMath() {
-            const dbh = parseFloat(document.getElementById('dbh_input').value) || 0;
-            const group = document.getElementById('species_group').value;
-            const multiplier = parseFloat(document.getElementById('tree_condition').value);
-            
-            if(group) {
-                document.getElementById('species-helper').classList.remove('hidden');
-                document.getElementById('helper-text').innerHTML = speciesTips[group];
-            }
-
-            if (dbh > 0 && group) {
-                const { b0, b1 } = jenkinsData[group];
-                const dbhCm = dbh * 2.54;
-                const biomassKg = Math.exp(b0 + b1 * Math.log(dbhCm));
-                const co2Lbs = Math.round((biomassKg * 0.5) * 3.6663 * 2.20462 * multiplier);
-                
-                const dollarValue = co2Lbs * EPA_RATE;
-                const miles = Math.round(co2Lbs * 1.1);
-                const charges = Math.round(co2Lbs * 54.3);
-
-                document.getElementById('display-co2').innerText = co2Lbs.toLocaleString();
-                document.getElementById('display-value').innerText = dollarValue.toLocaleString(undefined, {minimumFractionDigits: 2});
-                document.getElementById('display-miles').innerText = miles.toLocaleString();
-                document.getElementById('display-charges').innerText = charges.toLocaleString();
-
-                document.getElementById('hidden_dbh').value = dbh.toFixed(2);
-                document.getElementById('hidden_co2').value = co2Lbs;
-                document.getElementById('hidden_value').value = dollarValue.toFixed(2);
-                
-                renderChart(dbh, b0, b1, multiplier);
-            }
-        }
-
-        function renderChart(dbh, b0, b1, mult = 0.8) {
-            const canvas = document.getElementById('growthChart');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            const projection = [0, 5, 10, 15, 20].map(y => {
-                const dbhProj = (dbh + (y * 0.2)) * 2.54;
-                if (dbhProj <= 0) return 0;
-                const biomassKg = Math.exp(b0 + b1 * Math.log(dbhProj));
-                return Math.round((biomassKg * 0.5) * 3.6663 * 2.20462 * mult);
-            });
-            if (myChart) myChart.destroy();
-            myChart = new Chart(ctx, {
-                type: 'line',
-                data: { labels: ['Today', '+5y', '+10y', '+15y', '+20y'], datasets: [{ label: 'Lbs CO2', data: projection, borderColor: '#CC0000', backgroundColor: 'rgba(204, 0, 0, 0.1)', fill: true, tension: 0.3 }] },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-        }
-
-        // INPUT LISTENERS
-        document.getElementById('circ_input').addEventListener('input', function() {
-            const circ = parseFloat(this.value) || 0;
-            document.getElementById('dbh_input').value = circ > 0 ? (circ / Math.PI).toFixed(1) : "";
-            updateMath();
-        });
-        document.getElementById('dbh_input').addEventListener('input', function() {
-            const dbh = parseFloat(this.value) || 0;
-            document.getElementById('circ_input').value = dbh > 0 ? (dbh * Math.PI).toFixed(1) : "";
-            updateMath();
-        });
-        document.getElementById('species_group').addEventListener('change', updateMath);
-        document.getElementById('tree_condition').addEventListener('change', updateMath);
-
-        // FORM SUBMISSION
-        document.getElementById('treeForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const currentName = document.getElementById('user_name').value;
-            document.getElementById('timestamp').value = new Date().toLocaleString();
-            try {
-                const SHEET_URL = "https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG";
-                await fetch(SHEET_URL, { method: 'POST', body: new FormData(e.target), mode: 'no-cors' });
-                alert("ASSET LOGGED SUCCESSFULLY!");
-                e.target.reset();
-                document.getElementById('user_name').value = currentName; // Name persists
-                document.getElementById('species-helper').classList.add('hidden');
-                updateMath();
-            } catch (err) { alert("Submission Error."); }
-        };
-    </script>
-    <a href="https://forms.gle/92DfPQvUzDZ65Qn18" target="_blank" class="beta-bug-btn"><span>🐞</span> Report Bug</a>
-</body>
-</html>
+                    <p>Carbon-to-CO2 conversion utilizes a 3.66x molecular weight ratio. Asset valuation
