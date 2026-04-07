@@ -53,16 +53,34 @@
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-[10px] font-black text-zinc-500 uppercase">Species Grouping</label>
-                    <select name="C:Species Group" id="species_group" class="w-full border-2 p-3 rounded-lg font-bold" required>
-                        <option value="" disabled selected>Tap to select...</option>
-                        <option value="hardwood">Broadleaf: Sturdy (Oak, Hickory)</option>
-                        <option value="soft_hardwood">Broadleaf: Fast (Maple, Poplar)</option>
-                        <option value="evergreen">Evergreen: Needles (Pine, Cedar)</option>
-                        <option value="small_ornate">Small/Flowering (Dogwood, Holly)</option>
-                    </select>
-                </div>
+               <div>
+    <label class="block text-[10px] font-black text-zinc-500 uppercase">Species Grouping & ID Helper</label>
+    <select name="C:Species Group" id="species_group" class="w-full border-2 p-3 rounded-lg font-bold bg-white focus:border-red-600 outline-none" required>
+        <option value="" disabled selected>Tap to identify species group...</option>
+        
+        <optgroup label="Broadleaf: Slow Growth (High Density)">
+            <option value="hardwood">Oak (White, Red, Live), Hickory, Walnut</option>
+            <option value="hardwood">Beech, Ironwood, Persimmon</option>
+        </optgroup>
+
+        <optgroup label="Broadleaf: Fast Growth (Medium Density)">
+            <option value="soft_hardwood">Maple (Red, Silver), Tulip Poplar, Sweetgum</option>
+            <option value="soft_hardwood">Birch, Sycamore, Cottonwood, Willow</option>
+            <option value="soft_hardwood">Ash, Elm, Cherry</option>
+        </optgroup>
+
+        <optgroup label="Conifers: Needles/Cones">
+            <option value="evergreen">Pine (Loblolly, Longleaf, White)</option>
+            <option value="evergreen">Cedar, Cypress, Hemlock, Spruce</option>
+        </optgroup>
+
+        <optgroup label="Small / Flowering / Understory">
+            <option value="small_ornate">Dogwood, Redbud, Holly, Magnolia (Saucer)</option>
+            <option value="small_ornate">Crepe Myrtle, Ornamental Cherry/Pear</option>
+        </optgroup>
+    </select>
+    <p class="text-[9px] text-zinc-400 mt-1 uppercase font-bold italic">Select based on primary wood type for biomass accuracy.</p>
+</div>
 
                 <div id="proximity_note_container" class="bg-orange-50 border-2 border-orange-200 p-4 rounded-lg">
                     <p class="text-[10px] font-black text-orange-700 uppercase mb-2">⚠️ PROXIMITY ALERT: Nearby Entry Detected</p>
