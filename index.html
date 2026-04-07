@@ -32,6 +32,12 @@
         <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
             <div class="lg:col-span-5 space-y-6">
                 <form id="treeForm" class="space-y-4">
+                    
+                    <div>
+                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Surveyor Name (For Leaderboard)</label>
+                        <input type="text" name="A:Surveyor" id="user_name" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold focus:ring-2 focus:ring-red-600 outline-none" placeholder="Enter your name" required>
+                    </div>
+
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Circumference (In)</label>
@@ -88,17 +94,32 @@
             </div>
 
             <div class="lg:col-span-7 space-y-6">
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-stone-900 text-white p-4 md:p-6 rounded-2xl shadow-lg border-b-4 border-red-600">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-stone-900 text-white p-6 rounded-2xl shadow-lg border-b-4 border-red-600">
                         <p class="text-red-500 font-bold text-[10px] uppercase tracking-widest">Adjusted CO2 Storage</p>
-                        <p class="text-3xl md:text-4xl font-black italic mt-1"><span id="display-co2">0</span> <span class="text-xs text-stone-500 uppercase">lbs</span></p>
+                        <p class="text-4xl font-black italic mt-1"><span id="display-co2">0</span> <span class="text-xs text-stone-500 uppercase">lbs</span></p>
+                        <div class="mt-4 pt-4 border-t border-stone-700 flex items-center gap-3">
+                            <span class="text-2xl">🚗</span>
+                            <div>
+                                <p class="text-[9px] text-stone-500 uppercase font-black">Car Offset Equivalent</p>
+                                <p class="text-sm font-bold text-green-400"><span id="display-miles">0</span> miles driven</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="bg-stone-900 text-white p-4 md:p-6 rounded-2xl shadow-lg border-b-4 border-green-500">
+                    <div class="bg-stone-900 text-white p-6 rounded-2xl shadow-lg border-b-4 border-green-500">
                         <p class="text-green-500 font-bold text-[10px] uppercase tracking-widest">Social Value</p>
-                        <p class="text-3xl md:text-4xl font-black italic mt-1">$<span id="display-value">0.00</span></p>
+                        <p class="text-4xl font-black italic mt-1">$<span id="display-value">0.00</span></p>
+                        <div class="mt-4 pt-4 border-t border-stone-700 flex items-center gap-3">
+                            <span class="text-2xl">💡</span>
+                            <div>
+                                <p class="text-[9px] text-stone-500 uppercase font-black">Energy Equivalent</p>
+                                <p class="text-sm font-bold text-blue-400"><span id="display-charges">0</span> phone charges</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="bg-white border border-stone-200 rounded-2xl p-2 shadow-inner">
+                <div class="bg-white border border-stone-200 rounded-2xl p-4 shadow-inner">
+                    <p class="text-[10px] font-black text-stone-400 uppercase mb-4 text-center tracking-widest">20-Year Carbon Sequestration Forecast</p>
                     <div id="chart-wrapper"><canvas id="growthChart"></canvas></div>
                 </div>
             </div>
@@ -109,17 +130,18 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-[12px] text-stone-600 leading-relaxed">
                 <div>
                     <h3 class="font-black text-stone-800 uppercase text-[10px] mb-2">I. Biomass & Condition Factor</h3>
-                    <p>Base biomass calculation is derived from <strong>Jenkins et al. (2003)</strong> using the generalized regression equation $$BM = Exp(b0 + b1 * ln(DBH_{cm}))$$. The Condition Factor acts as a multiplier to discount carbon storage for decaying or structurally compromised specimens.</p>
+                    <p>Base biomass calculation is derived from <strong>Jenkins et al. (2003)</strong> using the generalized regression equation $$BM = Exp(b0 + b1 * ln(DBH_{cm}))$$. The Condition Factor acts as a multiplier to discount carbon storage for decaying specimens.</p>
                 </div>
                 <div>
                     <h3 class="font-black text-stone-800 uppercase text-[10px] mb-2">II. Sequestration & Economic Cost</h3>
-                    <p>Carbon-to-CO2 conversion utilizes a 3.66x molecular weight ratio. Asset valuation follows the <strong>U.S. EPA (2023)</strong> updated Social Cost of Carbon, valued at approximately $0.09 per lb of sequestered CO2 to reflect climate-related economic mitigation.</p>
+                    <p>Carbon-to-CO2 conversion utilizes a 3.66x molecular weight ratio. Asset valuation follows the <strong>U.S. EPA (2023)</strong> updated Social Cost of Carbon, valued at approximately $0.09 per lb of sequestered CO2.</p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        // 1. DATA & TIPS
         const jenkinsData = { 
             "hardwood": { b0: -2.0127, b1: 2.4342 },       
             "soft_hardwood": { b0: -2.4800, b1: 2.4835 },  
@@ -134,48 +156,40 @@
             "small_ornate": "<strong>ID:</strong> Small landscape tree (under 25ft). Often flowering. (e.g., Dogwood, Crepe Myrtle, Holly)." 
         };
 
-        const EPA_RATE = 0.09; let myChart = null;
+        const EPA_RATE = 0.09; 
+        let myChart = null;
 
-        window.handleGPS = function() {
-            const coordsInput = document.getElementById('coords');
-            coordsInput.value = "🛰️ Acquiring Satellites...";
-            coordsInput.style.background = "#fef3c7"; 
-            if ("geolocation" in navigator) {
-                const watchId = navigator.geolocation.watchPosition(
-                    (pos) => {
-                        const acc = pos.coords.accuracy;
-                        const lat = pos.coords.latitude.toFixed(6);
-                        const lng = pos.coords.longitude.toFixed(6);
-                        coordsInput.value = `${lat}, ${lng} (±${Math.round(acc)}m)`;
-                        if (acc < 7) {
-                            navigator.geolocation.clearWatch(watchId);
-                            coordsInput.value = `${lat}, ${lng}`;
-                            coordsInput.style.background = "#dcfce7"; 
-                        }
-                    },
-                    (err) => {
-                        alert("GPS Error: Ensure Location is ON");
-                        navigator.geolocation.clearWatch(watchId);
-                        coordsInput.value = "";
-                    },
-                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-                );
+        // 2. PAGE INITIALIZATION (Memory Logic)
+        window.onload = () => {
+            const savedName = localStorage.getItem('surveyorName');
+            if (savedName) {
+                document.getElementById('user_name').value = savedName;
             }
+            renderChart(0, -2.01, 2.43); 
         };
 
-        function calcCO2(dbhIn, b0, b1, multiplier) {
-            if (!dbhIn || dbhIn <= 0) return 0;
-            const dbhCm = dbhIn * 2.54;
-            const biomassKg = Math.exp(b0 + b1 * Math.log(dbhCm));
-            return Math.round((biomassKg * 0.5) * 3.6663 * 2.20462 * multiplier);
-        }
+        // Save name to memory whenever changed
+        document.getElementById('user_name').addEventListener('input', function() {
+            localStorage.setItem('surveyorName', this.value);
+        });
+
+        // 3. CORE LOGIC
+        window.handleGPS = function() {
+            const coordsInput = document.getElementById('coords');
+            coordsInput.value = "🛰️ Acquiring...";
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    coordsInput.value = `${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`;
+                    coordsInput.style.background = "#dcfce7";
+                }, () => { alert("GPS Error"); coordsInput.value = ""; });
+            }
+        };
 
         function updateMath() {
             const dbh = parseFloat(document.getElementById('dbh_input').value) || 0;
             const group = document.getElementById('species_group').value;
             const multiplier = parseFloat(document.getElementById('tree_condition').value);
             
-            // Fixed Visual ID trigger
             if(group) {
                 document.getElementById('species-helper').classList.remove('hidden');
                 document.getElementById('helper-text').innerHTML = speciesTips[group];
@@ -183,57 +197,70 @@
 
             if (dbh > 0 && group) {
                 const { b0, b1 } = jenkinsData[group];
-                const co2 = calcCO2(dbh, b0, b1, multiplier);
-                const dollarValue = co2 * EPA_RATE;
-                document.getElementById('display-co2').innerText = co2.toLocaleString();
+                const dbhCm = dbh * 2.54;
+                const biomassKg = Math.exp(b0 + b1 * Math.log(dbhCm));
+                const co2Lbs = Math.round((biomassKg * 0.5) * 3.6663 * 2.20462 * multiplier);
+                
+                const dollarValue = co2Lbs * EPA_RATE;
+                const miles = Math.round(co2Lbs * 1.1);
+                const charges = Math.round(co2Lbs * 54.3);
+
+                document.getElementById('display-co2').innerText = co2Lbs.toLocaleString();
                 document.getElementById('display-value').innerText = dollarValue.toLocaleString(undefined, {minimumFractionDigits: 2});
+                document.getElementById('display-miles').innerText = miles.toLocaleString();
+                document.getElementById('display-charges').innerText = charges.toLocaleString();
+
                 document.getElementById('hidden_dbh').value = dbh.toFixed(2);
-                document.getElementById('hidden_co2').value = co2;
+                document.getElementById('hidden_co2').value = co2Lbs;
                 document.getElementById('hidden_value').value = dollarValue.toFixed(2);
+                
                 renderChart(dbh, b0, b1, multiplier);
             }
         }
 
-        function renderChart(dbh, b0, b1, multiplier) {
+        function renderChart(dbh, b0, b1, mult = 0.8) {
             const canvas = document.getElementById('growthChart');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
-            const projection = [0, 5, 10, 15, 20].map(y => calcCO2(dbh + (y * 0.20), b0, b1, multiplier));
+            const projection = [0, 5, 10, 15, 20].map(y => {
+                const dbhProj = (dbh + (y * 0.2)) * 2.54;
+                if (dbhProj <= 0) return 0;
+                const biomassKg = Math.exp(b0 + b1 * Math.log(dbhProj));
+                return Math.round((biomassKg * 0.5) * 3.6663 * 2.20462 * mult);
+            });
             if (myChart) myChart.destroy();
             myChart = new Chart(ctx, {
                 type: 'line',
-                data: { labels: ['Now', '+5y', '+10y', '+15y', '+20y'], datasets: [{ label: 'Lbs CO2', data: projection, borderColor: '#CC0000', backgroundColor: 'rgba(204, 0, 0, 0.1)', fill: true, tension: 0.1 }] },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+                data: { labels: ['Today', '+5y', '+10y', '+15y', '+20y'], datasets: [{ label: 'Lbs CO2', data: projection, borderColor: '#CC0000', backgroundColor: 'rgba(204, 0, 0, 0.1)', fill: true, tension: 0.3 }] },
+                options: { responsive: true, maintainAspectRatio: false }
             });
         }
 
+        // INPUT LISTENERS
         document.getElementById('circ_input').addEventListener('input', function() {
             const circ = parseFloat(this.value) || 0;
             document.getElementById('dbh_input').value = circ > 0 ? (circ / Math.PI).toFixed(1) : "";
             updateMath();
         });
-
         document.getElementById('dbh_input').addEventListener('input', function() {
             const dbh = parseFloat(this.value) || 0;
             document.getElementById('circ_input').value = dbh > 0 ? (dbh * Math.PI).toFixed(1) : "";
             updateMath();
         });
-
         document.getElementById('species_group').addEventListener('change', updateMath);
         document.getElementById('tree_condition').addEventListener('change', updateMath);
-        
-        // Ensure graph initializes on load
-        window.onload = () => renderChart(0, -2.01, 2.43, 0.8);
 
+        // FORM SUBMISSION
         document.getElementById('treeForm').onsubmit = async (e) => {
             e.preventDefault();
+            const currentName = document.getElementById('user_name').value;
             document.getElementById('timestamp').value = new Date().toLocaleString();
             try {
                 const SHEET_URL = "https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG";
-                const formData = new FormData(e.target);
-                await fetch(SHEET_URL, { method: 'POST', body: formData, mode: 'no-cors' });
-                alert("SUCCESS: ASSET REGISTERED");
+                await fetch(SHEET_URL, { method: 'POST', body: new FormData(e.target), mode: 'no-cors' });
+                alert("ASSET LOGGED SUCCESSFULLY!");
                 e.target.reset();
+                document.getElementById('user_name').value = currentName; // Name persists
                 document.getElementById('species-helper').classList.add('hidden');
                 updateMath();
             } catch (err) { alert("Submission Error."); }
