@@ -38,8 +38,8 @@
             <div class="lg:col-span-5 space-y-6">
                 <form id="treeForm" class="space-y-4">
                     <div>
-                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Unity ID (Optional)</label>
-                        <input type="text" name="A:Surveyor" id="unity_id" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold focus:ring-2 focus:ring-red-600 outline-none" placeholder="e.g. jdoe2">
+                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Unity ID (Required for Leaderboard)</label>
+                        <input type="text" name="A:Surveyor" id="unity_id" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold focus:ring-2 focus:ring-red-600 outline-none" placeholder="e.g. jdoe2" required>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -93,7 +93,7 @@
                     <input type="hidden" name="H:Asset_Value" id="hidden_value">
                     <input type="hidden" name="I:Timestamp" id="timestamp">
 
-                    <button type="submit" class="w-full ncsu-red text-white font-black py-5 rounded-xl shadow-xl uppercase tracking-widest mt-4">Log to Asset Registry</button>
+                    <button type="submit" id="submit_btn" class="w-full ncsu-red text-white font-black py-5 rounded-xl shadow-xl uppercase tracking-widest mt-4 active:scale-95 transition-all">Log to Asset Registry</button>
                 </form>
             </div>
 
@@ -162,11 +162,16 @@
         }
 
         window.handleGPS = function() {
+            const coordsInput = document.getElementById('coords');
+            coordsInput.value = "🛰️ Acquiring Satellites...";
             if ("geolocation" in navigator) {
                 navigator.geolocation.getCurrentPosition((pos) => {
-                    document.getElementById('coords').value = `${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`;
-                    document.getElementById('coords').style.background = "#dcfce7";
-                });
+                    coordsInput.value = `${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`;
+                    coordsInput.style.background = "#dcfce7";
+                }, (err) => {
+                    alert("GPS Error: Please enable location services.");
+                    coordsInput.value = "";
+                }, {enableHighAccuracy: true});
             }
         };
 
@@ -192,65 +197,4 @@
                 document.getElementById('display-miles').innerText = Math.round(co2 * 1.1).toLocaleString();
                 document.getElementById('display-charges').innerText = Math.round(co2 * 54.3).toLocaleString();
 
-                document.getElementById('hidden_dbh').value = dbh.toFixed(2);
-                document.getElementById('hidden_co2').value = co2;
-                document.getElementById('hidden_value').value = (co2 * EPA_RATE).toFixed(2);
-                
-                updateChart(dbh, b0, b1, mult);
-            }
-        }
-
-        function initChart() {
-            const ctx = document.getElementById('growthChart').getContext('2d');
-            myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Today', '+5y', '+10y', '+15y', '+20y'],
-                    datasets: [{ label: 'Lbs CO2', data: [0,0,0,0,0], borderColor: '#CC0000', backgroundColor: 'rgba(204,0,0,0.1)', fill: true, tension: 0.3 }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-        }
-
-        function updateChart(dbh, b0, b1, mult) {
-            if (!myChart) return;
-            const newData = [0, 5, 10, 15, 20].map(y => {
-                const d = (dbh + (y * 0.2)) * 2.54;
-                return Math.round(Math.exp(b0 + b1 * Math.log(d)) * 0.5 * 3.6663 * 2.20462 * mult);
-            });
-            myChart.data.datasets[0].data = newData;
-            myChart.update();
-        }
-
-        document.getElementById('circ_input').addEventListener('input', function() {
-            document.getElementById('dbh_input').value = (this.value / Math.PI).toFixed(1);
-            updateMath();
-        });
-        document.getElementById('dbh_input').addEventListener('input', function() {
-            document.getElementById('circ_input').value = (this.value * Math.PI).toFixed(1);
-            updateMath();
-        });
-        document.getElementById('species_group').addEventListener('change', updateMath);
-        document.getElementById('tree_condition').addEventListener('change', updateMath);
-
-        document.getElementById('treeForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const currentID = document.getElementById('unity_id').value;
-            const formData = new FormData(e.target);
-            document.getElementById('timestamp').value = new Date().toLocaleString();
-
-            const photoInput = document.getElementById('photo_input');
-            if (!photoInput.files || photoInput.files.length === 0) { formData.delete('J:Photo'); }
-
-            try {
-                await fetch("https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG", { method: 'POST', body: formData });
-                alert("ASSET LOGGED!");
-                e.target.reset();
-                document.getElementById('photo-preview').style.display = 'none';
-                document.getElementById('unity_id').value = currentID;
-                updateMath();
-            } catch (err) { alert("Error submitting."); }
-        };
-    </script>
-</body>
-</html>
+                document.getElementById('hidden_dbh
