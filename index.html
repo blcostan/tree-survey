@@ -3,46 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NCSU Tree Survey</title>
+    <title>NCSU Tree Registry | Strategic Investment</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         .ncsu-red { background-color: #CC0000; }
-        #chart-container { position: relative; height: 280px; width: 100%; background: #fff; border-radius: 12px; }
+        #chart-container { position: relative; height: 300px; width: 100%; background: #fff; border-radius: 12px; }
         .helper-box { display: none; background: #fef2f2; border: 2px solid #fee2e2; border-radius: 8px; padding: 12px; margin-top: 8px; font-size: 12px; color: #991b1b; }
     </style>
 </head>
 <body class="p-2 md:p-6 pb-20">
+
     <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden border-t-8 border-red-600">
-        <div class="bg-zinc-900 p-6 text-white">
-            <h1 class="text-xl font-black italic uppercase">NC STATE UNIVERSITY</h1>
-            <p class="text-red-500 text-[10px] font-bold uppercase mt-1">Campus Planning & Strategic Investment</p>
+        
+        <div class="bg-zinc-900 p-6 text-white flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-black italic uppercase tracking-tighter">NC STATE UNIVERSITY</h1>
+                <p class="text-red-500 text-[10px] font-bold uppercase mt-1 tracking-widest">Campus Planning & Strategic Investment</p>
+            </div>
         </div>
 
         <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
+            
             <form id="treeForm" class="space-y-4">
                 <div>
-                    <label class="block text-[10px] font-black text-zinc-500 uppercase">Unity ID</label>
-                    <input type="text" name="A:Surveyor" id="unity_id" class="w-full border-2 p-3 rounded-lg font-bold" required>
+                    <label class="block text-[10px] font-black text-zinc-500 uppercase">Surveyor Unity ID</label>
+                    <input type="text" name="A:Surveyor" id="unity_id" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" required>
                 </div>
-                
+
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[10px] font-black text-zinc-500 uppercase">Circumference (In)</label>
-                        <input type="number" id="circ_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold" placeholder="37.7">
+                        <input type="number" id="circ_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" placeholder="37.7">
                     </div>
                     <div>
                         <label class="block text-[10px] font-black text-zinc-500 uppercase">DBH (Inches)</label>
-                        <input type="number" name="B:DBH" id="dbh_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold" placeholder="12.0">
+                        <input type="number" name="F:Calculated_DBH" id="dbh_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" placeholder="12.0" required>
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-[10px] font-black text-zinc-500 uppercase">Species Group</label>
-                    <select name="C:Species" id="species_group" class="w-full border-2 p-3 rounded-lg font-bold" required>
-                        <option value="" disabled selected>Select Group...</option>
+                    <label class="block text-[10px] font-black text-zinc-500 uppercase">Species Grouping</label>
+                    <select name="C:Species Group" id="species_group" class="w-full border-2 p-3 rounded-lg font-bold outline-none" required>
+                        <option value="" disabled selected>Tap to select...</option>
                         <option value="hardwood">Broadleaf: Sturdy (Oak, Hickory)</option>
                         <option value="soft_hardwood">Broadleaf: Fast (Maple, Poplar)</option>
                         <option value="evergreen">Evergreen: Needles (Pine, Cedar)</option>
@@ -53,7 +58,7 @@
 
                 <div>
                     <label class="block text-[10px] font-black text-zinc-500 uppercase">Tree Condition</label>
-                    <select name="D:Condition" id="tree_condition" class="w-full border-2 p-3 rounded-lg font-bold">
+                    <select name="D:Condition" id="tree_condition" class="w-full border-2 p-3 rounded-lg font-bold outline-none">
                         <option value="1.0">Excellent (100%)</option>
                         <option value="0.8" selected>Good (80%)</option>
                         <option value="0.6">Fair (60%)</option>
@@ -61,15 +66,16 @@
                     </select>
                 </div>
 
-                <button type="button" onclick="handleGPS()" class="w-full bg-zinc-800 text-white p-3 rounded-lg font-black text-[10px] uppercase">🛰️ Capture GPS</button>
-                <input type="text" name="E:GPS" id="coords" readonly class="w-full mt-2 bg-zinc-100 border p-3 rounded text-[11px] font-mono text-center" placeholder="GPS Required" required>
-                
-                <input type="hidden" name="F:Calculated_DBH" id="hidden_dbh">
+                <div class="pt-2">
+                    <button type="button" onclick="handleGPS()" class="w-full bg-zinc-800 text-white p-3 rounded-lg font-black text-[10px] uppercase tracking-widest active:bg-black transition-all">🛰️ Capture GPS</button>
+                    <input type="text" name="E:GPS" id="coords" readonly class="w-full mt-2 bg-zinc-100 border p-3 rounded-lg text-[11px] font-mono text-center" placeholder="GPS Required" required>
+                </div>
+
                 <input type="hidden" name="G:CO2_Lbs" id="hidden_co2">
                 <input type="hidden" name="H:Asset_Value" id="hidden_value">
                 <input type="hidden" name="I:Timestamp" id="timestamp">
 
-                <button type="submit" id="submit_btn" class="w-full ncsu-red text-white p-5 rounded-xl font-black uppercase tracking-widest shadow-xl">Log Asset</button>
+                <button type="submit" id="submit_btn" class="w-full ncsu-red text-white p-5 rounded-xl font-black uppercase tracking-widest shadow-xl active:scale-95 transition-all">Log Asset</button>
             </form>
 
             <div class="space-y-6">
@@ -83,36 +89,60 @@
                         <p class="text-4xl font-black italic mt-1">$<span id="display-value">0.00</span></p>
                     </div>
                 </div>
-                <div class="bg-zinc-50 border-2 rounded-2xl p-4">
-                    <div id="chart-container"><canvas id="growthChart"></canvas></div>
+
+                <div class="bg-zinc-50 border-2 border-zinc-100 rounded-2xl p-4 shadow-inner">
+                    <p class="text-[10px] font-black text-zinc-400 uppercase text-center mb-4 tracking-widest text-zinc-500">20-Year Accumulation Forecast (Lbs CO2)</p>
+                    <div id="chart-container">
+                        <canvas id="growthChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="bg-zinc-100 p-8 text-zinc-600 border-t-2 border-zinc-200 text-[11px]">
-            <h2 class="text-zinc-900 font-black uppercase mb-2">Methodology & Citations</h2>
-            <p><strong>I. Biomass:</strong> Jenkins et al. (2003) regression. BM = Exp(b0 + b1 * ln(DBH_cm)).</p>
-            <p><strong>II. Valuation:</strong> U.S. EPA (2023) Social Cost of Carbon (~$0.09/lb CO2e).</p>
+        <div class="bg-zinc-100 p-8 text-zinc-600 border-t-2 border-zinc-200">
+            <h2 class="text-sm font-black text-zinc-900 uppercase tracking-tighter mb-6 border-b-2 border-zinc-300 pb-2">Scientific Methodology & Citations</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 text-[12px] leading-relaxed">
+                <div>
+                    <h3 class="font-black text-zinc-800 uppercase text-[10px] mb-2 tracking-widest">I. Biomass Regression Models</h3>
+                    <p class="mb-4">Calculations utilize total above-ground biomass (AGB) equations from <strong>Jenkins, J.C., et al. (2003)</strong> <em>"Comprehensive database of diameter-based regression equations for North American tree species."</em></p>
+                    <div class="bg-white p-3 rounded border border-zinc-300 mb-4">
+                        <p class="font-mono text-[11px] italic text-zinc-800">Biomass (kg) = Exp(b0 + b1 * ln(DBH_cm))</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-black text-zinc-800 uppercase text-[10px] mb-2 tracking-widest">II. Carbon & Economic Indexing</h3>
+                    <p class="mb-2"><strong>Carbon Density:</strong> Dry tree biomass is assumed to be 50% elemental carbon. This is converted to CO2 equivalents by the molecular ratio of CO2 to C (3.6663).</p>
+                    <p><strong>Valuation:</strong> Indexed to the <strong>U.S. EPA (2023) Social Cost of Carbon</strong> (~$0.09 per lb CO2e).</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         const jenkins = { 
             "hardwood": [-2.0127, 2.4342, "Oaks, Hickory, Beech"], 
-            "soft_hardwood": [-2.48, 2.4835, "Maples, Poplars, Elms"], 
-            "evergreen": [-2.5356, 2.4349, "Pines, Cedars, Spruce"], 
-            "small_ornate": [-0.7152, 1.7029, "Dogwoods, Hollies, Redbuds"] 
+            "soft_hardwood": [-2.48, 2.4835, "Maple, Poplar, Sweetgum"], 
+            "evergreen": [-2.5356, 2.4349, "Pine, Cedar, Fir"], 
+            "small_ornate": [-0.7152, 1.7029, "Dogwood, Holly, Cherry"] 
         };
         let myChart = null;
 
         window.onload = () => {
             const ctx = document.getElementById('growthChart').getContext('2d');
-            myChart = new Chart(ctx, { type: 'line', data: { labels: ['Today', '+5y', '+10y', '+15y', '+20y'], datasets: [{ label: 'Lbs CO2', data: [0,0,0,0,0], borderColor: '#CC0000', backgroundColor: 'rgba(204,0,0,0.1)', fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false } });
-            const saved = localStorage.getItem('ncsu_unity_id');
-            if (saved) document.getElementById('unity_id').value = saved;
+            myChart = new Chart(ctx, { 
+                type: 'line', 
+                data: { 
+                    labels: ['Today', '+5y', '+10y', '+15y', '+20y'], 
+                    datasets: [{ label: 'Lbs CO2', data: [0,0,0,0,0], borderColor: '#CC0000', backgroundColor: 'rgba(204,0,0,0.1)', fill: true, tension: 0.3, borderWidth: 4 }] 
+                }, 
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } 
+            });
+            const savedID = localStorage.getItem('ncsu_unity_id');
+            if (savedID) document.getElementById('unity_id').value = savedID;
         };
 
-        // Sync inputs
         document.getElementById('circ_input').oninput = function() {
             document.getElementById('dbh_input').value = (this.value / Math.PI).toFixed(1);
             updateMath();
@@ -123,10 +153,11 @@
         };
 
         function handleGPS() {
+            const coords = document.getElementById('coords');
+            coords.value = "🛰️ Locating...";
             navigator.geolocation.getCurrentPosition(pos => {
-                document.getElementById('coords').value = pos.coords.latitude.toFixed(6) + ", " + pos.coords.longitude.toFixed(6);
-                document.getElementById('coords').style.background = "#dcfce7";
-            }, err => alert("GPS Error"), {enableHighAccuracy: true});
+                coords.value = pos.coords.latitude.toFixed(6) + ", " + pos.coords.longitude.toFixed(6);
+            }, err => alert("Enable GPS"), {enableHighAccuracy: true});
         }
 
         function updateMath() {
@@ -137,7 +168,7 @@
             if (group) {
                 const helper = document.getElementById('species-helper');
                 helper.style.display = 'block';
-                helper.innerHTML = "<strong>ID Guide:</strong> " + jenkins[group][2];
+                helper.innerHTML = "<strong>ID Examples:</strong> " + jenkins[group][2];
             }
 
             if (dbh > 0 && group) {
@@ -145,12 +176,10 @@
                 const co2 = Math.round(Math.exp(b0 + b1 * Math.log(dbh * 2.54)) * 0.5 * 3.6663 * 2.2046 * mult);
                 document.getElementById('display-co2').innerText = co2.toLocaleString();
                 document.getElementById('display-value').innerText = (co2 * 0.09).toFixed(2);
-                document.getElementById('hidden_dbh').value = dbh;
                 document.getElementById('hidden_co2').value = co2;
                 document.getElementById('hidden_value').value = (co2 * 0.09).toFixed(2);
                 
-                const newData = [0, 5, 10, 15, 20].map(y => Math.round(Math.exp(b0 + b1 * Math.log((dbh + (y*0.2)) * 2.54)) * 0.5 * 3.6663 * 2.2046 * mult));
-                myChart.data.datasets[0].data = newData;
+                myChart.data.datasets[0].data = [0, 5, 10, 15, 20].map(y => Math.round(Math.exp(b0 + b1 * Math.log((dbh + (y*0.2)) * 2.54)) * 0.5 * 3.6663 * 2.2046 * mult));
                 myChart.update();
             }
         }
@@ -163,8 +192,7 @@
             const btn = document.getElementById('submit_btn');
             document.getElementById('timestamp').value = new Date().toLocaleString();
             localStorage.setItem('ncsu_unity_id', document.getElementById('unity_id').value);
-            
-            btn.disabled = true; btn.innerText = "UPLOADING...";
+            btn.disabled = true; btn.innerText = "SAVING...";
             
             await fetch("https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG", { 
                 method: 'POST', 
@@ -172,8 +200,8 @@
                 mode: 'no-cors' 
             });
             
-            alert("ASSET LOGGED SUCCESSFULLY!");
-            location.reload(); 
+            alert("SUCCESSFULLY LOGGED");
+            location.reload();
         };
     </script>
 </body>
