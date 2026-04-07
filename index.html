@@ -2,86 +2,176 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NCSU | Strategic Investment Tree Survey</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NCSU Tree Survey</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; -webkit-tap-highlight-color: transparent; }
+        body { font-family: sans-serif; background-color: #f3f4f6; }
         .ncsu-red { background-color: #CC0000; }
-        .ncsu-dark { background-color: #222222; }
-        #chart-container { position: relative; height: 320px; width: 100%; margin-top: 10px; }
-        input, select, button { font-size: 16px !important; } 
-        #photo-preview { width: 100%; max-height: 150px; object-fit: cover; border-radius: 8px; margin-top: 10px; display: none; border: 2px solid #ddd; }
-        .custom-file-upload {
-            display: inline-block; width: 100%; padding: 12px; cursor: pointer;
-            background-color: #e5e7eb; color: #374151; border-radius: 8px;
-            text-align: center; font-size: 10px; font-weight: 900;
-            text-transform: uppercase; letter-spacing: 0.05em; border: 2px dashed #9ca3af;
-        }
+        #chart-container { position: relative; height: 300px; width: 100%; }
+        #photo-preview { width: 100%; max-height: 200px; object-fit: cover; display: none; border-radius: 8px; margin: 10px 0; }
     </style>
 </head>
-<body class="p-2 md:p-4 pb-20">
+<body class="p-2 pb-20">
 
-    <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-2xl overflow-hidden border-t-8 border-red-600">
-        <div class="ncsu-dark p-6 text-white flex justify-between items-center">
-            <div>
-                <h1 class="text-xl font-black italic uppercase">NC STATE UNIVERSITY</h1>
-                <p class="text-red-500 text-[10px] font-bold tracking-widest uppercase mt-1">Campus Planning & Strategic Investment</p>
-            </div>
-            <a href="https://lookerstudio.google.com/reporting/d92171ad-111b-4cd0-8fce-09dd1835a50b" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg text-[10px] font-black uppercase shadow-lg">Results ↗</a>
+    <div class="max-w-5xl mx-auto bg-white shadow-xl rounded-xl overflow-hidden">
+        <div class="bg-stone-900 p-6 text-white border-b-4 border-red-600">
+            <h1 class="text-xl font-bold italic">NC STATE UNIVERSITY</h1>
+            <p class="text-red-500 text-xs font-bold uppercase tracking-widest">Campus Planning & Strategic Investment</p>
         </div>
 
-        <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10 border-b border-stone-100">
-            <div class="lg:col-span-5 space-y-6">
+        <div class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="space-y-4">
                 <form id="treeForm" class="space-y-4">
                     <div>
-                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Unity ID (Required)</label>
-                        <input type="text" name="A:Surveyor" id="unity_id" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold focus:ring-2 focus:ring-red-600 outline-none" placeholder="e.g. jdoe2" required>
+                        <label class="block text-[10px] font-bold uppercase text-gray-500">Unity ID</label>
+                        <input type="text" name="A:Surveyor" id="unity_id" class="w-full border p-3 rounded-lg font-bold" placeholder="jdoe2" required>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Circumference (In)</label>
-                            <input type="number" name="B:Circumference" id="circ_input" step="0.1" min="0" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold focus:ring-2 focus:ring-red-600 outline-none" placeholder="Inches">
+                            <label class="block text-[10px] font-bold uppercase text-gray-500">DBH (Inches)</label>
+                            <input type="number" id="dbh_input" step="0.1" class="w-full border p-3 rounded-lg font-bold" placeholder="12.5">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">DBH (Inches)</label>
-                            <input type="number" id="dbh_input" step="0.1" min="0" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold focus:ring-2 focus:ring-red-600 outline-none" placeholder="Inches">
+                            <label class="block text-[10px] font-bold uppercase text-gray-500">Condition</label>
+                            <select id="tree_condition" class="w-full border p-3 rounded-lg font-bold">
+                                <option value="1.0">Excellent</option>
+                                <option value="0.8" selected>Good</option>
+                                <option value="0.6">Fair</option>
+                                <option value="0.4">Poor</option>
+                            </select>
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Species Group</label>
-                        <select name="C:Species Group" id="species_group" class="w-full border border-stone-300 rounded-lg px-4 py-3 text-xs font-semibold focus:ring-2 focus:ring-red-600 outline-none" required>
-                            <option value="" disabled selected>Tap to Identify...</option>
-                            <option value="hardwood">Broadleaf: Sturdy (Oak, Hickory, Beech)</option>
-                            <option value="soft_hardwood">Broadleaf: Tall/Fast (Poplar, Sweetgum, Elm)</option>
-                            <option value="evergreen">Evergreen: Needles/Scales (Pine, Cedar)</option>
-                            <option value="small_ornate">Small/Flowering (Dogwood, Holly)</option>
+                        <label class="block text-[10px] font-bold uppercase text-gray-500">Species Group</label>
+                        <select id="species_group" class="w-full border p-3 rounded-lg font-bold" required>
+                            <option value="" disabled selected>Select Group...</option>
+                            <option value="hardwood">Oak/Hickory (Hardwood)</option>
+                            <option value="soft_hardwood">Poplar/Maple (Soft Hardwood)</option>
+                            <option value="evergreen">Pine/Cedar (Evergreen)</option>
+                            <option value="small_ornate">Dogwood/Holly (Small)</option>
                         </select>
                     </div>
 
-                    <div>
-                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Tree Condition</label>
-                        <select name="D:Condition" id="tree_condition" class="w-full border border-stone-300 rounded-lg px-4 py-3 text-xs font-semibold focus:ring-2 focus:ring-red-600 outline-none">
-                            <option value="1.0">Excellent (100%)</option>
-                            <option value="0.8" selected>Good (80%)</option>
-                            <option value="0.6">Fair (60%)</option>
-                            <option value="0.4">Poor (40%)</option>
-                        </select>
+                    <button type="button" onclick="handleGPS()" class="w-full bg-stone-800 text-white p-3 rounded-lg font-bold text-xs">🛰️ CAPTURE GPS</button>
+                    <input type="text" name="E:GPS" id="coords" readonly class="w-full bg-gray-100 border p-2 rounded text-xs font-mono" placeholder="No GPS" required>
+
+                    <input type="hidden" name="F:Calculated_DBH" id="hidden_dbh">
+                    <input type="hidden" name="G:CO2_Lbs" id="hidden_co2">
+                    <input type="hidden" name="H:Asset_Value" id="hidden_value">
+                    <input type="hidden" name="I:Timestamp" id="timestamp">
+
+                    <button type="submit" id="submit_btn" class="w-full ncsu-red text-white p-4 rounded-xl font-bold uppercase tracking-widest shadow-lg">Submit Asset</button>
+                </form>
+            </div>
+
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-stone-900 text-white p-4 rounded-xl border-b-4 border-red-600">
+                        <p class="text-red-500 text-[10px] font-bold uppercase">CO2 (Lbs)</p>
+                        <p class="text-3xl font-bold italic"><span id="display-co2">0</span></p>
                     </div>
-
-                    <div id="species-helper" class="p-4 bg-red-50 border-2 border-red-200 rounded-xl hidden text-[12px] italic text-stone-800 font-medium"></div>
-
-                    <div>
-                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Documentation (Optional)</label>
-                        <label for="photo_input" class="custom-file-upload">📸 Take Tree Photo</label>
-                        <input type="file" name="J:Photo" id="photo_input" accept="image/*" capture="environment" class="hidden">
-                        <img id="photo-preview" alt="Preview">
+                    <div class="bg-stone-900 text-white p-4 rounded-xl border-b-4 border-green-500">
+                        <p class="text-green-500 text-[10px] font-bold uppercase">Value</p>
+                        <p class="text-3xl font-bold italic">$<span id="display-value">0.00</span></p>
                     </div>
+                </div>
 
-                    <div>
-                        <button type="button" onclick="handleGPS()" class="w-full ncsu-dark text-white px-4 py-3 rounded-lg text-[10px] font-black uppercase mb-2 active:bg-black">Capture GPS Location</button>
-                        <input type="text" name="E:GPS" id="coords" readonly class="w-full bg-stone
+                <div class="bg-white border rounded-xl p-4">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase text-center mb-2">20-Year CO2 Forecast</p>
+                    <div id="chart-container"><canvas id="growthChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gray-50 p-6 border-t">
+            <h2 class="text-xs font-bold uppercase mb-4 border-b pb-2">Scientific Methodology & Citations</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-[11px] text-gray-600">
+                <div>
+                    <p class="font-bold text-gray-800 uppercase text-[9px]">I. Biomass Models</p>
+                    <p>Calculated via <strong>Jenkins et al. (2003)</strong> regression: <em>BM = Exp(b0 + b1 * ln(DBH))</em>. Adjusted for tree condition.</p>
+                </div>
+                <div>
+                    <p class="font-bold text-gray-800 uppercase text-[9px]">II. Valuation</p>
+                    <p>CO2 sequestration value based on <strong>U.S. EPA (2023) Social Cost of Carbon</strong> (~$0.09 per lb).</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const jenkinsData = { 
+            "hardwood": { b0: -2.0127, b1: 2.4342 },       
+            "soft_hardwood": { b0: -2.4800, b1: 2.4835 },  
+            "evergreen": { b0: -2.5356, b1: 2.4349 },      
+            "small_ornate": { b0: -0.7152, b1: 1.7029 }    
+        };
+
+        let myChart = null;
+
+        window.onload = () => {
+            initChart();
+            const savedID = localStorage.getItem('ncsu_unity_id');
+            if (savedID) document.getElementById('unity_id').value = savedID;
+        };
+
+        window.handleGPS = function() {
+            const coordsInput = document.getElementById('coords');
+            coordsInput.value = "Locating...";
+            navigator.geolocation.getCurrentPosition((pos) => {
+                coordsInput.value = `${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`;
+                coordsInput.style.backgroundColor = "#dcfce7";
+            }, (err) => {
+                alert("Please enable GPS");
+                coordsInput.value = "";
+            }, {enableHighAccuracy: true});
+        };
+
+        function updateMath() {
+            const dbh = parseFloat(document.getElementById('dbh_input').value) || 0;
+            const group = document.getElementById('species_group').value;
+            const mult = parseFloat(document.getElementById('tree_condition').value) || 1.0;
+
+            if (dbh > 0 && group) {
+                const { b0, b1 } = jenkinsData[group];
+                const dbhCm = dbh * 2.54;
+                const co2 = Math.round(Math.exp(b0 + b1 * Math.log(dbhCm)) * 0.5 * 3.6663 * 2.20462 * mult);
+                
+                document.getElementById('display-co2').innerText = co2.toLocaleString();
+                document.getElementById('display-value').innerText = (co2 * 0.09).toFixed(2);
+
+                document.getElementById('hidden_dbh').value = dbh;
+                document.getElementById('hidden_co2').value = co2;
+                document.getElementById('hidden_value').value = (co2 * 0.09).toFixed(2);
+                
+                updateChart(dbh, b0, b1, mult);
+            }
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['0y', '5y', '10y', '15y', '20y'],
+                    datasets: [{ label: 'Lbs CO2', data: [0,0,0,0,0], borderColor: '#CC0000', fill: true, tension: 0.3 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        function updateChart(dbh, b0, b1, mult) {
+            const newData = [0, 5, 10, 15, 20].map(y => {
+                const d = (dbh + (y * 0.2)) * 2.54;
+                return Math.round(Math.exp(b0 + b1 * Math.log(d)) * 0.5 * 3.6663 * 2.20462 * mult);
+            });
+            myChart.data.datasets[0].data = newData;
+            myChart.update();
+        }
+
+        document.getElementById('dbh_input').addEventListener('input', updateMath);
+        document.getElementById('species_group').addEventListener('change', updateMath);
+        document.
