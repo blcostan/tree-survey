@@ -11,7 +11,6 @@
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; -webkit-tap-highlight-color: transparent; }
         .ncsu-red { background-color: #CC0000; }
         .ncsu-dark { background-color: #222222; }
-        /* FIXED: Added a concrete height to the chart box */
         #chart-container { position: relative; height: 300px; width: 100%; margin-top: 10px; }
         input, select, button { font-size: 16px !important; } 
     </style>
@@ -21,13 +20,13 @@
     <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-2xl overflow-hidden border-t-8 border-red-600">
         <div class="ncsu-dark p-6 text-white flex justify-between items-center">
             <div>
-                <h1 class="text-xl font-black italic uppercase text-white">NC STATE UNIVERSITY</h1>
+                <h1 class="text-xl font-black italic uppercase">NC STATE UNIVERSITY</h1>
                 <p class="text-red-500 text-[10px] font-bold tracking-widest uppercase mt-1">Campus Planning & Strategic Investment</p>
             </div>
             <a href="https://lookerstudio.google.com/reporting/d92171ad-111b-4cd0-8fce-09dd1835a50b" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all shadow-lg flex items-center gap-2">Results ↗</a>
         </div>
 
-        <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
+        <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10 border-b border-stone-100">
             <div class="lg:col-span-5 space-y-6">
                 <form id="treeForm" class="space-y-4">
                     <div>
@@ -87,24 +86,43 @@
 
             <div class="lg:col-span-7 space-y-4">
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-stone-900 text-white p-5 rounded-2xl border-b-4 border-red-600">
-                        <p class="text-red-500 font-bold text-[10px] uppercase">CO2 (Lbs)</p>
+                    <div class="bg-stone-900 text-white p-5 rounded-2xl border-b-4 border-red-600 shadow-lg">
+                        <p class="text-red-500 font-bold text-[10px] uppercase">CO2 Storage (Lbs)</p>
                         <p class="text-3xl font-black italic"><span id="display-co2">0</span></p>
-                        <p class="text-[10px] text-green-400 font-bold mt-2">🚗 <span id="display-miles">0</span> miles</p>
+                        <p class="text-[10px] text-green-400 font-bold mt-2">🚗 <span id="display-miles">0</span> miles driven</p>
                     </div>
-                    <div class="bg-stone-900 text-white p-5 rounded-2xl border-b-4 border-green-500">
-                        <p class="text-green-500 font-bold text-[10px] uppercase">Social Value</p>
+                    <div class="bg-stone-900 text-white p-5 rounded-2xl border-b-4 border-green-500 shadow-lg">
+                        <p class="text-green-500 font-bold text-[10px] uppercase">Social Asset Value</p>
                         <p class="text-3xl font-black italic">$<span id="display-value">0.00</span></p>
-                        <p class="text-[10px] text-blue-400 font-bold mt-2">💡 <span id="display-charges">0</span> charges</p>
+                        <p class="text-[10px] text-blue-400 font-bold mt-2">💡 <span id="display-charges">0</span> phone charges</p>
                     </div>
                 </div>
 
                 <div class="bg-white border border-stone-200 rounded-2xl p-4 shadow-inner">
-                    <p class="text-[10px] font-black text-stone-400 uppercase text-center tracking-widest mb-2">20-Year Growth Forecast (CO2 Lbs)</p>
+                    <p class="text-[10px] font-black text-stone-400 uppercase text-center tracking-widest mb-2">20-Year Growth Forecast</p>
                     <div id="chart-container">
                         <canvas id="growthChart"></canvas>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="bg-stone-50 p-6 md:p-10 text-stone-600 border-t border-stone-200">
+            <h2 class="text-sm font-black text-stone-900 uppercase tracking-widest mb-6 border-b border-stone-300 pb-2">Scientific Methodology & Citations</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 text-[12px] leading-relaxed">
+                <div>
+                    <h3 class="font-black text-stone-800 uppercase text-[10px] mb-3">I. Biomass Regression Models</h3>
+                    <p class="mb-3">Biomass estimation is calculated using generalized parameters from <strong>Jenkins, J.C. et al. (2003)</strong>. The model follows the logarithmic power law: $$BM = Exp(b0 + b1 \times ln(DBH_{cm}))$$.</p>
+                    <p>Adjustments are made for tree condition (1.0 to 0.4) to reflect health-related biomass degradation in urban canopy specimens.</p>
+                </div>
+                <div>
+                    <h3 class="font-black text-stone-800 uppercase text-[10px] mb-3">II. Carbon Sequestration & Economic Valuation</h3>
+                    <p class="mb-3">Dry biomass is converted to carbon (0.50) and subsequently to sequestered CO2 equivalents using the molecular weight ratio of 3.6663.</p>
+                    <p>Economic valuation is indexed to the <strong>U.S. EPA (2023) Social Cost of Carbon (SCC)</strong>. A localized rate of approximately $0.09/lb ($200/metric ton) is applied to represent long-term climate mitigation value.</p>
+                </div>
+            </div>
+            <div class="mt-8 pt-4 border-t border-stone-200 italic text-[10px] text-stone-400">
+                Source: Forest Science 49(1):12-35; EPA-450-R-23-001
             </div>
         </div>
     </div>
@@ -117,17 +135,22 @@
             "small_ornate": { b0: -0.7152, b1: 1.7029 }    
         };
 
+        const speciesTips = { 
+            "hardwood": "<strong>ID:</strong> Broad leaves. Thick bark. (e.g. Oak, Hickory).", 
+            "soft_hardwood": "<strong>ID:</strong> Tall, straight trunk. (e.g. Poplar, Maple).", 
+            "evergreen": "<strong>ID:</strong> Needles/Scales. (e.g. Pine, Cedar).", 
+            "small_ornate": "<strong>ID:</strong> Small landscaping tree. (e.g. Dogwood, Holly)." 
+        };
+
         const EPA_RATE = 0.09; 
         let myChart = null;
 
-        // LOAD SAVED UNITY ID
         window.onload = () => {
             const savedID = localStorage.getItem('ncsu_unity_id');
             if (savedID) { document.getElementById('unity_id').value = savedID; }
-            initChart(); // Ensure chart exists on load
+            initChart();
         };
 
-        // SAVE UNITY ID
         document.getElementById('unity_id').addEventListener('input', function() {
             localStorage.setItem('ncsu_unity_id', this.value);
         });
@@ -136,6 +159,7 @@
             if ("geolocation" in navigator) {
                 navigator.geolocation.getCurrentPosition((pos) => {
                     document.getElementById('coords').value = `${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`;
+                    document.getElementById('coords').style.background = "#dcfce7";
                 });
             }
         };
@@ -145,6 +169,11 @@
             const group = document.getElementById('species_group').value;
             const mult = parseFloat(document.getElementById('tree_condition').value);
             
+            if(group) {
+                document.getElementById('species-helper').classList.remove('hidden');
+                document.getElementById('helper-text').innerHTML = speciesTips[group];
+            }
+
             if (dbh > 0 && group) {
                 const { b0, b1 } = jenkinsData[group];
                 const dbhCm = dbh * 2.54;
@@ -152,7 +181,7 @@
                 const co2 = Math.round((biomassKg * 0.5) * 3.6663 * 2.20462 * mult);
                 
                 document.getElementById('display-co2').innerText = co2.toLocaleString();
-                document.getElementById('display-value').innerText = (co2 * EPA_RATE).toFixed(2);
+                document.getElementById('display-value').innerText = (co2 * EPA_RATE).toLocaleString(undefined, {minimumFractionDigits: 2});
                 document.getElementById('display-miles').innerText = Math.round(co2 * 1.1).toLocaleString();
                 document.getElementById('display-charges').innerText = Math.round(co2 * 54.3).toLocaleString();
 
@@ -164,7 +193,6 @@
             }
         }
 
-        // FIXED: Separate Chart Initialization
         function initChart() {
             const ctx = document.getElementById('growthChart').getContext('2d');
             myChart = new Chart(ctx, {
@@ -204,9 +232,10 @@
             document.getElementById('timestamp').value = new Date().toLocaleString();
             try {
                 await fetch("https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG", { method: 'POST', body: new FormData(e.target), mode: 'no-cors' });
-                alert("TREE LOGGED!");
+                alert("TREE LOGGED SUCCESSFULLY!");
                 e.target.reset();
                 document.getElementById('unity_id').value = currentID;
+                document.getElementById('species-helper').classList.add('hidden');
                 updateMath();
             } catch (err) { alert("Error."); }
         };
