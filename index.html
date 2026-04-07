@@ -11,9 +11,28 @@
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; -webkit-tap-highlight-color: transparent; }
         .ncsu-red { background-color: #CC0000; }
         .ncsu-dark { background-color: #222222; }
-        #chart-container { position: relative; height: 300px; width: 100%; margin-top: 10px; }
+        #chart-container { position: relative; height: 320px; width: 100%; margin-top: 10px; }
         input, select, button { font-size: 16px !important; } 
         #photo-preview { width: 100%; max-height: 150px; object-fit: cover; border-radius: 8px; margin-top: 10px; display: none; border: 2px solid #ddd; }
+        
+        /* CUSTOM PHOTO BUTTON STYLING */
+        .custom-file-upload {
+            display: inline-block;
+            width: 100%;
+            padding: 12px;
+            cursor: pointer;
+            background-color: #e5e7eb;
+            color: #374151;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+            border: 2px dashed #9ca3af;
+        }
+        .custom-file-upload:active { background-color: #d1d5db; transform: scale(0.98); }
     </style>
 </head>
 <body class="p-2 md:p-4 pb-20">
@@ -57,16 +76,19 @@
                         </select>
                     </div>
 
-                    <div id="species-helper" class="p-4 bg-red-50 border-2 border-red-200 rounded-xl hidden text-[12px] italic"></div>
+                    <div id="species-helper" class="p-4 bg-red-50 border-2 border-red-200 rounded-xl hidden text-[12px] italic text-stone-800 font-medium"></div>
 
                     <div>
-                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Tree Photo / Selfie (Optional)</label>
-                        <input type="file" name="J:Photo" id="photo_input" accept="image/*" capture="environment" class="w-full text-xs text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[10px] file:font-black file:uppercase file:bg-stone-200 file:text-stone-700 hover:file:bg-stone-300 cursor-pointer">
+                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Documentation (Optional)</label>
+                        <label for="photo_input" class="custom-file-upload">
+                            📸 Take Tree Photo
+                        </label>
+                        <input type="file" name="J:Photo" id="photo_input" accept="image/*" capture="environment" class="hidden">
                         <img id="photo-preview" alt="Preview">
                     </div>
 
                     <div>
-                        <button type="button" onclick="handleGPS()" class="w-full ncsu-dark text-white px-4 py-3 rounded-lg text-[10px] font-black uppercase mb-2 active:bg-black transition-colors">Capture GPS Location</button>
+                        <button type="button" onclick="handleGPS()" class="w-full ncsu-dark text-white px-4 py-3 rounded-lg text-[10px] font-black uppercase mb-2 active:bg-black transition-all">Capture GPS Location</button>
                         <input type="text" name="E:GPS" id="coords" readonly class="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 text-[11px] font-mono" placeholder="No GPS Captured" required>
                     </div>
 
@@ -75,26 +97,26 @@
                     <input type="hidden" name="H:Asset_Value" id="hidden_value">
                     <input type="hidden" name="I:Timestamp" id="timestamp">
 
-                    <button type="submit" class="w-full ncsu-red text-white font-black py-5 rounded-xl shadow-xl uppercase tracking-widest mt-4 active:scale-95 transition-all">Log Asset</button>
+                    <button type="submit" class="w-full ncsu-red text-white font-black py-5 rounded-xl shadow-xl uppercase tracking-widest mt-4 active:scale-95 transition-all">Log to Asset Registry</button>
                 </form>
             </div>
 
             <div class="lg:col-span-7 space-y-4">
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-stone-900 text-white p-5 rounded-2xl border-b-4 border-red-600">
-                        <p class="text-red-500 font-bold text-[10px] uppercase">CO2 Storage (Lbs)</p>
-                        <p class="text-3xl font-black italic"><span id="display-co2">0</span></p>
-                        <p class="text-[10px] text-green-400 font-bold mt-2">🚗 <span id="display-miles">0</span> miles</p>
+                    <div class="bg-stone-900 text-white p-6 rounded-2xl border-b-4 border-red-600 shadow-lg">
+                        <p class="text-red-500 font-bold text-[10px] uppercase tracking-widest">Adjusted CO2 Storage</p>
+                        <p class="text-4xl font-black italic mt-1"><span id="display-co2">0</span> <span class="text-xs text-stone-500 uppercase">lbs</span></p>
+                        <p class="text-[11px] text-green-400 font-bold mt-4 flex items-center gap-2">🚗 <span id="display-miles">0</span> miles driven</p>
                     </div>
-                    <div class="bg-stone-900 text-white p-5 rounded-2xl border-b-4 border-green-500">
-                        <p class="text-green-500 font-bold text-[10px] uppercase">Social Asset Value</p>
-                        <p class="text-3xl font-black italic">$<span id="display-value">0.00</span></p>
-                        <p class="text-[10px] text-blue-400 font-bold mt-2">💡 <span id="display-charges">0</span> charges</p>
+                    <div class="bg-stone-900 text-white p-6 rounded-2xl border-b-4 border-green-500 shadow-lg">
+                        <p class="text-green-500 font-bold text-[10px] uppercase tracking-widest">Social Asset Value</p>
+                        <p class="text-4xl font-black italic mt-1">$<span id="display-value">0.00</span></p>
+                        <p class="text-[11px] text-blue-400 font-bold mt-4 flex items-center gap-2">💡 <span id="display-charges">0</span> phone charges</p>
                     </div>
                 </div>
 
                 <div class="bg-white border border-stone-200 rounded-2xl p-4 shadow-inner">
-                    <p class="text-[10px] font-black text-stone-400 uppercase text-center tracking-widest mb-2">20-Year Growth Forecast</p>
+                    <p class="text-[10px] font-black text-stone-400 uppercase text-center tracking-widest mb-4">20-Year Carbon Sequestration Forecast</p>
                     <div id="chart-container">
                         <canvas id="growthChart"></canvas>
                     </div>
@@ -107,11 +129,13 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-10 text-[12px] leading-relaxed">
                 <div>
                     <h3 class="font-black text-stone-800 uppercase text-[10px] mb-3">I. Biomass Regression Models</h3>
-                    <p>Calculated using <strong>Jenkins, J.C. et al. (2003)</strong> parameters: $$BM = Exp(b0 + b1 \times ln(DBH_{cm}))$$.</p>
+                    <p class="mb-3">Biomass estimation is calculated using generalized parameters from <strong>Jenkins, J.C. et al. (2003)</strong>. The model follows the logarithmic power law: $$BM = Exp(b0 + b1 \times ln(DBH_{cm}))$$.</p>
+                    <p>Adjustments are made for tree condition (multiplier 0.8) to reflect the estimated health-related biomass degradation in urban canopy specimens.</p>
                 </div>
                 <div>
-                    <h3 class="font-black text-stone-800 uppercase text-[10px] mb-3">II. Economic Valuation</h3>
-                    <p>Indexed to <strong>U.S. EPA (2023) Social Cost of Carbon</strong> at ~$0.09/lb ($200/metric ton).</p>
+                    <h3 class="font-black text-stone-800 uppercase text-[10px] mb-3">II. Carbon Sequestration & Economic Valuation</h3>
+                    <p class="mb-3">Dry biomass is converted to carbon (0.50) and subsequently to sequestered CO2 equivalents using the molecular weight ratio of 3.6663.</p>
+                    <p>Economic valuation is indexed to the <strong>U.S. EPA (2023) Social Cost of Carbon (SCC)</strong>. A localized rate of approximately $0.09/lb ($200/metric ton) is applied to represent long-term climate mitigation value.</p>
                 </div>
             </div>
             <div class="mt-8 pt-4 border-t border-stone-200 italic text-[10px] text-stone-400 text-center">
@@ -122,5 +146,124 @@
 
     <script>
         const jenkinsData = { 
-            "hardwood": { b0: -2.0127, b1: 2.4342, tip: "<strong>ID:</strong> Broad leaves. Thick bark. (e.g. Oak, Hickory)." },       
-            "soft_hardwood": { b0: -2.4800, b1: 2.4835, tip: "<strong>ID:</strong> Tall, straight trunk. (e.g. Poplar, Maple)." },
+            "hardwood": { b0: -2.0127, b1: 2.4342, tip: "<strong>ID:</strong> Broad leaves. Thick bark. (e.g. Oak, Hickory, Beech)." },       
+            "soft_hardwood": { b0: -2.4800, b1: 2.4835, tip: "<strong>ID:</strong> Tall, straight trunk. (e.g. Poplar, Maple)." },  
+            "evergreen": { b0: -2.5356, b1: 2.4349, tip: "<strong>ID:</strong> Needles/Scales. Green year-round. (e.g. Pine, Cedar)." },      
+            "small_ornate": { b0: -0.7152, b1: 1.7029, tip: "<strong>ID:</strong> Small landscape tree under 25ft. (e.g. Dogwood, Holly)." }    
+        };
+
+        const EPA_RATE = 0.09; 
+        let myChart = null;
+
+        window.onload = () => {
+            const savedID = localStorage.getItem('ncsu_unity_id');
+            if (savedID) { document.getElementById('unity_id').value = savedID; }
+            initChart();
+        };
+
+        document.getElementById('unity_id').addEventListener('input', function() {
+            localStorage.setItem('ncsu_unity_id', this.value);
+        });
+
+        document.getElementById('photo_input').onchange = evt => {
+            const [file] = evt.target.files;
+            if (file) {
+                const preview = document.getElementById('photo-preview');
+                preview.src = URL.createObjectURL(file);
+                preview.style.display = 'block';
+            }
+        }
+
+        window.handleGPS = function() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    document.getElementById('coords').value = `${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`;
+                    document.getElementById('coords').style.background = "#dcfce7";
+                }, () => { alert("GPS Access Denied."); });
+            }
+        };
+
+        function updateMath() {
+            const dbh = parseFloat(document.getElementById('dbh_input').value) || 0;
+            const group = document.getElementById('species_group').value;
+            const mult = 0.8; 
+            
+            if(group) {
+                const helper = document.getElementById('species-helper');
+                helper.classList.remove('hidden');
+                helper.innerHTML = jenkinsData[group].tip;
+            }
+
+            if (dbh > 0 && group) {
+                const { b0, b1 } = jenkinsData[group];
+                const dbhCm = dbh * 2.54;
+                const biomassKg = Math.exp(b0 + b1 * Math.log(dbhCm));
+                const co2 = Math.round((biomassKg * 0.5) * 3.6663 * 2.20462 * mult);
+                
+                document.getElementById('display-co2').innerText = co2.toLocaleString();
+                document.getElementById('display-value').innerText = (co2 * EPA_RATE).toLocaleString(undefined, {minimumFractionDigits: 2});
+                document.getElementById('display-miles').innerText = Math.round(co2 * 1.1).toLocaleString();
+                document.getElementById('display-charges').innerText = Math.round(co2 * 54.3).toLocaleString();
+
+                document.getElementById('hidden_dbh').value = dbh.toFixed(2);
+                document.getElementById('hidden_co2').value = co2;
+                document.getElementById('hidden_value').value = (co2 * EPA_RATE).toFixed(2);
+                
+                updateChart(dbh, b0, b1, mult);
+            }
+        }
+
+        function initChart() {
+            const canvas = document.getElementById('growthChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Today', '+5y', '+10y', '+15y', '+20y'],
+                    datasets: [{ label: 'Lbs CO2', data: [0,0,0,0,0], borderColor: '#CC0000', backgroundColor: 'rgba(204,0,0,0.1)', fill: true, tension: 0.3 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        function updateChart(dbh, b0, b1, mult) {
+            if (!myChart) return;
+            const newData = [0, 5, 10, 15, 20].map(y => {
+                const d = (dbh + (y * 0.2)) * 2.54;
+                return Math.round(Math.exp(b0 + b1 * Math.log(d)) * 0.5 * 3.6663 * 2.20462 * mult);
+            });
+            myChart.data.datasets[0].data = newData;
+            myChart.update();
+        }
+
+        document.getElementById('circ_input').addEventListener('input', function() {
+            document.getElementById('dbh_input').value = (this.value / Math.PI).toFixed(1);
+            updateMath();
+        });
+        document.getElementById('dbh_input').addEventListener('input', function() {
+            document.getElementById('circ_input').value = (this.value * Math.PI).toFixed(1);
+            updateMath();
+        });
+        document.getElementById('species_group').addEventListener('change', updateMath);
+
+        document.getElementById('treeForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const currentID = document.getElementById('unity_id').value;
+            document.getElementById('timestamp').value = new Date().toLocaleString();
+            try {
+                await fetch("https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG", { 
+                    method: 'POST', 
+                    body: new FormData(e.target) 
+                });
+                alert("ASSET LOGGED SUCCESSFULLY!");
+                e.target.reset();
+                document.getElementById('photo-preview').style.display = 'none';
+                document.getElementById('unity_id').value = currentID;
+                document.getElementById('species-helper').classList.add('hidden');
+                updateMath();
+            } catch (err) { alert("Error submitting. Check connection."); }
+        };
+    </script>
+</body>
+</html>
