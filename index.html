@@ -15,24 +15,12 @@
         input, select, button { font-size: 16px !important; } 
         #photo-preview { width: 100%; max-height: 150px; object-fit: cover; border-radius: 8px; margin-top: 10px; display: none; border: 2px solid #ddd; }
         
-        /* CUSTOM PHOTO BUTTON STYLING */
         .custom-file-upload {
-            display: inline-block;
-            width: 100%;
-            padding: 12px;
-            cursor: pointer;
-            background-color: #e5e7eb;
-            color: #374151;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 10px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            transition: all 0.2s;
-            border: 2px dashed #9ca3af;
+            display: inline-block; width: 100%; padding: 12px; cursor: pointer;
+            background-color: #e5e7eb; color: #374151; border-radius: 8px;
+            text-align: center; font-size: 10px; font-weight: 900;
+            text-transform: uppercase; letter-spacing: 0.05em; border: 2px dashed #9ca3af;
         }
-        .custom-file-upload:active { background-color: #d1d5db; transform: scale(0.98); }
     </style>
 </head>
 <body class="p-2 md:p-4 pb-20">
@@ -43,7 +31,7 @@
                 <h1 class="text-xl font-black italic uppercase">NC STATE UNIVERSITY</h1>
                 <p class="text-red-500 text-[10px] font-bold tracking-widest uppercase mt-1">Campus Planning & Strategic Investment</p>
             </div>
-            <a href="https://lookerstudio.google.com/reporting/d92171ad-111b-4cd0-8fce-09dd1835a50b" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all shadow-lg flex items-center gap-2">Results ↗</a>
+            <a href="https://lookerstudio.google.com/reporting/d92171ad-111b-4cd0-8fce-09dd1835a50b" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg text-[10px] font-black uppercase shadow-lg">Results ↗</a>
         </div>
 
         <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10 border-b border-stone-100">
@@ -76,19 +64,27 @@
                         </select>
                     </div>
 
+                    <div>
+                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Tree Condition</label>
+                        <select name="D:Condition" id="tree_condition" class="w-full border border-stone-300 rounded-lg px-4 py-3 text-xs font-semibold focus:ring-2 focus:ring-red-600 outline-none">
+                            <option value="1.0">Excellent (100%)</option>
+                            <option value="0.8" selected>Good (80%)</option>
+                            <option value="0.6">Fair (60%)</option>
+                            <option value="0.4">Poor (40%)</option>
+                        </select>
+                    </div>
+
                     <div id="species-helper" class="p-4 bg-red-50 border-2 border-red-200 rounded-xl hidden text-[12px] italic text-stone-800 font-medium"></div>
 
                     <div>
                         <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Documentation (Optional)</label>
-                        <label for="photo_input" class="custom-file-upload">
-                            📸 Take Tree Photo
-                        </label>
+                        <label for="photo_input" class="custom-file-upload">📸 Take Tree Photo</label>
                         <input type="file" name="J:Photo" id="photo_input" accept="image/*" capture="environment" class="hidden">
                         <img id="photo-preview" alt="Preview">
                     </div>
 
                     <div>
-                        <button type="button" onclick="handleGPS()" class="w-full ncsu-dark text-white px-4 py-3 rounded-lg text-[10px] font-black uppercase mb-2 active:bg-black transition-all">Capture GPS Location</button>
+                        <button type="button" onclick="handleGPS()" class="w-full ncsu-dark text-white px-4 py-3 rounded-lg text-[10px] font-black uppercase mb-2 active:bg-black">Capture GPS Location</button>
                         <input type="text" name="E:GPS" id="coords" readonly class="w-full bg-stone-100 border border-stone-300 rounded-lg px-4 py-3 text-[11px] font-mono" placeholder="No GPS Captured" required>
                     </div>
 
@@ -97,29 +93,27 @@
                     <input type="hidden" name="H:Asset_Value" id="hidden_value">
                     <input type="hidden" name="I:Timestamp" id="timestamp">
 
-                    <button type="submit" class="w-full ncsu-red text-white font-black py-5 rounded-xl shadow-xl uppercase tracking-widest mt-4 active:scale-95 transition-all">Log to Asset Registry</button>
+                    <button type="submit" class="w-full ncsu-red text-white font-black py-5 rounded-xl shadow-xl uppercase tracking-widest mt-4">Log to Asset Registry</button>
                 </form>
             </div>
 
             <div class="lg:col-span-7 space-y-4">
                 <div class="grid grid-cols-2 gap-4">
                     <div class="bg-stone-900 text-white p-6 rounded-2xl border-b-4 border-red-600 shadow-lg">
-                        <p class="text-red-500 font-bold text-[10px] uppercase tracking-widest">Adjusted CO2 Storage</p>
-                        <p class="text-4xl font-black italic mt-1"><span id="display-co2">0</span> <span class="text-xs text-stone-500 uppercase">lbs</span></p>
-                        <p class="text-[11px] text-green-400 font-bold mt-4 flex items-center gap-2">🚗 <span id="display-miles">0</span> miles driven</p>
+                        <p class="text-red-500 font-bold text-[10px] uppercase">CO2 Storage (Lbs)</p>
+                        <p class="text-4xl font-black italic mt-1"><span id="display-co2">0</span></p>
+                        <p class="text-[11px] text-green-400 font-bold mt-4">🚗 <span id="display-miles">0</span> miles</p>
                     </div>
                     <div class="bg-stone-900 text-white p-6 rounded-2xl border-b-4 border-green-500 shadow-lg">
-                        <p class="text-green-500 font-bold text-[10px] uppercase tracking-widest">Social Asset Value</p>
+                        <p class="text-green-500 font-bold text-[10px] uppercase">Social Asset Value</p>
                         <p class="text-4xl font-black italic mt-1">$<span id="display-value">0.00</span></p>
-                        <p class="text-[11px] text-blue-400 font-bold mt-4 flex items-center gap-2">💡 <span id="display-charges">0</span> phone charges</p>
+                        <p class="text-[11px] text-blue-400 font-bold mt-4">💡 <span id="display-charges">0</span> charges</p>
                     </div>
                 </div>
 
                 <div class="bg-white border border-stone-200 rounded-2xl p-4 shadow-inner">
-                    <p class="text-[10px] font-black text-stone-400 uppercase text-center tracking-widest mb-4">20-Year Carbon Sequestration Forecast</p>
-                    <div id="chart-container">
-                        <canvas id="growthChart"></canvas>
-                    </div>
+                    <p class="text-[10px] font-black text-stone-400 uppercase text-center tracking-widest mb-4">20-Year Growth Forecast</p>
+                    <div id="chart-container"><canvas id="growthChart"></canvas></div>
                 </div>
             </div>
         </div>
@@ -129,27 +123,24 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-10 text-[12px] leading-relaxed">
                 <div>
                     <h3 class="font-black text-stone-800 uppercase text-[10px] mb-3">I. Biomass Regression Models</h3>
-                    <p class="mb-3">Biomass estimation is calculated using generalized parameters from <strong>Jenkins, J.C. et al. (2003)</strong>. The model follows the logarithmic power law: $$BM = Exp(b0 + b1 \times ln(DBH_{cm}))$$.</p>
-                    <p>Adjustments are made for tree condition (multiplier 0.8) to reflect the estimated health-related biomass degradation in urban canopy specimens.</p>
+                    <p class="mb-3">Biomass estimation is calculated using generalized parameters from <strong>Jenkins, J.C. et al. (2003)</strong>: $$BM = Exp(b0 + b1 \times ln(DBH_{cm}))$$.</p>
+                    <p>Adjustments are made for tree condition (1.0 to 0.4) to reflect health-related biomass degradation.</p>
                 </div>
                 <div>
-                    <h3 class="font-black text-stone-800 uppercase text-[10px] mb-3">II. Carbon Sequestration & Economic Valuation</h3>
-                    <p class="mb-3">Dry biomass is converted to carbon (0.50) and subsequently to sequestered CO2 equivalents using the molecular weight ratio of 3.6663.</p>
-                    <p>Economic valuation is indexed to the <strong>U.S. EPA (2023) Social Cost of Carbon (SCC)</strong>. A localized rate of approximately $0.09/lb ($200/metric ton) is applied to represent long-term climate mitigation value.</p>
+                    <h3 class="font-black text-stone-800 uppercase text-[10px] mb-3">II. Economic Valuation</h3>
+                    <p class="mb-3">Dry biomass is converted to carbon (0.50) and sequestered CO2 equivalents (ratio 3.6663).</p>
+                    <p>Economic valuation indexed to <strong>U.S. EPA (2023) Social Cost of Carbon</strong> (~$0.09/lb).</p>
                 </div>
-            </div>
-            <div class="mt-8 pt-4 border-t border-stone-200 italic text-[10px] text-stone-400 text-center">
-                Source: Forest Science 49(1):12-35; EPA-450-R-23-001
             </div>
         </div>
     </div>
 
     <script>
         const jenkinsData = { 
-            "hardwood": { b0: -2.0127, b1: 2.4342, tip: "<strong>ID:</strong> Broad leaves. Thick bark. (e.g. Oak, Hickory, Beech)." },       
-            "soft_hardwood": { b0: -2.4800, b1: 2.4835, tip: "<strong>ID:</strong> Tall, straight trunk. (e.g. Poplar, Maple)." },  
-            "evergreen": { b0: -2.5356, b1: 2.4349, tip: "<strong>ID:</strong> Needles/Scales. Green year-round. (e.g. Pine, Cedar)." },      
-            "small_ornate": { b0: -0.7152, b1: 1.7029, tip: "<strong>ID:</strong> Small landscape tree under 25ft. (e.g. Dogwood, Holly)." }    
+            "hardwood": { b0: -2.0127, b1: 2.4342, tip: "<strong>ID:</strong> Oak, Hickory, Beech." },       
+            "soft_hardwood": { b0: -2.4800, b1: 2.4835, tip: "<strong>ID:</strong> Poplar, Maple, Elm." },  
+            "evergreen": { b0: -2.5356, b1: 2.4349, tip: "<strong>ID:</strong> Pine, Cedar." },      
+            "small_ornate": { b0: -0.7152, b1: 1.7029, tip: "<strong>ID:</strong> Dogwood, Holly." }    
         };
 
         const EPA_RATE = 0.09; 
@@ -160,10 +151,6 @@
             if (savedID) { document.getElementById('unity_id').value = savedID; }
             initChart();
         };
-
-        document.getElementById('unity_id').addEventListener('input', function() {
-            localStorage.setItem('ncsu_unity_id', this.value);
-        });
 
         document.getElementById('photo_input').onchange = evt => {
             const [file] = evt.target.files;
@@ -179,14 +166,14 @@
                 navigator.geolocation.getCurrentPosition((pos) => {
                     document.getElementById('coords').value = `${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`;
                     document.getElementById('coords').style.background = "#dcfce7";
-                }, () => { alert("GPS Access Denied."); });
+                });
             }
         };
 
         function updateMath() {
             const dbh = parseFloat(document.getElementById('dbh_input').value) || 0;
             const group = document.getElementById('species_group').value;
-            const mult = 0.8; 
+            const mult = parseFloat(document.getElementById('tree_condition').value) || 0.8;
             
             if(group) {
                 const helper = document.getElementById('species-helper');
@@ -214,9 +201,7 @@
         }
 
         function initChart() {
-            const canvas = document.getElementById('growthChart');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
+            const ctx = document.getElementById('growthChart').getContext('2d');
             myChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -246,23 +231,25 @@
             updateMath();
         });
         document.getElementById('species_group').addEventListener('change', updateMath);
+        document.getElementById('tree_condition').addEventListener('change', updateMath);
 
         document.getElementById('treeForm').onsubmit = async (e) => {
             e.preventDefault();
             const currentID = document.getElementById('unity_id').value;
+            const formData = new FormData(e.target);
             document.getElementById('timestamp').value = new Date().toLocaleString();
+
+            const photoInput = document.getElementById('photo_input');
+            if (!photoInput.files || photoInput.files.length === 0) { formData.delete('J:Photo'); }
+
             try {
-                await fetch("https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG", { 
-                    method: 'POST', 
-                    body: new FormData(e.target) 
-                });
-                alert("ASSET LOGGED SUCCESSFULLY!");
+                await fetch("https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG", { method: 'POST', body: formData });
+                alert("ASSET LOGGED!");
                 e.target.reset();
                 document.getElementById('photo-preview').style.display = 'none';
                 document.getElementById('unity_id').value = currentID;
-                document.getElementById('species-helper').classList.add('hidden');
                 updateMath();
-            } catch (err) { alert("Error submitting. Check connection."); }
+            } catch (err) { alert("Error submitting."); }
         };
     </script>
 </body>
