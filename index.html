@@ -8,125 +8,231 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; -webkit-tap-highlight-color: transparent;}
         .ncsu-red { background-color: #CC0000; }
-        #submit_btn { display: none; }
-        #proximity_note_container { display: none; }
+        #chart-container { position: relative; height: 280px; width: 100%; background: #fff; border-radius: 12px; }
+        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #333; border-top: 4px solid #CC0000; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #submit_btn, #proximity_note_container { display: none; }
     </style>
 </head>
 <body class="p-2 md:p-6 pb-20">
 
-    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden border-t-8 border-red-600">
-        <div class="bg-zinc-900 p-6 text-white">
-            <h1 class="text-xl font-black italic uppercase tracking-tighter">NC STATE UNIVERSITY</h1>
-            <p class="text-red-500 text-[10px] font-bold uppercase tracking-widest">Asset Registry | Competition Mode</p>
+    <div id="overlay">
+        <div class="spinner mx-auto mb-4"></div>
+        <p class="font-black uppercase tracking-widest text-xs">Transmitting to NCSU Registry...</p>
+    </div>
+
+    <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden border-t-8 border-red-600">
+        
+        <div class="bg-zinc-900 p-6 text-white flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-black italic uppercase tracking-tighter text-white">NC STATE UNIVERSITY</h1>
+                <p class="text-red-500 text-[10px] font-bold uppercase mt-1 tracking-widest text-zinc-400">Campus Planning & Strategic Investment</p>
+            </div>
+            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Asset Verification v3.9</div>
         </div>
 
-        <div class="p-6">
+        <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
+            
             <form id="treeForm" class="space-y-4">
-                <input type="text" name="A:Surveyor" id="unity_id" placeholder="Unity ID" class="w-full border-2 p-3 rounded-lg font-bold" required>
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="number" id="circ_input" placeholder="Circumference" class="border-2 p-3 rounded-lg font-bold">
-                    <input type="number" name="F:Calculated_DBH" id="dbh_input" placeholder="DBH" class="border-2 p-3 rounded-lg font-bold" required>
+                <div>
+                    <label class="block text-[10px] font-black text-zinc-500 uppercase">Surveyor Unity ID</label>
+                    <input type="text" name="A:Surveyor" id="unity_id" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" placeholder="e.g. jdoe2" required>
                 </div>
 
-                <select name="C:Species Group" id="species_group" class="w-full border-2 p-3 rounded-lg font-bold" required>
-                    <option value="" disabled selected>Select Species Group...</option>
-                    <option value="hardwood">Broadleaf: Sturdy (Oak, Hickory)</option>
-                    <option value="soft_hardwood">Broadleaf: Fast (Maple, Poplar)</option>
-                    <option value="evergreen">Evergreen: Needles (Pine, Cedar)</option>
-                    <option value="small_ornate">Small/Flowering (Dogwood, Holly)</option>
-                </select>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-black text-zinc-500 uppercase">Circumference (In)</label>
+                        <input type="number" id="circ_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold" placeholder="37.7">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-zinc-500 uppercase">DBH (Inches)</label>
+                        <input type="number" name="F:Calculated_DBH" id="dbh_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold" required>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-black text-zinc-500 uppercase">Species Grouping</label>
+                    <select name="C:Species Group" id="species_group" class="w-full border-2 p-3 rounded-lg font-bold" required>
+                        <option value="" disabled selected>Tap to select...</option>
+                        <option value="hardwood">Broadleaf: Sturdy (Oak, Hickory)</option>
+                        <option value="soft_hardwood">Broadleaf: Fast (Maple, Poplar)</option>
+                        <option value="evergreen">Evergreen: Needles (Pine, Cedar)</option>
+                        <option value="small_ornate">Small/Flowering (Dogwood, Holly)</option>
+                    </select>
+                </div>
 
                 <div id="proximity_note_container" class="bg-orange-50 border-2 border-orange-200 p-4 rounded-lg">
-                    <p class="text-[10px] font-black text-orange-700 uppercase mb-2">⚠️ PROXIMITY ALERT: Nearby Tree Detected</p>
-                    <label class="block text-[10px] font-bold text-zinc-600 mb-1">Describe this tree to prove it's a new asset:</label>
-                    <textarea name="J:Proximity_Note" id="prox_note" class="w-full p-2 text-sm border-2 rounded" placeholder="e.g. 'Smaller maple 5ft North of the Oak'"></textarea>
+                    <p class="text-[10px] font-black text-orange-700 uppercase mb-2">⚠️ PROXIMITY ALERT: Nearby Entry Detected</p>
+                    <label class="block text-[10px] font-bold text-zinc-600 mb-1 tracking-tight">Prove this is a unique tree (e.g., "Small maple 5ft North of the Oak"):</label>
+                    <textarea name="J:Proximity_Note" id="prox_note" class="w-full p-2 text-sm border-2 rounded font-medium focus:border-orange-500 outline-none" placeholder="Required for nearby assets..."></textarea>
                 </div>
 
-                <div class="pt-4 space-y-3">
-                    <button type="button" onclick="handleGPS()" class="w-full bg-zinc-800 text-white p-4 rounded-lg font-black text-[10px] uppercase tracking-widest">🛰️ Capture & Verify Location</button>
+                <div class="pt-2 space-y-3">
+                    <button type="button" id="gps_verify_btn" onclick="handleGPS()" class="w-full bg-zinc-800 text-white p-4 rounded-lg font-black text-[10px] uppercase tracking-widest active:bg-black transition-all">🛰️ Capture & Verify Location</button>
                     
-                    <div id="status-box" class="bg-zinc-100 border-2 border-dashed p-4 text-center rounded-lg">
-                        <p id="gps-msg" class="text-[10px] font-black text-zinc-500 uppercase">GPS Verification Required</p>
+                    <div id="status-box" class="bg-zinc-100 border-2 border-dashed border-zinc-300 rounded-lg p-4 text-center">
+                        <p id="gps-msg" class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Awaiting GPS Hardware Signal</p>
                     </div>
 
-                    <input type="hidden" name="E:GPS" id="coords">
+                    <input type="hidden" name="E:GPS" id="coords" required>
+                    <input type="hidden" name="D:Condition" value="0.8">
                     <input type="hidden" name="G:CO2_Lbs" id="hidden_co2">
                     <input type="hidden" name="H:Asset_Value" id="hidden_value">
                     <input type="hidden" name="I:Timestamp" id="timestamp">
                 </div>
 
-                <button type="submit" id="submit_btn" class="w-full ncsu-red text-white p-5 rounded-xl font-black uppercase tracking-widest shadow-xl">Log Asset</button>
+                <button type="submit" id="submit_btn" class="w-full ncsu-red text-white p-5 rounded-xl font-black uppercase tracking-widest shadow-xl">Confirm Tree Entry</button>
             </form>
+
+            <div class="space-y-6">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-zinc-900 text-white p-6 rounded-2xl border-b-4 border-red-600 shadow-lg">
+                        <p class="text-red-500 font-black text-[10px] uppercase tracking-widest">CO2 Sequestration</p>
+                        <p class="text-4xl font-black italic mt-1"><span id="display-co2">0</span> <span class="not-italic text-sm text-zinc-500 font-bold text-zinc-500">Lbs</span></p>
+                    </div>
+                    <div class="bg-zinc-900 text-white p-6 rounded-2xl border-b-4 border-green-500 shadow-lg">
+                        <p class="text-green-500 font-black text-[10px] uppercase tracking-widest">Asset Value</p>
+                        <p class="text-4xl font-black italic mt-1">$<span id="display-value">0.00</span></p>
+                    </div>
+                </div>
+                <div class="bg-zinc-50 border-2 border-zinc-100 rounded-2xl p-4 shadow-inner">
+                    <p class="text-[10px] font-black text-zinc-400 uppercase text-center mb-4 tracking-widest">20-Year Accumulation Forecast</p>
+                    <div id="chart-container"><canvas id="growthChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-zinc-100 p-8 text-zinc-600 border-t-2 border-zinc-200">
+            <h2 class="text-sm font-black text-zinc-900 uppercase tracking-tighter mb-6 border-b-2 border-zinc-300 pb-2 text-zinc-900">Scientific Methodology & Citations</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 text-[11px] leading-relaxed">
+                <div>
+                    <h3 class="font-black text-zinc-800 uppercase text-[10px] mb-2 tracking-widest">I. Biomass Regression Models</h3>
+                    <p class="mb-4">Calculations utilize total above-ground biomass (AGB) equations from <strong>Jenkins, J.C., et al. (2003)</strong> <em>"Comprehensive database of diameter-based regression equations for North American tree species."</em></p>
+                    <div class="bg-white p-3 rounded border border-zinc-300 mb-4">
+                        <p class="font-mono italic text-zinc-800">Biomass (kg) = Exp(b0 + b1 * ln(DBH_cm))</p>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-black text-zinc-800 uppercase text-[10px] mb-2 tracking-widest">II. Carbon & Economic Indexing</h3>
+                    <p class="mb-2"><strong>Carbon Density:</strong> Dry tree biomass is assumed to be 50% elemental carbon. This is converted to CO2 equivalents by the molecular ratio of CO2 to C (3.6663).</p>
+                    <p><strong>Valuation:</strong> Indexed to the <strong>U.S. EPA (2023) Social Cost of Carbon</strong> (~$0.09 per lb CO2e).</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         const jenkins = { "hardwood": [-2.0127, 2.4342], "soft_hardwood": [-2.48, 2.4835], "evergreen": [-2.5356, 2.4349], "small_ornate": [-0.7152, 1.7029] };
-        
+        let myChart = null;
+
+        window.onload = () => {
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            myChart = new Chart(ctx, { type: 'line', data: { labels: ['Today', '+5y', '+10y', '+15y', '+20y'], datasets: [{ label: 'Lbs CO2', data: [0,0,0,0,0], borderColor: '#CC0000', backgroundColor: 'rgba(204,0,0,0.1)', fill: true, tension: 0.3, borderWidth: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+            document.getElementById('unity_id').value = localStorage.getItem('ncsu_unity_id') || "";
+        };
+
+        // Sync inputs
+        document.getElementById('circ_input').oninput = function() {
+            const val = parseFloat(this.value) || 0;
+            document.getElementById('dbh_input').value = (val / Math.PI).toFixed(1);
+            updateMath();
+        };
+        document.getElementById('dbh_input').oninput = function() {
+            const val = parseFloat(this.value) || 0;
+            document.getElementById('circ_input').value = (val * Math.PI).toFixed(1);
+            updateMath();
+        };
+
         function getDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371e3; 
-            const dLat = (lat2-lat1) * Math.PI/180;
-            const dLon = (lon2-lon1) * Math.PI/180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            const R = 6371e3;
+            const φ1 = lat1 * Math.PI/180;
+            const φ2 = lat2 * Math.PI/180;
+            const Δφ = (lat2-lat1) * Math.PI/180;
+            const Δλ = (lon2-lon1) * Math.PI/180;
+            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
         function handleGPS() {
+            const statusBox = document.getElementById('status-box');
             const gpsMsg = document.getElementById('gps-msg');
-            const noteBox = document.getElementById('proximity_note_container');
             const submitBtn = document.getElementById('submit_btn');
+            const noteContainer = document.getElementById('proximity_note_container');
 
+            gpsMsg.innerText = "🛰️ Localizing...";
+            
             navigator.geolocation.getCurrentPosition((pos) => {
                 const lat = pos.coords.latitude;
                 const lng = pos.coords.longitude;
                 const lastLat = localStorage.getItem('last_lat');
                 const lastLng = localStorage.getItem('last_lng');
+                const lastTime = localStorage.getItem('last_time') || 0;
                 const dist = lastLat ? getDistance(lat, lng, parseFloat(lastLat), parseFloat(lastLng)) : 999;
+                const secondsElapsed = (Date.now() - lastTime) / 1000;
 
-                document.getElementById('coords').value = `${lat}, ${lng}`;
+                // Cooldown check
+                if (secondsElapsed < 30) {
+                    gpsMsg.innerText = `🛑 WAIT ${Math.round(30 - secondsElapsed)}s`;
+                    statusBox.style.backgroundColor = "#fee2e2";
+                    return;
+                }
 
-                if (dist < 2.5) { // If closer than 8 feet
-                    gpsMsg.innerText = "⚠️ NEARBY ASSET FLAG";
-                    noteBox.style.display = "block";
+                document.getElementById('coords').value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                window.tempGPS = { lat, lng };
+
+                // Distance logic
+                if (dist < 2.5) { // within 8 feet
+                    gpsMsg.innerText = "⚠️ PROXIMITY FLAG";
+                    statusBox.style.backgroundColor = "#fff7ed";
+                    noteContainer.style.display = "block";
                     document.getElementById('prox_note').required = true;
                 } else {
                     gpsMsg.innerText = "✅ LOCATION VERIFIED";
-                    noteBox.style.display = "none";
+                    statusBox.style.backgroundColor = "#f0fdf4";
+                    noteContainer.style.display = "none";
                     document.getElementById('prox_note').required = false;
                 }
-                
                 submitBtn.style.display = "block";
-                window.currentPos = { lat, lng };
-            }, null, {enableHighAccuracy: true});
+
+            }, (err) => alert("GPS Permission Required"), {enableHighAccuracy: true});
         }
 
-        // Logic for Math & Submission (simplified for brevity)
-        document.getElementById('circ_input').oninput = function() { 
-            document.getElementById('dbh_input').value = (this.value / Math.PI).toFixed(1); 
-            const dbh = parseFloat(document.getElementById('dbh_input').value);
+        function updateMath() {
+            const dbh = parseFloat(document.getElementById('dbh_input').value) || 0;
             const group = document.getElementById('species_group').value;
-            if(dbh && group) {
-                const co2 = Math.round(Math.exp(jenkins[group][0] + jenkins[group][1] * Math.log(dbh * 2.54)) * 0.5 * 3.6663 * 2.2046 * 0.8);
+            if (dbh > 0 && group) {
+                const [b0, b1] = jenkins[group];
+                const co2 = Math.round(Math.exp(b0 + b1 * Math.log(dbh * 2.54)) * 0.5 * 3.6663 * 2.2046 * 0.8);
+                document.getElementById('display-co2').innerText = co2.toLocaleString();
+                document.getElementById('display-value').innerText = (co2 * 0.09).toFixed(2);
                 document.getElementById('hidden_co2').value = co2;
                 document.getElementById('hidden_value').value = (co2 * 0.09).toFixed(2);
+                myChart.data.datasets[0].data = [0, 5, 10, 15, 20].map(y => Math.round(Math.exp(b0 + b1 * Math.log((dbh + (y*0.2)) * 2.54)) * 0.5 * 3.6663 * 2.2046 * 0.8));
+                myChart.update();
             }
-        };
+        }
+
+        document.getElementById('species_group').onchange = updateMath;
 
         document.getElementById('treeForm').onsubmit = async (e) => {
             e.preventDefault();
+            document.getElementById('overlay').style.display = 'flex';
             document.getElementById('timestamp').value = new Date().toLocaleString();
-            localStorage.setItem('last_lat', window.currentPos.lat);
-            localStorage.setItem('last_lng', window.currentPos.lng);
+            
+            localStorage.setItem('last_lat', window.tempGPS.lat);
+            localStorage.setItem('last_lng', window.tempGPS.lng);
+            localStorage.setItem('last_time', Date.now());
             localStorage.setItem('ncsu_unity_id', document.getElementById('unity_id').value);
 
             await fetch("https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG", { 
                 method: 'POST', body: new FormData(e.target), mode: 'no-cors' 
             });
-            alert("Logged!");
-            location.reload();
+            
+            document.getElementById('overlay').innerHTML = "<p class='font-black uppercase tracking-widest text-xl'>🌳 Logged!</p>";
+            setTimeout(() => location.reload(), 1200);
         };
     </script>
 </body>
