@@ -11,6 +11,7 @@
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         .ncsu-red { background-color: #CC0000; }
         #chart-container { position: relative; height: 280px; width: 100%; background: #fff; border-radius: 12px; }
+        .helper-box { display: none; background: #fef2f2; border: 2px solid #fee2e2; border-radius: 8px; padding: 12px; margin-top: 8px; font-size: 12px; color: #991b1b; font-style: italic; }
     </style>
 </head>
 <body class="p-2 md:p-6 pb-20">
@@ -26,23 +27,35 @@
             <form id="treeForm" class="space-y-4">
                 <div>
                     <label class="block text-[10px] font-black text-zinc-500 uppercase">Unity ID</label>
-                    <input type="text" name="A:Surveyor" id="unity_id" class="w-full border-2 p-3 rounded-lg font-bold" required>
+                    <input type="text" name="A:Surveyor" id="unity_id" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" required>
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-[10px] font-black text-zinc-500 uppercase">Circumference (In)</label>
-                        <input type="number" id="circ_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold" placeholder="37.7">
+                        <input type="number" id="circ_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" placeholder="37.7">
                     </div>
                     <div>
                         <label class="block text-[10px] font-black text-zinc-500 uppercase">DBH (Inches)</label>
-                        <input type="number" id="dbh_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold" placeholder="12.0">
+                        <input type="number" id="dbh_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" placeholder="12.0">
                     </div>
                 </div>
 
                 <div>
+                    <label class="block text-[10px] font-black text-zinc-500 uppercase">Species Group</label>
+                    <select id="species_group" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" required>
+                        <option value="" disabled selected>Select Group...</option>
+                        <option value="hardwood">Broadleaf: Sturdy (Oak, Hickory, Beech)</option>
+                        <option value="soft_hardwood">Broadleaf: Fast (Maple, Poplar, Elm)</option>
+                        <option value="evergreen">Evergreen: Needles (Pine, Cedar, Spruce)</option>
+                        <option value="small_ornate">Small/Flowering (Dogwood, Holly, Redbud)</option>
+                    </select>
+                    <div id="species-helper" class="helper-box"></div>
+                </div>
+
+                <div>
                     <label class="block text-[10px] font-black text-zinc-500 uppercase">Tree Condition</label>
-                    <select id="tree_condition" class="w-full border-2 p-3 rounded-lg font-bold">
+                    <select id="tree_condition" class="w-full border-2 p-3 rounded-lg font-bold outline-none">
                         <option value="1.0">Excellent (100%)</option>
                         <option value="0.8" selected>Good (80%)</option>
                         <option value="0.6">Fair (60%)</option>
@@ -50,64 +63,58 @@
                     </select>
                 </div>
 
-                <div>
-                    <label class="block text-[10px] font-black text-zinc-500 uppercase">Species Group</label>
-                    <select id="species_group" class="w-full border-2 p-3 rounded-lg font-bold" required>
-                        <option value="" disabled selected>Select Group...</option>
-                        <option value="hardwood">Hardwood (Oak, Hickory)</option>
-                        <option value="soft_hardwood">Soft Hardwood (Maple, Poplar)</option>
-                        <option value="evergreen">Evergreen (Pine, Cedar)</option>
-                        <option value="small_ornate">Small (Dogwood, Holly)</option>
-                    </select>
-                </div>
-
-                <button type="button" onclick="handleGPS()" class="w-full bg-zinc-800 text-white p-3 rounded-lg font-black text-[10px] uppercase">🛰️ Capture GPS</button>
-                <input type="text" name="E:GPS" id="coords" readonly class="w-full mt-2 bg-zinc-100 border p-3 rounded text-[11px] font-mono text-center" placeholder="No GPS Captured" required>
+                <button type="button" onclick="handleGPS()" class="w-full bg-zinc-800 text-white p-3 rounded-lg font-black text-[10px] uppercase active:scale-95 transition-all">🛰️ Capture GPS Location</button>
+                <input type="text" name="E:GPS" id="coords" readonly class="w-full mt-2 bg-zinc-100 border p-3 rounded text-[11px] font-mono text-center" placeholder="No GPS Data" required>
                 
                 <input type="hidden" name="F:Calculated_DBH" id="hidden_dbh">
                 <input type="hidden" name="G:CO2_Lbs" id="hidden_co2">
                 <input type="hidden" name="H:Asset_Value" id="hidden_value">
                 <input type="hidden" name="I:Timestamp" id="timestamp">
 
-                <button type="submit" id="submit_btn" class="w-full ncsu-red text-white p-5 rounded-xl font-black uppercase tracking-widest shadow-xl">Log to Asset Registry</button>
+                <button type="submit" id="submit_btn" class="w-full ncsu-red text-white p-5 rounded-xl font-black uppercase tracking-widest shadow-xl active:scale-95 transition-all">Log to Asset Registry</button>
             </form>
 
             <div class="space-y-6">
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-zinc-900 text-white p-6 rounded-2xl border-b-4 border-red-600">
-                        <p class="text-red-500 font-black text-[10px] uppercase">CO2 Lbs</p>
-                        <p class="text-4xl font-black italic"><span id="display-co2">0</span></p>
+                    <div class="bg-zinc-900 text-white p-6 rounded-2xl border-b-4 border-red-600 shadow-lg">
+                        <p class="text-red-500 font-black text-[10px] uppercase">CO2 Storage (Lbs)</p>
+                        <p class="text-4xl font-black italic mt-1"><span id="display-co2">0</span></p>
                     </div>
-                    <div class="bg-zinc-900 text-white p-6 rounded-2xl border-b-4 border-green-500">
-                        <p class="text-green-500 font-black text-[10px] uppercase">Value</p>
-                        <p class="text-4xl font-black italic">$<span id="display-value">0.00</span></p>
+                    <div class="bg-zinc-900 text-white p-6 rounded-2xl border-b-4 border-green-500 shadow-lg">
+                        <p class="text-green-500 font-black text-[10px] uppercase">Asset Value</p>
+                        <p class="text-4xl font-black italic mt-1">$<span id="display-value">0.00</span></p>
                     </div>
                 </div>
-                <div class="bg-zinc-50 border-2 rounded-2xl p-4">
-                    <p class="text-[10px] font-black text-zinc-400 uppercase text-center mb-4">20-Year Growth Forecast</p>
+                <div class="bg-zinc-50 border-2 rounded-2xl p-4 shadow-inner">
+                    <p class="text-[10px] font-black text-zinc-400 uppercase text-center mb-4">20-Year Sequestration Forecast</p>
                     <div id="chart-container"><canvas id="growthChart"></canvas></div>
                 </div>
             </div>
         </div>
 
         <div class="bg-zinc-100 p-8 text-zinc-600 border-t-2 border-zinc-200">
-            <h2 class="text-sm font-black text-zinc-900 uppercase mb-4">Scientific Methodology & Citations</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-[11px] leading-relaxed">
+            <h2 class="text-sm font-black text-zinc-900 uppercase mb-4 border-b border-zinc-300 pb-2">Scientific Methodology & Citations</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-[11px] leading-relaxed">
                 <div>
                     <p class="font-bold text-zinc-800 uppercase text-[9px] mb-1">I. Biomass Models</p>
-                    <p>Based on <strong>Jenkins et al. (2003)</strong> parameters. Biomass is estimated from DBH in centimeters using species-specific coefficients.</p>
-                    <p class="mt-1 italic font-mono">BM = Exp(b0 + b1 * ln(DBH_cm))</p>
+                    <p>Based on <strong>Jenkins et al. (2003)</strong> parameters. Above-ground biomass is estimated from DBH using regression coefficients for North American species.</p>
+                    <p class="mt-1 italic font-mono bg-white p-1 border inline-block">BM = Exp(b0 + b1 * ln(DBH_cm))</p>
                 </div>
                 <div>
                     <p class="font-bold text-zinc-800 uppercase text-[9px] mb-1">II. Carbon Valuation</p>
-                    <p>Carbon is 50% of biomass. Value is indexed to the <strong>U.S. EPA (2023) Social Cost of Carbon</strong> (~$0.09/lb CO2e).</p>
+                    <p>Indexed to the <strong>U.S. EPA (2023) Social Cost of Carbon</strong> (~$0.09/lb CO2e). Calculations assume dry biomass is 50% carbon.</p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const jenkins = { "hardwood": [-2.0127, 2.4342], "soft_hardwood": [-2.48, 2.4835], "evergreen": [-2.5356, 2.4349], "small_ornate": [-0.7152, 1.7029] };
+        const jenkins = { 
+            "hardwood": [-2.0127, 2.4342, "<strong>ID Guide:</strong> Look for heavy, slow-growing broadleaf trees like Oaks or Beech. Smallest leaves are often lobed."], 
+            "soft_hardwood": [-2.48, 2.4835, "<strong>ID Guide:</strong> Fast-growing broadleaf trees like Maples, Poplars, or Sweetgums. Often have 'papery' bark."], 
+            "evergreen": [-2.5356, 2.4349, "<strong>ID Guide:</strong> Any tree with needles or scales that stays green year-round (Pines, Cedars)."], 
+            "small_ornate": [-0.7152, 1.7029, "<strong>ID Guide:</strong> Small trees that rarely exceed 30ft, like Dogwoods, Hollies, or Crepe Myrtles."] 
+        };
         let myChart = null;
 
         window.onload = () => {
@@ -115,40 +122,45 @@
             myChart = new Chart(ctx, { 
                 type: 'line', 
                 data: { 
-                    labels: ['0y', '5y', '10y', '15y', '20y'], 
-                    datasets: [{ label: 'Lbs CO2', data: [0,0,0,0,0], borderColor: '#CC0000', backgroundColor: 'rgba(204,0,0,0.1)', fill: true, tension: 0.3 }] 
+                    labels: ['Today', '+5y', '+10y', '+15y', '+20y'], 
+                    datasets: [{ label: 'Lbs CO2', data: [0,0,0,0,0], borderColor: '#CC0000', backgroundColor: 'rgba(204,0,0,0.1)', fill: true, tension: 0.3, borderWidth: 4 }] 
                 }, 
-                options: { responsive: true, maintainAspectRatio: false } 
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } 
             });
             const saved = localStorage.getItem('ncsu_unity_id');
             if (saved) document.getElementById('unity_id').value = saved;
         };
 
-        // Live Sync for Circumference & DBH
+        // Sync inputs
         document.getElementById('circ_input').oninput = function() {
-            const val = parseFloat(this.value) || 0;
-            document.getElementById('dbh_input').value = (val / Math.PI).toFixed(1);
+            document.getElementById('dbh_input').value = (this.value / Math.PI).toFixed(1);
             updateMath();
         };
         document.getElementById('dbh_input').oninput = function() {
-            const val = parseFloat(this.value) || 0;
-            document.getElementById('circ_input').value = (val * Math.PI).toFixed(1);
+            document.getElementById('circ_input').value = (this.value * Math.PI).toFixed(1);
             updateMath();
         };
 
         function handleGPS() {
-            const coords = document.getElementById('coords');
-            coords.value = "Locating...";
+            const target = document.getElementById('coords');
+            target.value = "🛰️ Locating...";
             navigator.geolocation.getCurrentPosition(pos => {
-                coords.value = pos.coords.latitude.toFixed(6) + ", " + pos.coords.longitude.toFixed(6);
-                coords.style.background = "#dcfce7";
-            }, err => alert("Please enable GPS"), {enableHighAccuracy: true});
+                target.value = pos.coords.latitude.toFixed(6) + ", " + pos.coords.longitude.toFixed(6);
+                target.style.background = "#dcfce7";
+            }, err => alert("GPS Error: Enable location services."), {enableHighAccuracy: true});
         }
 
         function updateMath() {
             const dbh = parseFloat(document.getElementById('dbh_input').value) || 0;
             const group = document.getElementById('species_group').value;
             const mult = parseFloat(document.getElementById('tree_condition').value);
+            
+            if (group) {
+                const helper = document.getElementById('species-helper');
+                helper.style.display = 'block';
+                helper.innerHTML = jenkins[group][2];
+            }
+
             if (dbh > 0 && group) {
                 const [b0, b1] = jenkins[group];
                 const co2 = Math.round(Math.exp(b0 + b1 * Math.log(dbh * 2.54)) * 0.5 * 3.6663 * 2.2046 * mult);
@@ -172,13 +184,13 @@
             const btn = document.getElementById('submit_btn');
             document.getElementById('timestamp').value = new Date().toLocaleString();
             localStorage.setItem('ncsu_unity_id', document.getElementById('unity_id').value);
-            btn.disabled = true; btn.innerText = "SAVING...";
+            btn.disabled = true; btn.innerText = "SAVING DATA...";
             try {
                 await fetch("https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG", { method: 'POST', body: new FormData(e.target), mode: 'no-cors' });
                 alert("ASSET LOGGED!");
                 location.reload();
             } catch (err) {
-                alert("Error saving data.");
+                alert("Connection Error.");
                 btn.disabled = false; btn.innerText = "Log to Asset Registry";
             }
         };
