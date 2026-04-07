@@ -44,13 +44,13 @@
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Species Group</label>
+                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Species Group (Visual ID)</label>
                         <select name="C:Species Group" id="species_group" class="w-full border border-stone-300 rounded-lg px-4 py-3 text-xs font-semibold focus:ring-2 focus:ring-red-600 outline-none" required>
-                            <option value="" disabled selected>Select Group</option>
-                            <option value="mixed_hardwood">Mixed Hardwood (Poplar/Gum)</option>
-                            <option value="pine">Softwood (Pine/Conifer)</option>
-                            <option value="hard_maple">Hardwood (Oak/Sugar Maple)</option>
-                            <option value="soft_maple">Soft Maple (Red/Silver)</option>
+                            <option value="" disabled selected>Tap to Identify Tree...</option>
+                            <option value="hardwood">Broadleaf: Sturdy (Oak, Hickory, Beech)</option>
+                            <option value="soft_hardwood">Broadleaf: Tall/Fast (Poplar, Sweetgum, Elm)</option>
+                            <option value="evergreen">Evergreen: Needles/Scales (Pine, Cedar, Cypress)</option>
+                            <option value="small_ornate">Small/Flowering (Dogwood, Myrtle, Holly)</option>
                         </select>
                     </div>
 
@@ -105,133 +105,4 @@
         </div>
 
         <div class="bg-stone-50 p-6 md:p-8 border-t border-stone-200 mt-auto">
-            <h2 class="text-sm font-black text-stone-900 uppercase tracking-widest mb-6">Scientific Methodology</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-[12px] text-stone-600 leading-relaxed">
-                <div>
-                    <h3 class="font-black text-stone-800 uppercase text-[10px] mb-2">I. Biomass & Condition Factor</h3>
-                    <p>Base biomass calculation is derived from <strong>Jenkins et al. (2003)</strong> using the generalized regression equation $$BM = Exp(b0 + b1 * ln(DBH_{cm}))$$. The Condition Factor acts as a multiplier to discount carbon storage for decaying or structurally compromised specimens.</p>
-                </div>
-                <div>
-                    <h3 class="font-black text-stone-800 uppercase text-[10px] mb-2">II. Sequestration & Economic Cost</h3>
-                    <p>Carbon-to-CO2 conversion utilizes a 3.66x molecular weight ratio. Asset valuation follows the <strong>U.S. EPA (2023)</strong> updated Social Cost of Carbon, valued at approximately $0.09 per lb of sequestered CO2 to reflect climate-related economic mitigation.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const jenkinsData = { "mixed_hardwood": { b0: -2.4800, b1: 2.4835 }, "pine": { b0: -2.5356, b1: 2.4349 }, "hard_maple": { b0: -2.0127, b1: 2.4342 }, "soft_maple": { b0: -1.9123, b1: 2.3651 } };
-        const speciesTips = { "hard_maple": "Look for <strong>'U' shaped sinuses</strong>.", "soft_maple": "Look for <strong>'V' shaped sinuses</strong>.", "pine": "Needle-leaved evergreens.", "mixed_hardwood": "Poplar/Sweetgum." };
-        const EPA_RATE = 0.09; let myChart = null;
-
-        window.handleGPS = function() {
-            const coordsInput = document.getElementById('coords');
-            coordsInput.value = "🛰️ Acquiring Satellites...";
-            coordsInput.style.background = "#fef3c7"; 
-            if ("geolocation" in navigator) {
-                const watchId = navigator.geolocation.watchPosition(
-                    (pos) => {
-                        const acc = pos.coords.accuracy;
-                        const lat = pos.coords.latitude.toFixed(6);
-                        const lng = pos.coords.longitude.toFixed(6);
-                        coordsInput.value = `${lat}, ${lng} (±${Math.round(acc)}m)`;
-                        if (acc < 7) {
-                            navigator.geolocation.clearWatch(watchId);
-                            coordsInput.value = `${lat}, ${lng}`;
-                            coordsInput.style.background = "#dcfce7"; 
-                        }
-                    },
-                    (err) => {
-                        alert("GPS Error: Ensure Location is ON");
-                        navigator.geolocation.clearWatch(watchId);
-                        coordsInput.value = "";
-                    },
-                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-                );
-                setTimeout(() => {
-                    navigator.geolocation.clearWatch(watchId);
-                    if(coordsInput.value.includes("±")) {
-                        coordsInput.value = coordsInput.value.split(' (')[0];
-                        coordsInput.style.background = "#f3f4f6";
-                    }
-                }, 12000);
-            }
-        };
-
-        function calcCO2(dbhIn, b0, b1, multiplier) {
-            if (!dbhIn || dbhIn <= 0) return 0;
-            const dbhCm = dbhIn * 2.54;
-            const biomassKg = Math.exp(b0 + b1 * Math.log(dbhCm));
-            return Math.round((biomassKg * 0.5) * 3.6663 * 2.20462 * multiplier);
-        }
-
-        function updateMath() {
-            const dbh = parseFloat(document.getElementById('dbh_input').value) || 0;
-            const group = document.getElementById('species_group').value;
-            const multiplier = parseFloat(document.getElementById('tree_condition').value);
-            if(group) {
-                document.getElementById('species-helper').classList.remove('hidden');
-                document.getElementById('helper-text').innerHTML = speciesTips[group];
-            }
-            if (dbh > 0 && group) {
-                const { b0, b1 } = jenkinsData[group];
-                const co2 = calcCO2(dbh, b0, b1, multiplier);
-                const dollarValue = co2 * EPA_RATE;
-                document.getElementById('display-co2').innerText = co2.toLocaleString();
-                document.getElementById('display-value').innerText = dollarValue.toLocaleString(undefined, {minimumFractionDigits: 2});
-                document.getElementById('hidden_dbh').value = dbh.toFixed(2);
-                document.getElementById('hidden_co2').value = co2;
-                document.getElementById('hidden_value').value = dollarValue.toFixed(2);
-                renderChart(dbh, b0, b1, multiplier);
-            }
-        }
-
-        function renderChart(dbh, b0, b1, multiplier) {
-            const canvas = document.getElementById('growthChart');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            const projection = [0, 5, 10, 15, 20].map(y => calcCO2(dbh + (y * 0.20), b0, b1, multiplier));
-            if (myChart) myChart.destroy();
-            myChart = new Chart(ctx, {
-                type: 'line',
-                data: { labels: ['Now', '+5y', '+10y', '+15y', '+20y'], datasets: [{ label: 'Lbs CO2', data: projection, borderColor: '#CC0000', backgroundColor: 'rgba(204, 0, 0, 0.1)', fill: true, tension: 0.1 }] },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
-            });
-        }
-
-        document.getElementById('circ_input').addEventListener('input', function() {
-            const circ = parseFloat(this.value) || 0;
-            document.getElementById('dbh_input').value = circ > 0 ? (circ / Math.PI).toFixed(1) : "";
-            updateMath();
-        });
-
-        document.getElementById('dbh_input').addEventListener('input', function() {
-            const dbh = parseFloat(this.value) || 0;
-            document.getElementById('circ_input').value = dbh > 0 ? (dbh * Math.PI).toFixed(1) : "";
-            updateMath();
-        });
-
-        document.getElementById('species_group').addEventListener('change', updateMath);
-        document.getElementById('tree_condition').addEventListener('change', updateMath);
-        window.onload = () => renderChart(0, -2.48, 2.48, 0.8);
-
-        document.getElementById('treeForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const gpsInput = document.getElementById('coords');
-            if (gpsInput.value.includes(" (")) {
-                gpsInput.value = gpsInput.value.split(" (")[0];
-            }
-            document.getElementById('timestamp').value = new Date().toLocaleString();
-            try {
-                const SHEET_URL = "https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG";
-                const formData = new FormData(e.target);
-                await fetch(SHEET_URL, { method: 'POST', body: formData, mode: 'no-cors' });
-                alert("SUCCESS: ASSET REGISTERED");
-                e.target.reset();
-                updateMath();
-            } catch (err) { alert("Submission Error."); }
-        };
-    </script>
-    <a href="https://forms.gle/92DfPQvUzDZ65Qn18" target="_blank" class="beta-bug-btn"><span>🐞</span> Report Bug</a>
-</body>
-</html>
+            <h2 class="text-sm font-black text
