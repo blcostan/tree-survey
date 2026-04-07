@@ -3,100 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NCSU Tree Survey | Asset Registry</title>
+    <title>NCSU Tree Survey</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js" onload="console.log('ChartJS Loaded')"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         .ncsu-red { background-color: #CC0000; }
-        #chart-container { position: relative; height: 300px; width: 100%; background-color: #ffffff; border-radius: 12px; }
-        canvas { display: block; max-width: 100%; }
+        #chart-container { position: relative; height: 280px; width: 100%; background: #fff; border-radius: 12px; }
     </style>
 </head>
 <body class="p-2 md:p-6 pb-20">
-
     <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden border-t-8 border-red-600">
-        
         <div class="bg-zinc-900 p-6 text-white flex justify-between items-center">
             <div>
-                <h1 class="text-xl font-black italic uppercase tracking-tighter">NC STATE UNIVERSITY</h1>
-                <p class="text-red-500 text-[10px] font-bold tracking-widest uppercase mt-1">Campus Planning & Strategic Investment</p>
+                <h1 class="text-xl font-black italic uppercase">NC STATE UNIVERSITY</h1>
+                <p class="text-red-500 text-[10px] font-bold uppercase mt-1">Campus Planning & Strategic Investment</p>
             </div>
         </div>
 
         <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
-            
-            <div class="space-y-6">
-                <form id="treeForm" class="space-y-4">
+            <form id="treeForm" class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-black text-zinc-500 uppercase">Unity ID</label>
+                    <input type="text" name="A:Surveyor" id="unity_id" class="w-full border-2 p-3 rounded-lg font-bold" required>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[10px] font-black text-zinc-500 uppercase">Unity ID (Required)</label>
-                        <input type="text" name="A:Surveyor" id="unity_id" class="w-full border-2 border-zinc-200 rounded-lg p-3 font-bold focus:border-red-600 outline-none" placeholder="e.g. jdoe2" required>
+                        <label class="block text-[10px] font-black text-zinc-500 uppercase">DBH (Inches)</label>
+                        <input type="number" id="dbh_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold">
                     </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[10px] font-black text-zinc-500 uppercase">DBH (Inches)</label>
-                            <input type="number" id="dbh_input" step="0.1" class="w-full border-2 border-zinc-200 rounded-lg p-3 font-bold focus:border-red-600 outline-none" placeholder="12.0">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-black text-zinc-500 uppercase">Condition</label>
-                            <select id="tree_condition" class="w-full border-2 border-zinc-200 rounded-lg p-3 font-bold outline-none">
-                                <option value="1.0">Excellent (100%)</option>
-                                <option value="0.8" selected>Good (80%)</option>
-                                <option value="0.6">Fair (60%)</option>
-                                <option value="0.4">Poor (40%)</option>
-                            </select>
-                        </div>
-                    </div>
-
                     <div>
-                        <label class="block text-[10px] font-black text-zinc-500 uppercase">Species Group</label>
-                        <select id="species_group" class="w-full border-2 border-zinc-200 rounded-lg p-3 font-bold outline-none" required>
-                            <option value="" disabled selected>Tap to select...</option>
-                            <option value="hardwood">Hardwood (Oak, Hickory)</option>
-                            <option value="soft_hardwood">Soft Hardwood (Maple, Poplar)</option>
-                            <option value="evergreen">Evergreen (Pine, Cedar)</option>
-                            <option value="small_ornate">Small (Dogwood, Holly)</option>
+                        <label class="block text-[10px] font-black text-zinc-500 uppercase">Condition</label>
+                        <select id="tree_condition" class="w-full border-2 p-3 rounded-lg font-bold">
+                            <option value="1.0">Excellent</option>
+                            <option value="0.8" selected>Good</option>
+                            <option value="0.6">Fair</option>
+                            <option value="0.4">Poor</option>
                         </select>
                     </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black text-zinc-500 uppercase">Species Group</label>
+                    <select id="species_group" class="w-full border-2 p-3 rounded-lg font-bold" required>
+                        <option value="" disabled selected>Select...</option>
+                        <option value="hardwood">Hardwood (Oak, Hickory)</option>
+                        <option value="soft_hardwood">Soft Hardwood (Maple, Poplar)</option>
+                        <option value="evergreen">Evergreen (Pine, Cedar)</option>
+                        <option value="small_ornate">Small (Dogwood, Holly)</option>
+                    </select>
+                </div>
+                <button type="button" onclick="handleGPS()" class="w-full bg-zinc-800 text-white p-3 rounded-lg font-black text-[10px] uppercase">🛰️ Capture GPS</button>
+                <input type="text" name="E:GPS" id="coords" readonly class="w-full mt-2 bg-zinc-100 border p-3 rounded text-[11px] font-mono" placeholder="No Coordinates" required>
+                
+                <input type="hidden" name="F:Calculated_DBH" id="hidden_dbh"><input type="hidden" name="G:CO2_Lbs" id="hidden_co2">
+                <input type="hidden" name="H:Asset_Value" id="hidden_value"><input type="hidden" name="I:Timestamp" id="timestamp">
 
-                    <div class="pt-2">
-                        <button type="button" onclick="handleGPS()" class="w-full bg-zinc-800 text-white p-3 rounded-lg font-black text-[10px] uppercase tracking-widest active:bg-black">🛰️ Capture GPS Location</button>
-                        <input type="text" name="E:GPS" id="coords" readonly class="w-full mt-2 bg-zinc-100 border p-3 rounded-lg text-[11px] font-mono" placeholder="No Coordinates" required>
-                    </div>
-
-                    <input type="hidden" name="F:Calculated_DBH" id="hidden_dbh">
-                    <input type="hidden" name="G:CO2_Lbs" id="hidden_co2">
-                    <input type="hidden" name="H:Asset_Value" id="hidden_value">
-                    <input type="hidden" name="I:Timestamp" id="timestamp">
-
-                    <button type="submit" id="submit_btn" class="w-full ncsu-red text-white p-5 rounded-xl font-black uppercase tracking-widest shadow-xl hover:bg-red-700 transition-colors">Log to Asset Registry</button>
-                </form>
-            </div>
+                <button type="submit" id="submit_btn" class="w-full ncsu-red text-white p-5 rounded-xl font-black uppercase tracking-widest shadow-xl">Log to Asset Registry</button>
+            </form>
 
             <div class="space-y-6">
                 <div class="grid grid-cols-2 gap-4">
                     <div class="bg-zinc-900 text-white p-6 rounded-2xl border-b-4 border-red-600">
-                        <p class="text-red-500 font-black text-[10px] uppercase">CO2 Storage (Lbs)</p>
-                        <p class="text-4xl font-black italic mt-1"><span id="display-co2">0</span></p>
+                        <p class="text-red-500 font-black text-[10px] uppercase">CO2 Lbs</p>
+                        <p class="text-4xl font-black italic"><span id="display-co2">0</span></p>
                     </div>
                     <div class="bg-zinc-900 text-white p-6 rounded-2xl border-b-4 border-green-500">
-                        <p class="text-green-500 font-black text-[10px] uppercase">Asset Value</p>
-                        <p class="text-4xl font-black italic mt-1">$<span id="display-value">0.00</span></p>
+                        <p class="text-green-500 font-black text-[10px] uppercase">Value</p>
+                        <p class="text-4xl font-black italic">$<span id="display-value">0.00</span></p>
                     </div>
                 </div>
-
-                <div class="bg-zinc-50 border-2 border-zinc-100 rounded-2xl p-4 shadow-inner">
-                    <p class="text-[10px] font-black text-zinc-400 uppercase text-center mb-4 tracking-widest">20-Year Growth Forecast (CO2 Lbs)</p>
-                    <div id="chart-container">
-                        <canvas id="growthChart"></canvas>
-                    </div>
+                <div class="bg-zinc-50 border-2 rounded-2xl p-4">
+                    <p class="text-[10px] font-black text-zinc-400 uppercase text-center mb-4">20-Year Growth Forecast</p>
+                    <div id="chart-container"><canvas id="growthChart"></canvas></div>
                 </div>
             </div>
         </div>
 
         <div class="bg-zinc-100 p-8 text-zinc-600 border-t-2 border-zinc-200">
-            <h2 class="text-sm font-black text-zinc-900 uppercase tracking-tighter mb-6 border-b-2 border-zinc-300 pb-2">Scientific Methodology & Citations</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 text-[12px] leading-relaxed">
+            <h2 class="text-sm font-black text-zinc-900 uppercase mb-4">Methodology & Citations</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-[11px]">
                 <div>
+                    <p class="font-bold text-zinc-800 uppercase text-[9px]">I. Biomass Models</p>
+                    <p>Calculated via <strong>Jenkins et al. (2003)</strong> regression: <em>Exp(b0 + b1 * ln(DBH_cm))</em>.</p>
+                </div>
+                <div>
+                    <p class="font-bold text-zinc-800 uppercase text-[9px]">II. Valuation</p>
+                    <p>CO2 value based on <strong>U.S. EPA (2023) Social Cost of Carbon</strong> (~$0.09 per lb).</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const jenkins = { "hardwood": [-2.0127, 2.4342], "soft_hardwood": [-2.48, 2.4835], "evergreen": [-2.5356, 2.4349], "small_ornate": [-0.7152, 1.7029] };
+        let myChart = null;
+
+        window.onload = () => {
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            myChart = new Chart(ctx, { type: 'line', data: { labels: ['0y', '5y', '10y', '15y', '20y'], datasets: [{ label: 'Lbs CO2', data: [0,0,0,0,0], borderColor: '#CC0000', backgroundColor: 'rgba(204,0,0,0.1)', fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false } });
+            const saved = localStorage.getItem('ncsu_unity_id');
+            if (saved) document.getElementById('unity_id').value = saved;
+        };
+
+        function handleGPS() {
+            navigator.geolocation.getCurrentPosition(pos => {
+                document.getElementById('coords').value = pos.coords.latitude.toFixed(6) + ", " + pos.coords.longitude.toFixed(6);
+                document.getElementById('coords').style.background = "#dcfce7";
+            }, err => alert("Enable GPS"), {enableHighAccuracy: true});
+        }
+
+        function updateMath() {
+            const dbh = parseFloat(document.getElementById('dbh_input').value) || 0;
+            const group = document.getElementById('species_group').value;
+            const mult = parseFloat(document.getElementById('tree_condition').value);
+            if (dbh > 0 && group) {
+                const [b0, b1] = jenkins[group];
+                const co2 = Math.round(Math.exp(b0 + b1 * Math.log(dbh * 2.54)) * 0.5 * 3.6663 * 2.2046 * mult);
+                document.getElementById('display-co2').innerText = co2.toLocaleString();
+                document.getElementById('display-value').innerText = (co2 * 0.09).toFixed(2);
+                document.getElementById('hidden_dbh').value = dbh;
+                document.getElementById('hidden_co2').value = co2;
+                document.getElementById('hidden_value').value = (co2 * 0.09).toFixed(2);
+                const newData = [0, 5, 10, 15, 20].map(y => Math.round(Math.exp(b0 + b1 * Math.log((dbh + (y*0.2)) * 2.54)) * 0.5 * 3.6663 * 2.2046 * mult));
+                myChart.data.datasets[0].data = newData;
+                myChart.update();
+            }
+        }
+
+        document.getElementById('dbh_input').addEventListener('input', updateMath);
+        document.getElementById('species_group').addEventListener('change', updateMath);
+        document.getElementById('tree_condition').addEventListener('change', updateMath);
+
+        document.getElementById('treeForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submit_btn');
+            document.getElementById('timestamp').value = new Date().toLocaleString();
+            localStorage.setItem('ncsu_unity_id', document.getElementById('unity_id').value);
+            btn.disabled = true; btn.innerText = "SAVING...";
+            await fetch("https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG", { method: 'POST', body: new FormData(e.target), mode: 'no-cors' });
+            alert("LOGGED!");
+            location.reload();
+        };
+    </script>
+</body>
+</html>
