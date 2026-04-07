@@ -30,8 +30,8 @@
             <div class="lg:col-span-5 space-y-6">
                 <form id="treeForm" class="space-y-4">
                     <div>
-                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Unity ID</label>
-                        <input type="text" name="A:Surveyor" id="unity_id" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold focus:ring-2 focus:ring-red-600 outline-none" placeholder="e.g. jdoe2" required>
+                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Unity ID (Optional)</label>
+                        <input type="text" name="A:Surveyor" id="unity_id" class="w-full border border-stone-300 rounded-lg px-4 py-3 font-bold focus:ring-2 focus:ring-red-600 outline-none" placeholder="e.g. jdoe2">
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -46,7 +46,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-black text-stone-500 uppercase mb-1">Species Group</label>
+                        <label class="block text-[10px) font-black text-stone-500 uppercase mb-1">Species Group</label>
                         <select name="C:Species Group" id="species_group" class="w-full border border-stone-300 rounded-lg px-4 py-3 text-xs font-semibold focus:ring-2 focus:ring-red-600 outline-none" required>
                             <option value="" disabled selected>Tap to Identify...</option>
                             <option value="hardwood">Broadleaf: Sturdy (Oak, Hickory, Beech)</option>
@@ -194,7 +194,9 @@
         }
 
         function initChart() {
-            const ctx = document.getElementById('growthChart').getContext('2d');
+            const canvas = document.getElementById('growthChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
             myChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -234,6 +236,7 @@
                 await fetch("https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG", { method: 'POST', body: new FormData(e.target), mode: 'no-cors' });
                 alert("TREE LOGGED SUCCESSFULLY!");
                 e.target.reset();
+                // Even if empty, we restore whatever was there
                 document.getElementById('unity_id').value = currentID;
                 document.getElementById('species-helper').classList.add('hidden');
                 updateMath();
