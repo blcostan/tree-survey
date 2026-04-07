@@ -53,33 +53,18 @@
                     </div>
                 </div>
 
-               <div>
-    <label class="block text-[10px] font-black text-zinc-500 uppercase">Species Grouping & ID Helper</label>
+      <div>
+    <div class="flex justify-between items-center mb-1">
+        <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Species Grouping</label>
+        <button type="button" onclick="document.getElementById('species_modal').style.display='flex'" class="text-[9px] font-black text-red-600 uppercase border-b border-red-600 hover:text-red-700 transition-all cursor-help">ℹ️ ID Guide</button>
+    </div>
     <select name="C:Species Group" id="species_group" class="w-full border-2 p-3 rounded-lg font-bold bg-white focus:border-red-600 outline-none" required>
-        <option value="" disabled selected>Tap to identify species group...</option>
-        
-        <optgroup label="Broadleaf: Slow Growth (High Density)">
-            <option value="hardwood">Oak (White, Red, Live), Hickory, Walnut</option>
-            <option value="hardwood">Beech, Ironwood, Persimmon</option>
-        </optgroup>
-
-        <optgroup label="Broadleaf: Fast Growth (Medium Density)">
-            <option value="soft_hardwood">Maple (Red, Silver), Tulip Poplar, Sweetgum</option>
-            <option value="soft_hardwood">Birch, Sycamore, Cottonwood, Willow</option>
-            <option value="soft_hardwood">Ash, Elm, Cherry</option>
-        </optgroup>
-
-        <optgroup label="Conifers: Needles/Cones">
-            <option value="evergreen">Pine (Loblolly, Longleaf, White)</option>
-            <option value="evergreen">Cedar, Cypress, Hemlock, Spruce</option>
-        </optgroup>
-
-        <optgroup label="Small / Flowering / Understory">
-            <option value="small_ornate">Dogwood, Redbud, Holly, Magnolia (Saucer)</option>
-            <option value="small_ornate">Crepe Myrtle, Ornamental Cherry/Pear</option>
-        </optgroup>
+        <option value="" disabled selected>Tap to identify group...</option>
+        <option value="hardwood">Broadleaf: Sturdy (Oak, Hickory)</option>
+        <option value="soft_hardwood">Broadleaf: Fast (Maple, Poplar)</option>
+        <option value="evergreen">Evergreen: Needles (Pine, Cedar)</option>
+        <option value="small_ornate">Small/Flowering (Dogwood, Holly)</option>
     </select>
-    <p class="text-[9px] text-zinc-400 mt-1 uppercase font-bold italic">Select based on primary wood type for biomass accuracy.</p>
 </div>
 
                 <div id="proximity_note_container" class="bg-orange-50 border-2 border-orange-200 p-4 rounded-lg">
