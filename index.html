@@ -188,35 +188,51 @@
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     }
 
-    function handleGPS() {
-        const statusBox = document.getElementById('status-box');
-        const gpsMsg = document.getElementById('gps-msg');
-        const submitBtn = document.getElementById('submit_btn');
-        gpsMsg.innerText = "🛰️ REQUESTING SIGNAL...";
+function handleGPS() {
+    const statusBox = document.getElementById('status-box');
+    const gpsMsg = document.getElementById('gps-msg');
+    const submitBtn = document.getElementById('submit_btn');
+    gpsMsg.innerText = "🛰️ REQUESTING SIGNAL...";
+    
+    navigator.geolocation.getCurrentPosition((pos) => {
+        const lat = pos.coords.latitude, lng = pos.coords.longitude;
+        const accuracy = pos.coords.accuracy; // Precision in meters
         
-        navigator.geolocation.getCurrentPosition((pos) => {
-            const lat = pos.coords.latitude, lng = pos.coords.longitude;
-            document.getElementById('coords').value = lat.toFixed(6) + ", " + lng.toFixed(6);
-            window.tempGPS = { lat, lng };
-            
-            const dist = localStorage.getItem('last_lat') ? getDistance(lat, lng, parseFloat(localStorage.getItem('last_lat')), parseFloat(localStorage.getItem('last_lng'))) : 999;
-            
-            // SHOW SUBMIT BUTTON NO MATTER WHAT
-            submitBtn.style.display = "block";
+        document.getElementById('coords').value = lat.toFixed(6) + ", " + lng.toFixed(6);
+        window.tempGPS = { lat, lng };
+        
+        // 1. FIRST: Check if the signal is actually accurate (e.g., within 15 meters)
+        if (accuracy > 15) {
+            gpsMsg.innerText = `❌ POOR SIGNAL (${Math.round(accuracy)}m)`;
+            statusBox.style.backgroundColor = "#fee2e2"; // Red background
+            submitBtn.style.display = "none"; // Block submission
+            return; // Stop here
+        }
 
-            if (dist < 7.62) {
-                gpsMsg.innerText = "⚠️ PROXIMITY FLAG";
-                statusBox.style.backgroundColor = "#fff7ed";
-                document.getElementById('proximity_note_container').style.display = "block";
-                document.getElementById('prox_note').required = true;
-            } else {
-                gpsMsg.innerText = "✅ LOCATION VERIFIED";
-                statusBox.style.backgroundColor = "#f0fdf4";
-                document.getElementById('proximity_note_container').style.display = "none";
-                document.getElementById('prox_note').required = false;
-            }
-        }, (err) => { gpsMsg.innerText = "❌ GPS ERROR"; }, { enableHighAccuracy: true });
-    }
+        // 2. SECOND: Check Proximity
+        const dist = localStorage.getItem('last_lat') ? getDistance(lat, lng, parseFloat(localStorage.getItem('last_lat')), parseFloat(localStorage.getItem('last_lng'))) : 999;
+        
+        submitBtn.style.display = "block";
+
+        if (dist < 7.62) {
+            gpsMsg.innerText = "⚠️ PROXIMITY FLAG";
+            statusBox.style.backgroundColor = "#fff7ed";
+            document.getElementById('proximity_note_container').style.display = "block";
+            document.getElementById('prox_note').required = true;
+        } else {
+            gpsMsg.innerText = `✅ VERIFIED (+/- ${Math.round(accuracy)}m)`;
+            statusBox.style.backgroundColor = "#f0fdf4";
+            document.getElementById('proximity_note_container').style.display = "none";
+            document.getElementById('prox_note').required = false;
+        }
+    }, (err) => { 
+        gpsMsg.innerText = "❌ GPS ERROR: ENABLE LOCATION"; 
+    }, { 
+        enableHighAccuracy: true, 
+        timeout: 10000, 
+        maximumAge: 0 
+    });
+}
 
     document.getElementById('treeForm').onsubmit = async (e) => {
         e.preventDefault();
