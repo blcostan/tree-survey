@@ -55,7 +55,7 @@
 
                 <div>
                     <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Species Grouping</label>
-                    <select name="C:Species Group" id="species_group" class="w-full border-2 p-3 rounded-lg font-bold bg-white focus:border-red-600 outline-none" onchange="updateSpeciesHelper()" required>
+                    <select name="C:Species Group" id="species_group" class="w-full border-2 p-3 rounded-lg font-bold bg-white focus:border-red-600 outline-none" onchange="runAllUpdates()" required>
                         <option value="" disabled selected>Tap to identify tree type...</option>
                         <option value="hardwood">🌳 STURDY (Oak, Hickory, Walnut)</option>
                         <option value="soft_hardwood">🍃 FAST (Maple, Poplar, Sycamore)</option>
@@ -68,18 +68,15 @@
                 </div>
 
                 <div id="proximity_note_container" class="bg-orange-50 border-2 border-orange-200 p-4 rounded-lg">
-                    <p class="text-[10px] font-black text-orange-700 uppercase mb-2">⚠️ PROXIMITY ALERT: Nearby Entry Detected</p>
-                    <label class="block text-[10px] font-bold text-zinc-600 mb-1 tracking-tight">Prove this is a unique tree (min. 10 characters):</label>
-                    <textarea name="J:Proximity_Note" id="prox_note" class="w-full p-2 text-sm border-2 rounded font-medium focus:border-orange-500 outline-none" placeholder="Required for nearby assets..."></textarea>
+                    <p class="text-[10px] font-black text-orange-700 uppercase mb-2">⚠️ PROXIMITY ALERT</p>
+                    <textarea name="J:Proximity_Note" id="prox_note" class="w-full p-2 text-sm border-2 rounded font-medium" placeholder="Describe unique features..."></textarea>
                 </div>
 
                 <div class="pt-2 space-y-3">
-                    <button type="button" id="gps_verify_btn" onclick="handleGPS()" class="w-full bg-zinc-800 text-white p-4 rounded-lg font-black text-[10px] uppercase tracking-widest active:bg-black transition-all">🛰️ Capture & Verify Location</button>
-                    
+                    <button type="button" onclick="handleGPS()" class="w-full bg-zinc-800 text-white p-4 rounded-lg font-black text-[10px] uppercase tracking-widest">🛰️ Capture & Verify Location</button>
                     <div id="status-box" class="bg-zinc-100 border-2 border-dashed border-zinc-300 rounded-lg p-4 text-center">
-                        <p id="gps-msg" class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Awaiting GPS Hardware Signal</p>
+                        <p id="gps-msg" class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Awaiting GPS Signal</p>
                     </div>
-
                     <input type="hidden" name="E:GPS" id="coords" required>
                     <input type="hidden" name="D:Condition" value="0.8">
                     <input type="hidden" name="G:CO2_Lbs" id="hidden_co2">
@@ -101,79 +98,40 @@
                         <p class="text-4xl font-black italic mt-1">$<span id="display-value">0.00</span></p>
                     </div>
                 </div>
-                
                 <div class="bg-zinc-50 border-2 border-zinc-100 rounded-2xl p-4 shadow-inner">
                     <p class="text-[10px] font-black text-zinc-400 uppercase text-center mb-4 tracking-widest">20-Year Accumulation Forecast</p>
                     <div id="chart-container"><canvas id="growthChart"></canvas></div>
                 </div>
-
                 <div class="mt-6 pt-4 border-t border-zinc-100">
-                    <a href="https://docs.google.com/forms/d/e/1FAIpQLScJp7D7jV5v_X_8uG5zY8G9N_z-EwL8qW4z_m1R9e6i0y7-QA/viewform" 
-                       target="_blank"
-                       class="block text-center text-[10px] font-black text-zinc-400 uppercase tracking-widest hover:text-red-600 transition-colors">
-                       🛠️ Report a System Bug / Issue
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-zinc-100 p-8 text-zinc-600 border-t-2 border-zinc-200">
-            <h2 class="text-sm font-black text-zinc-900 uppercase tracking-tighter mb-6 border-b-2 border-zinc-300 pb-2">Scientific Methodology & Citations</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 text-[11px] leading-relaxed">
-                <div>
-                    <h3 class="font-black text-zinc-800 uppercase text-[10px] mb-2 tracking-widest">I. Biomass Regression Models</h3>
-                    <p class="mb-4">Calculations utilize total above-ground biomass (AGB) equations from <strong>Jenkins, J.C., et al. (2003)</strong>.</p>
-                </div>
-                <div>
-                    <h3 class="font-black text-zinc-800 uppercase text-[10px] mb-2 tracking-widest">II. Carbon & Economic Indexing</h3>
-                    <p class="mb-2"><strong>Carbon Density:</strong> Dry tree biomass is 50% carbon. Molec. ratio CO2:C (3.6663).</p>
-                    <p><strong>Valuation:</strong> Social Cost of Carbon (~$0.09 per lb CO2e).</p>
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLScJp7D7jV5v_X_8uG5zY8G9N_z-EwL8qW4z_m1R9e6i0y7-QA/viewform" target="_blank" class="block text-center text-[10px] font-black text-zinc-400 uppercase tracking-widest hover:text-red-600 transition-colors">🛠️ Report a System Bug</a>
                 </div>
             </div>
         </div>
     </div>
 
 <script>
-    const jenkins = { 
-        "hardwood": [-2.0127, 2.4342], 
-        "soft_hardwood": [-2.48, 2.4835], 
-        "evergreen": [-2.5356, 2.4349], 
-        "small_ornate": [-0.7152, 1.7029] 
-    };
+    const jenkins = { "hardwood": [-2.0127, 2.4342], "soft_hardwood": [-2.48, 2.4835], "evergreen": [-2.5356, 2.4349], "small_ornate": [-0.7152, 1.7029] };
     let myChart = null;
-    let isNearby = false;
 
     window.onload = () => {
         const ctx = document.getElementById('growthChart').getContext('2d');
-        myChart = new Chart(ctx, { 
-            type: 'line', 
-            data: { 
-                labels: ['Today', '+5y', '+10y', '+15y', '+20y'], 
-                datasets: [{ label: 'Lbs CO2', data: [0,0,0,0,0], borderColor: '#CC0000', backgroundColor: 'rgba(204,0,0,0.1)', fill: true, tension: 0.3, borderWidth: 4 }] 
-            }, 
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } 
-        });
+        myChart = new Chart(ctx, { type: 'line', data: { labels: ['Today', '+5y', '+10y', '+15y', '+20y'], datasets: [{ label: 'Lbs CO2', data: [0,0,0,0,0], borderColor: '#CC0000', backgroundColor: 'rgba(204,0,0,0.1)', fill: true, tension: 0.3, borderWidth: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
         document.getElementById('unity_id').value = localStorage.getItem('ncsu_unity_id') || "";
     };
 
-    // New Helper Function for Species Description
-    function updateSpeciesHelper() {
+    function runAllUpdates() {
         const group = document.getElementById('species_group').value;
         const helpBox = document.getElementById('species-help-box');
         const helpText = document.getElementById('species-help-text');
-        
-        const descriptions = {
-            "hardwood": "🌳 STURDY: High-density wood. Typical of Oaks, Hickories, and Walnuts. These store the most carbon per inch.",
-            "soft_hardwood": "🍃 FAST: Medium-density wood. Typical of Tulip Poplars, Maples, and Sycamores. Rapid growers.",
-            "evergreen": "🌲 EVERGREEN: Needle-bearing trees like Loblolly Pines and Cedars. Keep their foliage year-round.",
-            "small_ornate": "🌸 SMALL: Trees that stay small (under 30ft), like Dogwoods, Redbuds, or Crepe Myrtles."
+        const descs = {
+            "hardwood": "🌳 STURDY: High-density wood (Oaks/Hickories). Stores maximum carbon.",
+            "soft_hardwood": "🍃 FAST: Medium-density (Maples/Poplars). Common rapid-growth trees.",
+            "evergreen": "🌲 EVERGREEN: Conifers and Pines. Needle-bearing foliage.",
+            "small_ornate": "🌸 SMALL: Understory trees like Dogwoods or Crepe Myrtles."
         };
-
-        if (descriptions[group]) {
-            helpText.innerText = descriptions[group];
+        if (descs[group]) {
+            helpText.innerText = descs[group];
             helpBox.classList.remove('hidden');
-        } else {
-            helpBox.classList.add('hidden');
         }
         updateMath();
     }
@@ -183,25 +141,52 @@
         const group = document.getElementById('species_group').value;
         if (dbh > 0 && group) {
             const [b0, b1] = jenkins[group];
-            // Jenkins calc using 0.8 health factor
             const co2 = Math.round(Math.exp(b0 + b1 * Math.log(dbh * 2.54)) * 0.5 * 3.6663 * 2.2046 * 0.8);
             document.getElementById('display-co2').innerText = co2.toLocaleString();
             document.getElementById('display-value').innerText = (co2 * 0.09).toFixed(2);
             document.getElementById('hidden_co2').value = co2;
             document.getElementById('hidden_value').value = (co2 * 0.09).toFixed(2);
-            
-            // Update chart forecast
             myChart.data.datasets[0].data = [0, 5, 10, 15, 20].map(y => Math.round(Math.exp(b0 + b1 * Math.log((dbh + (y*0.2)) * 2.54)) * 0.5 * 3.6663 * 2.2046 * 0.8));
             myChart.update();
         }
     }
 
-    // Diameter/Circumference Linking
     document.getElementById('circ_input').oninput = function() {
-        const val = parseFloat(this.value) || 0;
-        document.getElementById('dbh_input').value = (val / Math.PI).toFixed(1);
+        document.getElementById('dbh_input').value = (parseFloat(this.value) / Math.PI || 0).toFixed(1);
         updateMath();
     };
     document.getElementById('dbh_input').oninput = function() {
-        const val = parseFloat(this.value) || 0;
-        document.getElementById('circ_input').value = (val * Math.PI).toFixed
+        document.getElementById('circ_input').value = (parseFloat(this.value) * Math.PI || 0).toFixed(1);
+        updateMath();
+    };
+
+    function getDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371e3;
+        const dLat = (lat2-lat1) * Math.PI/180;
+        const dLon = (lon2-lon1) * Math.PI/180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    function handleGPS() {
+        const statusBox = document.getElementById('status-box');
+        const gpsMsg = document.getElementById('gps-msg');
+        gpsMsg.innerText = "🛰️ REQUESTING SIGNAL...";
+        navigator.geolocation.getCurrentPosition((pos) => {
+            const lat = pos.coords.latitude, lng = pos.coords.longitude;
+            document.getElementById('coords').value = lat.toFixed(6) + ", " + lng.toFixed(6);
+            window.tempGPS = { lat, lng };
+            const dist = localStorage.getItem('last_lat') ? getDistance(lat, lng, parseFloat(localStorage.getItem('last_lat')), parseFloat(localStorage.getItem('last_lng'))) : 999;
+            if (dist < 7.62) {
+                gpsMsg.innerText = "⚠️ PROXIMITY FLAG";
+                statusBox.style.backgroundColor = "#fff7ed";
+                document.getElementById('proximity_note_container').style.display = "block";
+            } else {
+                gpsMsg.innerText = "✅ LOCATION VERIFIED";
+                statusBox.style.backgroundColor = "#f0fdf4";
+                document.getElementById('submit_btn').style.display = "block";
+            }
+        }, (err) => { gpsMsg.innerText = "❌ GPS ERROR"; }, { enableHighAccuracy: true });
+    }
+
+    document.
