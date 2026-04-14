@@ -6,7 +6,7 @@
     <title>NCSU Tree Registry | Strategic Investment</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
@@ -33,7 +33,7 @@
                 <h1 class="text-xl font-black italic uppercase tracking-tighter">NC STATE UNIVERSITY</h1>
                 <p class="text-red-500 text-[10px] font-bold uppercase mt-1 tracking-widest">Campus Planning & Strategic Investment</p>
             </div>
-            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Annual Performance v5.6</div>
+            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Annual Performance v5.7</div>
         </div>
 
         <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -69,17 +69,17 @@
                     <div>
                         <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Health Condition</label>
                         <select name="D:Condition" id="condition_select" class="w-full border-2 p-3 rounded-lg font-bold bg-white focus:border-red-600 outline-none" onchange="updateMath()" required>
-                            <option value="1.0">Excellent (100% Growth)</option>
-                            <option value="0.8" selected>Good (80% Growth)</option>
-                            <option value="0.5">Fair (50% Growth)</option>
-                            <option value="0.2">Poor (20% Growth)</option>
-                            <option value="0.0">Dead (0% Growth)</option>
+                            <option value="1.0">Excellent</option>
+                            <option value="0.8" selected>Good</option>
+                            <option value="0.5">Fair</option>
+                            <option value="0.2">Poor</option>
+                            <option value="0.0">Dead</option>
                         </select>
                     </div>
                 </div>
 
-                <div id="species-help-box" class="hidden p-3 bg-zinc-900 rounded-lg border-l-4 border-red-600">
-                    <p id="species-help-text" class="text-[11px] leading-snug text-zinc-300 italic font-medium"></p>
+                <div id="species-help-box" class="hidden p-3 bg-zinc-900 rounded-lg border-l-4 border-red-600 text-[11px] text-zinc-300 italic font-medium leading-snug">
+                    <p id="species-help-text"></p>
                 </div>
 
                 <div id="proximity_note_container" class="bg-orange-50 border-2 border-orange-200 p-4 rounded-lg hidden">
@@ -149,12 +149,8 @@
     const jenkins = { "hardwood": [-2.0127, 2.4342], "soft_hardwood": [-2.48, 2.4835], "evergreen": [-2.5356, 2.4349], "small_ornate": [-0.7152, 1.7029] };
     let myChart = null;
 
-    // Force chart initialization with a retry mechanism
-    function startRegistry() {
-        const canvas = document.getElementById('growthChart');
-        if (!canvas) return;
-        
-        const ctx = canvas.getContext('2d');
+    window.onload = () => {
+        const ctx = document.getElementById('growthChart').getContext('2d');
         myChart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -177,9 +173,7 @@
             }
         });
         document.getElementById('unity_id').value = localStorage.getItem('ncsu_unity_id') || "";
-    }
-
-    window.onload = startRegistry;
+    };
 
     function updateSpeciesHelper() {
         const group = document.getElementById('species_group').value;
@@ -246,41 +240,4 @@
         msg.innerText = "🛰️ SEARCHING...";
         navigator.geolocation.getCurrentPosition((pos) => {
             const { latitude: lat, longitude: lng, accuracy: acc } = pos.coords;
-            document.getElementById('coords').value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-            window.tempGPS = { lat, lng };
-            const lastLat = localStorage.getItem('last_lat');
-            const lastLng = localStorage.getItem('last_lng');
-            const dist = lastLat ? getDistance(lat, lng, parseFloat(lastLat), parseFloat(lastLng)) : 999;
-            document.getElementById('submit_btn').style.display = "block";
-            if (dist < 7.6) {
-                msg.innerText = "⚠️ PROXIMITY FLAG";
-                box.style.backgroundColor = "#fff7ed";
-                prox.classList.remove('hidden');
-                document.getElementById('prox_note').required = true;
-                document.getElementById('troll_flag').value = "TROLL";
-            } else {
-                msg.innerText = `✅ VERIFIED (+/- ${Math.round(acc)}m)`;
-                box.style.backgroundColor = "#f0fdf4";
-                prox.classList.add('hidden');
-                document.getElementById('troll_flag').value = "CLEAN";
-            }
-        }, () => { msg.innerText = "❌ GPS ERROR"; }, { enableHighAccuracy: true });
-    }
-
-    document.getElementById('treeForm').onsubmit = async (e) => {
-        e.preventDefault();
-        document.getElementById('overlay').style.display = "flex";
-        document.getElementById('timestamp').value = new Date().toLocaleString();
-        if(window.tempGPS) {
-            localStorage.setItem('last_lat', window.tempGPS.lat);
-            localStorage.setItem('last_lng', window.tempGPS.lng);
-        }
-        localStorage.setItem('ncsu_unity_id', document.getElementById('unity_id').value);
-        try {
-            await fetch("https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG", { method: 'POST', body: new FormData(e.target), mode: 'no-cors' });
-            location.reload();
-        } catch (e) { alert("Error"); document.getElementById('overlay').style.display = "none"; }
-    };
-</script>
-</body>
-</html>
+            document.getElementById('coords').value = `${lat.toFixed(
