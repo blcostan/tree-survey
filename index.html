@@ -31,7 +31,7 @@
                 <h1 class="text-xl font-black italic uppercase tracking-tighter text-white">NC STATE UNIVERSITY</h1>
                 <p class="text-red-500 text-[10px] font-bold uppercase mt-1 tracking-widest">Campus Planning & Strategic Investment</p>
             </div>
-            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Annual Performance v5.0</div>
+            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Annual Performance v5.1</div>
         </div>
 
         <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -76,6 +76,10 @@
                     </div>
                 </div>
 
+                <div id="species-help-box" class="hidden p-3 bg-zinc-900 rounded-lg border-l-4 border-red-600">
+                    <p id="species-help-text" class="text-[11px] leading-snug text-zinc-300 italic font-medium"></p>
+                </div>
+
                 <div class="pt-2 space-y-3">
                     <button type="button" id="gps_verify_btn" onclick="handleGPS()" class="w-full bg-zinc-800 text-white p-4 rounded-lg font-black text-[10px] uppercase tracking-widest active:bg-black transition-all">🛰️ Capture & Verify Location</button>
                     <div id="status-box" class="bg-zinc-100 border-2 border-dashed border-zinc-300 rounded-lg p-4 text-center">
@@ -88,6 +92,10 @@
                 </div>
 
                 <button type="submit" id="submit_btn" class="w-full ncsu-red text-white p-5 rounded-xl font-black uppercase tracking-widest shadow-xl transition-transform active:scale-95">Confirm Tree Entry</button>
+                
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLScSlYjJBIPVpbNBrg1xE11q8-ShIrGuR-c242hEcaFVytwq3g/viewform?usp=sharing" target="_blank" class="block text-center text-[9px] font-bold text-zinc-400 uppercase tracking-widest hover:text-red-600 transition-colors pt-2">
+                    🛠️ Report Technical Bug
+                </a>
             </form>
 
             <div class="space-y-6">
@@ -107,7 +115,48 @@
                 </div>
             </div>
         </div>
+
+        <div class="bg-zinc-100 p-8 text-zinc-600 border-t-2 border-zinc-200">
+            <h2 class="text-sm font-black text-zinc-900 uppercase tracking-tighter mb-6 border-b-2 border-zinc-300 pb-2">Scientific Methodology & Citations</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 text-[11px] leading-relaxed">
+                <div>
+                    <h3 class="font-black text-zinc-800 uppercase text-[10px] mb-2 tracking-widest">I. Annual Increment Modeling</h3>
+                    <p class="mb-4">Calculations utilize total above-ground biomass (AGB) equations from <strong>Jenkins, J.C., et al. (2003)</strong>. Annual sequestration is derived via the <i>Current Annual Increment</i> (CAI) method, assuming a mean radial growth of 0.2"/year adjusted by health factor.</p>
+                </div>
+                <div>
+                    <h3 class="font-black text-zinc-800 uppercase text-[10px] mb-2 tracking-widest">II. Carbon & Economic Indexing</h3>
+                    <p class="mb-2"><strong>Molecular Ratio:</strong> Biomass is ~50% carbon; CO2e utilizes the 3.6663 atomic weight ratio.</p>
+                    <p><strong>Valuation:</strong> Calculated via EPA Social Cost of Carbon (~$190/metric ton or $0.09/lb CO2e).</p>
+                </div>
+            </div>
+        </div>
     </div>
 
 <script>
-    const jenkins = { "hardwood": [-2.0127, 2
+    const jenkins = { "hardwood": [-2.0127, 2.4342], "soft_hardwood": [-2.48, 2.4835], "evergreen": [-2.5356, 2.4349], "small_ornate": [-0.7152, 1.7029] };
+    let myChart = null;
+
+    window.onload = () => {
+        const ctx = document.getElementById('growthChart').getContext('2d');
+        myChart = new Chart(ctx, { 
+            type: 'line', 
+            data: { 
+                labels: ['Today', '+5y', '+10y', '+15y', '+20y'], 
+                datasets: [{ 
+                    label: 'Lbs CO2/Yr', 
+                    borderColor: '#CC0000', 
+                    backgroundColor: 'rgba(204,0,0,0.1)', 
+                    fill: true, 
+                    tension: 0.3, 
+                    borderWidth: 4, 
+                    data: [0,0,0,0,0] 
+                }] 
+            }, 
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { legend: { display: false } }, 
+                scales: { y: { beginAtZero: true } } 
+            } 
+        });
+        document.getElementById('unity_id').value = localStorage.getItem('ncsu_unity_id') || "";
