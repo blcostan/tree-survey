@@ -152,9 +152,15 @@
     </div>
 
 <script>
-    const jenkins = { "hardwood": [-2.0127, 2.4342], "soft_hardwood": [-2.48, 2.4835], "evergreen": [-2.5356, 2.4349], "small_ornate": [-0.7152, 1.7029] };
+    // Jenkins Coefficients (Standard Metric-based coefficients)
+    const jenkins = { 
+        "hardwood": [-2.0127, 2.4342], 
+        "soft_hardwood": [-2.48, 2.4835], 
+        "evergreen": [-2.5356, 2.4349], 
+        "small_ornate": [-0.7152, 1.7029] 
+    };
     
-    // Species Helper Logic
+    // 1. Species Helper Logic
     function updateSpeciesHelper() {
         const group = document.getElementById('species_group').value;
         const helpBox = document.getElementById('species-help-box');
@@ -175,41 +181,53 @@
         updateMath();
     }
 
-    // Main Math Engine
+    // 2. The Master Math Engine (Unit-Corrected)
     function updateMath() {
-        const dbh = parseFloat(document.getElementById('dbh_input').value) || 0;
+        const dbhInches = parseFloat(document.getElementById('dbh_input').value) || 0;
         const group = document.getElementById('species_group').value;
         const condition = parseFloat(document.getElementById('condition_select').value);
         
-        if (dbh > 0 && group) {
+        if (dbhInches > 0 && group) {
+            // STEP A: Convert Inches to Centimeters for the Jenkins Formula
+            const dbhCm = dbhInches * 2.54; 
+
             const params = jenkins[group];
-            const biomassTotal = Math.exp(params[0] + params[1] * Math.log(dbh));
-            const totalCO2 = biomassTotal * 2.20462 * 0.5 * 3.6663 * condition;
+            
+            // STEP B: Calculate Biomass in Kilograms
+            const biomassKG = Math.exp(params[0] + params[1] * Math.log(dbhCm));
+            
+            // STEP C: Convert KG to Lbs and calculate CO2e
+            // (Lbs = KG * 2.20462) | (CO2 = Lbs * 0.5 Carbon * 3.6663 Ratio)
+            const totalCO2 = (biomassKG * 2.20462) * 0.5 * 3.6663 * condition;
             const socialValue = totalCO2 * 0.09;
 
+            // Update UI
             document.getElementById('display-co2').innerText = Math.round(totalCO2).toLocaleString();
             document.getElementById('display-value').innerText = socialValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
             
+            // Update Hidden Fields for Sheet Monkey
             document.getElementById('hidden_co2').value = totalCO2.toFixed(2);
             document.getElementById('hidden_value').value = socialValue.toFixed(2);
             
-            updateGraph(dbh, params, condition);
+            updateGraph(dbhInches, params, condition);
         }
     }
 
-    // Graph Engine
-    function updateGraph(dbh, params, condition) {
-        const growth = 0.2 * condition;
+    // 3. Forecast Graph Logic
+    function updateGraph(dbhInches, params, condition) {
+        const growthInches = 0.2 * condition;
         let points = [];
         for (let i = 0; i < 5; i++) {
-            const futureDbh = dbh + (i * 5 * growth);
-            const futureBiomass = Math.exp(params[0] + params[1] * Math.log(futureDbh));
-            const futureCO2 = futureBiomass * 2.20462 * 0.5 * 3.6663 * condition;
+            const futureDbhCm = (dbhInches + (i * 5 * growthInches)) * 2.54;
+            const futureKG = Math.exp(params[0] + params[1] * Math.log(futureDbhCm));
+            const futureCO2 = (futureKG * 2.20462) * 0.5 * 3.6663 * condition;
             points.push(futureCO2);
         }
+        
         const min = Math.min(...points);
         const max = Math.max(...points);
         const range = max - min || 1; 
+
         const svgPoints = points.map((p, i) => {
             const x = 40 + (i * 85);
             const y = 160 - ((p - min) / range * 100 + 20); 
@@ -219,7 +237,7 @@
         document.getElementById('svgPath').setAttribute('d', `M ${svgPoints.join(' L ')}`);
     }
 
-    // Troll Catch (Proximity) Logic
+    // 4. Troll Catch (Proximity) Logic
     function checkProximity(newLat, newLng) {
         const lastLat = localStorage.getItem('last_lat');
         const lastLng = localStorage.getItem('last_lng');
@@ -228,7 +246,7 @@
         const proxNote = document.getElementById('prox_note');
 
         if (lastLat && lastLng) {
-            const R = 6371e3; 
+            const R = 6371e3; // Earth radius in meters
             const φ1 = newLat * Math.PI/180;
             const φ2 = lastLat * Math.PI/180;
             const Δφ = (lastLat-newLat) * Math.PI/180;
@@ -237,7 +255,7 @@
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
             const distance = R * c; 
 
-            if (distance < 3) { // 3 meters limit
+            if (distance < 3) {
                 proximityBox.style.display = 'block';
                 proxNote.required = true;
                 trollFlag.value = "ALERT: " + distance.toFixed(1) + "m";
@@ -251,7 +269,7 @@
         localStorage.setItem('last_lng', newLng);
     }
 
-    // GPS & Submission Logic
+    // 5. GPS Handling
     async function handleGPS() {
         const btn = document.getElementById('gps_btn');
         const msg = document.getElementById('gps-msg');
@@ -275,7 +293,7 @@
         }, { enableHighAccuracy: true });
     }
 
-    // Bidirectional Listeners
+    // 6. Bidirectional Listeners (Circumference <-> DBH)
     document.getElementById('circ_input').addEventListener('input', (e) => {
         const val = parseFloat(e.target.value);
         if (val > 0) document.getElementById('dbh_input').value = (val / Math.PI).toFixed(1);
@@ -287,13 +305,13 @@
         updateMath();
     });
 
-    // Form Submission
+    // 7. Form Submission to Sheet Monkey
     document.getElementById('treeForm').addEventListener('submit', function(e) {
         e.preventDefault();
         document.getElementById('overlay').style.display = 'flex';
         fetch('https://api.sheetmonkey.io/form/jV4qG7y49Xf', { method: 'POST', body: new FormData(this)})
-            .then(() => { alert('Tree Recorded!'); location.reload(); })
-            .catch(() => { document.getElementById('overlay').style.display = 'none'; alert('Error Transmitting.'); });
+            .then(() => { alert('Registry Updated Successfully!'); location.reload(); })
+            .catch(() => { document.getElementById('overlay').style.display = 'none'; alert('Sync Error. Check Signal.'); });
     });
 </script>
 </body>
