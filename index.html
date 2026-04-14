@@ -4,15 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NCSU Tree Registry | Strategic Investment</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" onload="initChart()"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; -webkit-tap-highlight-color: transparent;}
         .ncsu-red { background-color: #CC0000; }
-        #chart-container { position: relative; height: 300px; width: 100%; background: #ffffff; border-radius: 12px; }
+        #chart-container { position: relative; height: 300px; width: 100%; background: #fff; border-radius: 12px; }
         #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; }
         .spinner { width: 40px; height: 40px; border: 4px solid #333; border-top: 4px solid #CC0000; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -33,7 +31,7 @@
                 <h1 class="text-xl font-black italic uppercase tracking-tighter">NC STATE UNIVERSITY</h1>
                 <p class="text-red-500 text-[10px] font-bold uppercase mt-1 tracking-widest">Campus Planning & Strategic Investment</p>
             </div>
-            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Annual Performance v5.7</div>
+            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Annual Performance v5.8</div>
         </div>
 
         <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -89,7 +87,7 @@
                 </div>
 
                 <div class="pt-2 space-y-3">
-                    <button type="button" onclick="handleGPS()" class="w-full bg-zinc-800 text-white p-4 rounded-lg font-black text-[10px] uppercase tracking-widest">🛰️ Capture & Verify Location</button>
+                    <button type="button" id="gps_verify_btn" onclick="handleGPS()" class="w-full bg-zinc-800 text-white p-4 rounded-lg font-black text-[10px] uppercase tracking-widest">🛰️ Capture & Verify Location</button>
                     <div id="status-box" class="bg-zinc-100 border-2 border-dashed border-zinc-300 rounded-lg p-4 text-center">
                         <p id="gps-msg" class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Awaiting GPS Hardware Signal</p>
                     </div>
@@ -149,7 +147,7 @@
     const jenkins = { "hardwood": [-2.0127, 2.4342], "soft_hardwood": [-2.48, 2.4835], "evergreen": [-2.5356, 2.4349], "small_ornate": [-0.7152, 1.7029] };
     let myChart = null;
 
-    window.onload = () => {
+    function initChart() {
         const ctx = document.getElementById('growthChart').getContext('2d');
         myChart = new Chart(ctx, {
             type: 'line',
@@ -173,7 +171,7 @@
             }
         });
         document.getElementById('unity_id').value = localStorage.getItem('ncsu_unity_id') || "";
-    };
+    }
 
     function updateSpeciesHelper() {
         const group = document.getElementById('species_group').value;
@@ -187,57 +185,4 @@
         };
         if (descs[group]) {
             helpText.innerText = descs[group];
-            helpBox.classList.remove('hidden');
-        }
-        updateMath();
-    }
-
-    function updateMath() {
-        const dbh = parseFloat(document.getElementById('dbh_input').value) || 0;
-        const group = document.getElementById('species_group').value;
-        const condition = parseFloat(document.getElementById('condition_select').value);
-        
-        if (dbh > 0 && group && myChart) {
-            const [b0, b1] = jenkins[group];
-            const totalCO2 = (d) => Math.exp(b0 + b1 * Math.log(d * 2.54)) * 0.5 * 3.6663 * 2.2046;
-            const calcAnnual = (d) => {
-                if (condition === 0) return 0;
-                return Math.max(0, Math.round((totalCO2(d) - totalCO2(d - 0.2)) * condition));
-            };
-            
-            const current = calcAnnual(dbh);
-            document.getElementById('display-co2').innerText = current.toLocaleString();
-            document.getElementById('display-value').innerText = (current * 0.09).toFixed(2);
-            document.getElementById('hidden_co2').value = current;
-            document.getElementById('hidden_value').value = (current * 0.09).toFixed(2);
-
-            myChart.data.datasets[0].data = [0, 5, 10, 15, 20].map(y => calcAnnual(dbh + (y * 0.2)));
-            myChart.update();
-        }
-    }
-
-    document.getElementById('circ_input').oninput = function() {
-        document.getElementById('dbh_input').value = (this.value / Math.PI).toFixed(1);
-        updateMath();
-    };
-    document.getElementById('dbh_input').oninput = function() {
-        document.getElementById('circ_input').value = (this.value * Math.PI).toFixed(1);
-        updateMath();
-    };
-
-    function getDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371e3;
-        const dLat = (lat2-lat1) * Math.PI/180;
-        const dLon = (lon2-lon1) * Math.PI/180;
-        const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    }
-
-    function handleGPS() {
-        const msg = document.getElementById('gps-msg');
-        const box = document.getElementById('status-box');
-        const prox = document.getElementById('proximity_note_container');
-        msg.innerText = "🛰️ SEARCHING...";
-        navigator.geolocation.getCurrentPosition((pos) => {
-            const { latitude: lat, longitude: lng, accuracy: acc } = pos.coords;
-            document.getElementById('coords').value = `${lat.toFixed(
+            helpBox.
