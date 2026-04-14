@@ -1,3 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NCSU Tree Registry | Strategic Investment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; -webkit-tap-highlight-color: transparent;}
+        .ncsu-red { background-color: #CC0000; }
+        #chart-container { position: relative; height: 280px; width: 100%; background: #fff; border-radius: 12px; }
+        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #333; border-top: 4px solid #CC0000; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #submit_btn, #proximity_note_container { display: none; }
+    </style>
+</head>
 <body class="p-2 md:p-6 pb-20">
 
     <div id="overlay">
@@ -46,7 +65,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Current Health</label>
+                        <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Health Condition</label>
                         <select name="D:Condition" id="condition_select" class="w-full border-2 p-3 rounded-lg font-bold bg-white focus:border-red-600 outline-none" onchange="updateMath()" required>
                             <option value="1.0">Excellent (100% Growth)</option>
                             <option value="0.8" selected>Good (80% Growth)</option>
@@ -55,19 +74,6 @@
                             <option value="0.0">Dead (0% Growth)</option>
                         </select>
                     </div>
-                </div>
-
-                <div id="species-help-box" class="hidden p-3 bg-zinc-900 rounded-lg border-l-4 border-red-600">
-                    <p id="species-help-text" class="text-[11px] leading-snug text-zinc-300 italic font-medium"></p>
-                </div>
-
-                <div id="proximity_note_container" class="bg-orange-50 border-2 border-orange-200 p-4 rounded-lg">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="text-2xl">🧌</span>
-                        <p class="text-[10px] font-black text-orange-700 uppercase tracking-widest">Troll Alert: Proximity Triggered</p>
-                    </div>
-                    <textarea name="M:Proximity_Note" id="prox_note" class="w-full p-2 text-sm border-2 rounded font-medium focus:border-orange-500 outline-none" placeholder="Explain why you are logging this close..."></textarea>
-                    <input type="hidden" name="L:Troll Catch" id="troll_flag">
                 </div>
 
                 <div class="pt-2 space-y-3">
@@ -99,143 +105,9 @@
                     <p class="text-[10px] font-black text-zinc-400 uppercase text-center mb-4 tracking-widest">Future Annual Performance Forecast</p>
                     <div id="chart-container"><canvas id="growthChart"></canvas></div>
                 </div>
-                
-                <a href="https://lookerstudio.google.com/reporting/d92171ad-111b-4cd0-8fce-09dd1835a50b" target="_blank" class="block w-full text-center bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest py-4 rounded-xl shadow-lg transition-colors text-[12px]">
-                    📊 View Class Registry Results
-                </a>
             </div>
         </div>
     </div>
 
 <script>
-    const jenkins = { "hardwood": [-2.0127, 2.4342], "soft_hardwood": [-2.48, 2.4835], "evergreen": [-2.5356, 2.4349], "small_ornate": [-0.7152, 1.7029] };
-    let myChart = null;
-
-    window.onload = () => {
-        const ctx = document.getElementById('growthChart').getContext('2d');
-        myChart = new Chart(ctx, { type: 'line', data: { labels: ['Today', '+5y', '+10y', '+15y', '+20y'], datasets: [{ label: 'Lbs CO2/Yr', borderColor: '#CC0000', backgroundColor: 'rgba(204,0,0,0.1)', fill: true, tension: 0.3, borderWidth: 4, data: [0,0,0,0,0] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
-        document.getElementById('unity_id').value = localStorage.getItem('ncsu_unity_id') || "";
-    };
-
-    function updateSpeciesHelper() {
-        const group = document.getElementById('species_group').value;
-        const helpBox = document.getElementById('species-help-box');
-        const helpText = document.getElementById('species-help-text');
-        const descs = {
-            "hardwood": "🌳 STURDY: High-density wood. Stores massive carbon.",
-            "soft_hardwood": "🍃 FAST: Medium-density. Rapid annual sequestration.",
-            "evergreen": "🌲 EVERGREEN: Year-round active sequestration.",
-            "small_ornate": "🌸 SMALL: Ornamental carbon contribution."
-        };
-        if (descs[group]) {
-            helpText.innerText = descs[group];
-            helpBox.classList.remove('hidden');
-        }
-        updateMath();
-    }
-
-    function updateMath() {
-        const dbh = parseFloat(document.getElementById('dbh_input').value) || 0;
-        const group = document.getElementById('species_group').value;
-        const condition = parseFloat(document.getElementById('condition_select').value) || 0;
-        
-        if (dbh > 0 && group) {
-            const [b0, b1] = jenkins[group];
-            
-            // Formula for Total Biomass at a specific DBH
-            const totalCO2 = (d) => Math.exp(b0 + b1 * Math.log(d * 2.54)) * 0.5 * 3.6663 * 2.2046;
-            
-            // ANNUAL CALCULATION: (Current Total) - (Total one year ago) * Health Multiplier
-            // Assume 0.2 inch growth per year for campus trees
-            const calcAnnual = (d) => {
-                if (condition === 0) return 0; // Dead trees sequester 0 per year
-                const current = totalCO2(d);
-                const lastYear = totalCO2(d - 0.2);
-                return Math.round((current - lastYear) * condition);
-            };
-
-            const annualCO2 = calcAnnual(dbh);
-            document.getElementById('display-co2').innerText = annualCO2.toLocaleString();
-            document.getElementById('display-value').innerText = (annualCO2 * 0.09).toFixed(2);
-            document.getElementById('hidden_co2').value = annualCO2;
-            document.getElementById('hidden_value').value = (annualCO2 * 0.09).toFixed(2);
-            
-            // Forecast: How much will it sequester per year as it gets bigger?
-            myChart.data.datasets[0].data = [0, 5, 10, 15, 20].map(y => calcAnnual(dbh + (y * 0.2)));
-            myChart.update();
-        }
-    }
-
-    // Existing input listeners and GPS functions remain the same...
-    document.getElementById('circ_input').oninput = function() {
-        document.getElementById('dbh_input').value = (parseFloat(this.value) / Math.PI || 0).toFixed(1);
-        updateMath();
-    };
-    document.getElementById('dbh_input').oninput = function() {
-        document.getElementById('circ_input').value = (parseFloat(this.value) * Math.PI || 0).toFixed(1);
-        updateMath();
-    };
-
-    function getDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371e3;
-        const dLat = (lat2-lat1) * Math.PI/180;
-        const dLon = (lon2-lon1) * Math.PI/180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    }
-
-    function handleGPS() {
-        const statusBox = document.getElementById('status-box');
-        const gpsMsg = document.getElementById('gps-msg');
-        const submitBtn = document.getElementById('submit_btn');
-        gpsMsg.innerText = "🛰️ REQUESTING SIGNAL...";
-        navigator.geolocation.getCurrentPosition((pos) => {
-            const lat = pos.coords.latitude, lng = pos.coords.longitude, accuracy = pos.coords.accuracy;
-            document.getElementById('coords').value = lat.toFixed(6) + ", " + lng.toFixed(6);
-            window.tempGPS = { lat, lng };
-            if (accuracy > 15) {
-                gpsMsg.innerText = `❌ POOR SIGNAL (${Math.round(accuracy)}m)`;
-                statusBox.style.backgroundColor = "#fee2e2";
-                submitBtn.style.display = "none";
-                return;
-            }
-            const dist = localStorage.getItem('last_lat') ? getDistance(lat, lng, parseFloat(localStorage.getItem('last_lat')), parseFloat(localStorage.getItem('last_lng'))) : 999;
-            submitBtn.style.display = "block";
-            if (dist < 7.62) {
-                gpsMsg.innerText = "⚠️ PROXIMITY FLAG";
-                statusBox.style.backgroundColor = "#fff7ed";
-                document.getElementById('proximity_note_container').style.display = "block";
-                document.getElementById('prox_note').required = true;
-                document.getElementById('troll_flag').value = "TROLL"; 
-            } else {
-                gpsMsg.innerText = `✅ VERIFIED (+/- ${Math.round(accuracy)}m)`;
-                statusBox.style.backgroundColor = "#f0fdf4";
-                document.getElementById('proximity_note_container').style.display = "none";
-                document.getElementById('prox_note').required = false;
-                document.getElementById('troll_flag').value = "CLEAN"; 
-            }
-        }, (err) => { gpsMsg.innerText = "❌ GPS ERROR: ENABLE LOCATION"; }, { enableHighAccuracy: true, timeout: 10000 });
-    }
-
-    document.getElementById('treeForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const condSelect = document.getElementById('condition_select');
-        formData.set('D:Condition', condSelect.options[condSelect.selectedIndex].text);
-        document.getElementById('overlay').style.display = 'flex';
-        document.getElementById('timestamp').value = new Date().toLocaleString();
-        if(window.tempGPS) {
-            localStorage.setItem('last_lat', window.tempGPS.lat);
-            localStorage.setItem('last_lng', window.tempGPS.lng);
-        }
-        localStorage.setItem('ncsu_unity_id', document.getElementById('unity_id').value);
-        try {
-            await fetch("https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG", { method: 'POST', body: formData, mode: 'no-cors' });
-            location.reload();
-        } catch (err) {
-            alert("Transmission Error.");
-            document.getElementById('overlay').style.display = 'none';
-        }
-    };
-</script>
-</body>
+    const jenkins = { "hardwood": [-2.0127, 2
