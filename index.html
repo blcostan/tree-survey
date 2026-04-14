@@ -10,7 +10,16 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; -webkit-tap-highlight-color: transparent;}
         .ncsu-red { background-color: #CC0000; }
-        #chart-container { position: relative; height: 280px; width: 100%; background: #fff; border-radius: 12px; }
+        /* Chart Container with forced dimensions and a temporary diagnostic border */
+        #chart-wrapper { 
+            position: relative; 
+            height: 300px; 
+            width: 100%; 
+            background: #ffffff; 
+            border-radius: 12px;
+            border: 1px solid #e5e7eb; 
+            padding: 10px;
+        }
         #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; }
         .spinner { width: 40px; height: 40px; border: 4px solid #333; border-top: 4px solid #CC0000; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -31,7 +40,7 @@
                 <h1 class="text-xl font-black italic uppercase tracking-tighter text-white">NC STATE UNIVERSITY</h1>
                 <p class="text-red-500 text-[10px] font-bold uppercase mt-1 tracking-widest">Campus Planning & Strategic Investment</p>
             </div>
-            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Annual Performance v5.3</div>
+            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Annual Performance v5.4</div>
         </div>
 
         <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -81,18 +90,15 @@
                 </div>
 
                 <div id="proximity_note_container" class="bg-orange-50 border-2 border-orange-200 p-4 rounded-lg hidden">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="text-2xl">🧌</span>
-                        <p class="text-[10px] font-black text-orange-700 uppercase tracking-widest">Troll Alert: Proximity Triggered</p>
-                    </div>
-                    <textarea name="M:Proximity_Note" id="prox_note" class="w-full p-2 text-sm border-2 rounded font-medium focus:border-orange-500 outline-none" placeholder="Explain why you are logging this close..."></textarea>
+                    <p class="text-[10px] font-black text-orange-700 uppercase tracking-widest mb-2">🧌 Troll Alert: Proximity Triggered</p>
+                    <textarea name="M:Proximity_Note" id="prox_note" class="w-full p-2 text-sm border-2 rounded font-medium focus:border-orange-500 outline-none" placeholder="Explain proximity..."></textarea>
                     <input type="hidden" name="L:Troll Catch" id="troll_flag">
                 </div>
 
                 <div class="pt-2 space-y-3">
-                    <button type="button" id="gps_verify_btn" onclick="handleGPS()" class="w-full bg-zinc-800 text-white p-4 rounded-lg font-black text-[10px] uppercase tracking-widest active:bg-black transition-all">🛰️ Capture & Verify Location</button>
+                    <button type="button" onclick="handleGPS()" class="w-full bg-zinc-800 text-white p-4 rounded-lg font-black text-[10px] uppercase tracking-widest">🛰️ Capture & Verify Location</button>
                     <div id="status-box" class="bg-zinc-100 border-2 border-dashed border-zinc-300 rounded-lg p-4 text-center">
-                        <p id="gps-msg" class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Awaiting GPS Hardware Signal</p>
+                        <p id="gps-msg" class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Awaiting GPS Signal</p>
                     </div>
                     <input type="hidden" name="E:GPS" id="coords" required>
                     <input type="hidden" name="G:CO2_Lbs" id="hidden_co2">
@@ -100,9 +106,9 @@
                     <input type="hidden" name="I:Timestamp" id="timestamp">
                 </div>
 
-                <button type="submit" id="submit_btn" class="w-full ncsu-red text-white p-5 rounded-xl font-black uppercase tracking-widest shadow-xl transition-transform active:scale-95">Confirm Tree Entry</button>
+                <button type="submit" id="submit_btn" class="w-full ncsu-red text-white p-5 rounded-xl font-black uppercase tracking-widest shadow-xl">Confirm Tree Entry</button>
                 
-                <a href="https://docs.google.com/forms/d/e/1FAIpQLScSlYjJBIPVpbNBrg1xE11q8-ShIrGuR-c242hEcaFVytwq3g/viewform?usp=sharing" target="_blank" class="block text-center text-[9px] font-bold text-zinc-400 uppercase tracking-widest hover:text-red-600 transition-colors pt-2">
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLScSlYjJBIPVpbNBrg1xE11q8-ShIrGuR-c242hEcaFVytwq3g/viewform?usp=sharing" target="_blank" class="block text-center text-[9px] font-bold text-zinc-400 uppercase tracking-widest pt-2">
                     🛠️ Report Technical Bug
                 </a>
             </form>
@@ -118,4 +124,106 @@
                         <p class="text-4xl font-black italic mt-1">$<span id="display-value">0.00</span></p>
                     </div>
                 </div>
-                <div class="bg-zinc-50 border-2 border-zinc-100 rounded-2xl p-
+                
+                <div class="bg-white rounded-2xl p-4 shadow-inner">
+                    <p class="text-[10px] font-black text-zinc-400 uppercase text-center mb-4 tracking-widest">Future Annual Performance Forecast</p>
+                    <div id="chart-wrapper">
+                        <canvas id="growthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const jenkins = { "hardwood": [-2.0127, 2.4342], "soft_hardwood": [-2.48, 2.4835], "evergreen": [-2.5356, 2.4349], "small_ornate": [-0.7152, 1.7029] };
+    let myChart;
+
+    // Force chart initialization immediately
+    function initChart() {
+        const ctx = document.getElementById('growthChart');
+        if (!ctx) return;
+        myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Today', '+5y', '+10y', '+15y', '+20y'],
+                datasets: [{
+                    label: 'Lbs CO2/Yr',
+                    borderColor: '#CC0000',
+                    backgroundColor: 'rgba(204,0,0,0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    borderWidth: 4,
+                    data: [0, 0, 0, 0, 0]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { font: { weight: 'bold' } } } }
+            }
+        });
+    }
+
+    window.onload = () => {
+        initChart();
+        document.getElementById('unity_id').value = localStorage.getItem('ncsu_unity_id') || "";
+    };
+
+    function updateSpeciesHelper() {
+        const group = document.getElementById('species_group').value;
+        const helpBox = document.getElementById('species-help-box');
+        const helpText = document.getElementById('species-help-text');
+        const descs = {
+            "hardwood": "🌳 STURDY: High-density wood (Oaks/Hickories). Stores maximum carbon.",
+            "soft_hardwood": "🍃 FAST: Medium-density (Maples/Poplars). Rapid annual sequestration.",
+            "evergreen": "🌲 EVERGREEN: Needle-bearing trees. Year-round active sequestration.",
+            "small_ornate": "🌸 SMALL: Understory trees with lower annual biomass production."
+        };
+        if (descs[group]) {
+            helpText.innerText = descs[group];
+            helpBox.classList.remove('hidden');
+        }
+        updateMath();
+    }
+
+    function updateMath() {
+        const dbh = parseFloat(document.getElementById('dbh_input').value) || 0;
+        const group = document.getElementById('species_group').value;
+        const condition = parseFloat(document.getElementById('condition_select').value);
+        
+        if (dbh > 0 && group && myChart) {
+            const [b0, b1] = jenkins[group];
+            const totalCO2 = (d) => Math.exp(b0 + b1 * Math.log(d * 2.54)) * 0.5 * 3.6663 * 2.2046;
+            const calcAnnual = (d) => {
+                if (condition === 0) return 0;
+                return Math.max(0, Math.round((totalCO2(d) - totalCO2(d - 0.2)) * condition));
+            };
+            
+            const currentVal = calcAnnual(dbh);
+            document.getElementById('display-co2').innerText = currentVal.toLocaleString();
+            document.getElementById('display-value').innerText = (currentVal * 0.09).toFixed(2);
+            document.getElementById('hidden_co2').value = currentVal;
+            document.getElementById('hidden_value').value = (currentVal * 0.09).toFixed(2);
+
+            myChart.data.datasets[0].data = [0, 5, 10, 15, 20].map(y => calcAnnual(dbh + (y * 0.2)));
+            myChart.update();
+        }
+    }
+
+    document.getElementById('circ_input').oninput = function() {
+        document.getElementById('dbh_input').value = (parseFloat(this.value) / Math.PI || 0).toFixed(1);
+        updateMath();
+    };
+    document.getElementById('dbh_input').oninput = function() {
+        document.getElementById('circ_input').value = (parseFloat(this.value) * Math.PI || 0).toFixed(1);
+        updateMath();
+    };
+
+    // GPS & Troll Catch logic
+    function getDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371e3;
+        const dLat = (lat2-lat1) * Math.PI/180;
+        const dLon = (lon2-lon1) * Math.PI/180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*
