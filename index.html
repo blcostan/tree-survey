@@ -71,8 +71,9 @@
                 </div>
 
                 <div id="species-help-box" class="hidden p-4 bg-zinc-900 rounded-lg border-l-4 border-red-600 mt-2">
-    <p id="species-help-text" class="text-[12px] leading-relaxed text-zinc-300 italic font-medium"></p>
-</div>
+                    <p id="species-help-text" class="text-[12px] leading-relaxed text-zinc-300 italic font-medium"></p>
+                </div>
+
                 <div id="proximity_note_container" class="bg-orange-50 border-2 border-orange-200 p-4 rounded-lg">
                     <p class="text-[10px] font-black text-orange-700 uppercase tracking-widest mb-2">🧌 Troll Alert: Proximity Triggered</p>
                     <textarea name="M:Proximity_Note" id="prox_note" class="w-full p-2 text-sm border-2 rounded outline-none" placeholder="Explain proximity..."></textarea>
@@ -146,7 +147,7 @@
                 <div>
                     <h3 class="font-black text-zinc-800 uppercase text-[10px] mb-2 tracking-widest">II. Carbon & Economic Indexing</h3>
                     <p class="mb-2"><strong>Molecular Ratio:</strong> Biomass is estimated at 50% dry-weight carbon. To convert to CO2 equivalent (CO2e), we apply the 3.6663 atomic weight ratio (44/12).</p>
-                   <p><strong>Economic Valuation:</strong> Social value represents the <strong>Total Asset Value</strong> of the stored carbon based on the <strong>EPA Social Cost of Carbon</strong> ($190/metric ton), or <strong>$0.09 per pound</strong> of CO2e banked.</p>
+                    <p><strong>Economic Valuation:</strong> Social value represents the <strong>Total Asset Value</strong> of the stored carbon based on the <strong>EPA Social Cost of Carbon</strong> ($190/metric ton), or <strong>$0.09 per pound</strong> of CO2e banked.</p>
                 </div>
             </div>
         </div>
@@ -155,7 +156,7 @@
 <script>
     const jenkins = { "hardwood": [-2.0127, 2.4342], "soft_hardwood": [-2.48, 2.4835], "evergreen": [-2.5356, 2.4349], "small_ornate": [-0.7152, 1.7029] };
     
-function updateSpeciesHelper() {
+    function updateSpeciesHelper() {
         const group = document.getElementById('species_group').value;
         const helpBox = document.getElementById('species-help-box');
         const helpText = document.getElementById('species-help-text');
@@ -175,33 +176,23 @@ function updateSpeciesHelper() {
         updateMath();
     }
 
-function updateMath() {
+    function updateMath() {
         const dbh = parseFloat(document.getElementById('dbh_input').value) || 0;
         const group = document.getElementById('species_group').value;
         const condition = parseFloat(document.getElementById('condition_select').value);
         
         if (dbh > 0 && group) {
             const params = jenkins[group];
-            
-            // 1. Calculate TOTAL Biomass (the whole tree)
             const biomassTotal = Math.exp(params[0] + params[1] * Math.log(dbh));
-            
-            // 2. Convert to Lbs of CO2 (Lifetime Storage)
-            // Note: We include the 'condition' as a multiplier so dead/poor trees show reduced asset value
             const totalCO2 = biomassTotal * 2.20462 * 0.5 * 3.6663 * condition;
-            
-            // 3. Social value of the total stored asset ($0.09 per lb)
             const socialValue = totalCO2 * 0.09;
 
-            // 4. Update the display boxes on your screen
             document.getElementById('display-co2').innerText = Math.round(totalCO2).toLocaleString();
             document.getElementById('display-value').innerText = socialValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
             
-            // 5. Update the hidden fields so Sheet Monkey sends the TOTALS to your Google Sheet
             document.getElementById('hidden_co2').value = totalCO2.toFixed(2);
             document.getElementById('hidden_value').value = socialValue.toFixed(2);
             
-            // Keep your graph logic running (it will now forecast future total storage)
             updateGraph(dbh, params, condition);
         }
     }
@@ -209,7 +200,6 @@ function updateMath() {
     function updateGraph(dbh, params, condition) {
         const growth = 0.2 * condition;
         let points = [];
-        // Calculate total storage at 0, 5, 10, 15, and 20 years in the future
         for (let i = 0; i < 5; i++) {
             const futureDbh = dbh + (i * 5 * growth);
             const futureBiomass = Math.exp(params[0] + params[1] * Math.log(futureDbh));
@@ -223,7 +213,6 @@ function updateMath() {
 
         const svgPoints = points.map((p, i) => {
             const x = 40 + (i * 85);
-            // Dynamic scaling so the line reflects the growth in the "Bank"
             const y = 160 - ((p - min) / range * 100 + 20); 
             document.getElementById(`p${i+1}`).setAttribute('cy', y);
             return `${x} ${y}`;
@@ -253,22 +242,36 @@ function updateMath() {
         }, { enableHighAccuracy: true });
     }
 
+    // Bidirectional conversion: Circumference -> DBH
     document.getElementById('circ_input').addEventListener('input', (e) => {
         const val = parseFloat(e.target.value);
         if (val > 0) {
             document.getElementById('dbh_input').value = (val / Math.PI).toFixed(1);
-            updateMath();
+        } else {
+            document.getElementById('dbh_input').value = "";
         }
+        updateMath();
     });
 
-    document.getElementById('dbh_input').addEventListener('input', updateMath);
+    // Bidirectional conversion: DBH -> Circumference
+    document.getElementById('dbh_input').addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        if (val > 0) {
+            document.getElementById('circ_input').value = (val * Math.PI).toFixed(1);
+        } else {
+            document.getElementById('circ_input').value = "";
+        }
+        updateMath();
+    });
 
+    // Submit form logic
     document.getElementById('treeForm').addEventListener('submit', function(e) {
         e.preventDefault();
         document.getElementById('overlay').style.display = 'flex';
-        // Replace the URL below with your actual Google Apps Script URL
         fetch('https://api.sheetmonkey.io/form/jV4qG7y49Xf', { method: 'POST', body: new FormData(this)})
             .then(() => { alert('Success!'); location.reload(); })
             .catch(() => { document.getElementById('overlay').style.display = 'none'; alert('Error!'); });
     });
 </script>
+</body>
+</html>
