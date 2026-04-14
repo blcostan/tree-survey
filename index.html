@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NCSU Tree Registry | Strategic Investment</title>
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; -webkit-tap-highlight-color: transparent;}
         .ncsu-red { background-color: #CC0000; }
-        #chart-container { position: relative; height: 300px; width: 100%; background: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+        #chart-container { position: relative; height: 300px; width: 100%; background: #ffffff; border-radius: 12px; }
         #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; }
         .spinner { width: 40px; height: 40px; border: 4px solid #333; border-top: 4px solid #CC0000; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -33,7 +33,7 @@
                 <h1 class="text-xl font-black italic uppercase tracking-tighter">NC STATE UNIVERSITY</h1>
                 <p class="text-red-500 text-[10px] font-bold uppercase mt-1 tracking-widest">Campus Planning & Strategic Investment</p>
             </div>
-            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Annual Performance v5.9</div>
+            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Annual Performance v6.0</div>
         </div>
 
         <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -78,8 +78,8 @@
                     </div>
                 </div>
 
-                <div id="species-help-box" class="hidden p-3 bg-zinc-900 rounded-lg border-l-4 border-red-600 text-[11px] text-zinc-300 italic font-medium leading-snug">
-                    <p id="species-help-text"></p>
+                <div id="species-help-box" class="hidden p-3 bg-zinc-900 rounded-lg border-l-4 border-red-600">
+                    <p id="species-help-text" class="text-[11px] leading-snug text-zinc-300 italic font-medium"></p>
                 </div>
 
                 <div id="proximity_note_container" class="bg-orange-50 border-2 border-orange-200 p-4 rounded-lg hidden">
@@ -134,4 +134,99 @@
                 <div>
                     <h3 class="font-black text-zinc-800 uppercase text-[10px] mb-2 tracking-widest">I. Annual Increment Modeling</h3>
                     <p class="mb-4">Calculations utilize total above-ground biomass (AGB) equations from <strong>Jenkins, J.C., et al. (2003)</strong>. Unlike static storage models, this registry calculates the <i>Current Annual Increment</i> (CAI). This represents the additional carbon sequestered in the coming year as the tree increases in volume.</p>
-                    <p>We assume a mean radial growth of 0.2 inches per year,
+                    <p>We assume a mean radial growth of 0.2 inches per year, which is then adjusted by the <strong>Visual Health Factor</strong> selected during the survey (Excellent to Dead).</p>
+                </div>
+                <div>
+                    <h3 class="font-black text-zinc-800 uppercase text-[10px] mb-2 tracking-widest">II. Carbon & Economic Indexing</h3>
+                    <p class="mb-2"><strong>Molecular Ratio:</strong> Biomass is estimated at 50% dry-weight carbon. To convert to CO2 equivalent (CO2e), we apply the 3.6663 atomic weight ratio ($44/12$).</p>
+                    <p><strong>Economic Valuation:</strong> Social value is calculated via the <strong>EPA Social Cost of Carbon</strong> (2024 update), indexed at approximately $190 per metric ton, or <strong>$0.09 per pound</strong> of CO2e sequestered.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const jenkins = { "hardwood": [-2.0127, 2.4342], "soft_hardwood": [-2.48, 2.4835], "evergreen": [-2.5356, 2.4349], "small_ornate": [-0.7152, 1.7029] };
+    let myChart = null;
+
+    // Guaranteed Init
+    window.addEventListener('DOMContentLoaded', () => {
+        const ctx = document.getElementById('growthChart').getContext('2d');
+        myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Today', '+5y', '+10y', '+15y', '+20y'],
+                datasets: [{
+                    label: 'Lbs CO2/Yr',
+                    borderColor: '#CC0000',
+                    backgroundColor: 'rgba(204,0,0,0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    borderWidth: 4,
+                    data: [0, 0, 0, 0, 0]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+        document.getElementById('unity_id').value = localStorage.getItem('ncsu_unity_id') || "";
+    });
+
+    function updateSpeciesHelper() {
+        const group = document.getElementById('species_group').value;
+        const helpBox = document.getElementById('species-help-box');
+        const helpText = document.getElementById('species-help-text');
+        const descs = {
+            "hardwood": "🌳 STURDY: High-density wood (Oaks/Hickories). Stores maximum carbon.",
+            "soft_hardwood": "🍃 FAST: Medium-density (Maples/Poplars). Rapid annual sequestration.",
+            "evergreen": "🌲 EVERGREEN: Needle-bearing trees. Year-round active sequestration.",
+            "small_ornate": "🌸 SMALL: Understory trees with lower annual biomass production."
+        };
+        if (descs[group]) {
+            helpText.innerText = descs[group];
+            helpBox.classList.remove('hidden');
+        }
+        updateMath();
+    }
+
+    function updateMath() {
+        const dbh = parseFloat(document.getElementById('dbh_input').value) || 0;
+        const group = document.getElementById('species_group').value;
+        const condition = parseFloat(document.getElementById('condition_select').value);
+        
+        if (dbh > 0 && group && myChart) {
+            const [b0, b1] = jenkins[group];
+            const totalCO2 = (d) => Math.exp(b0 + b1 * Math.log(d * 2.54)) * 0.5 * 3.6663 * 2.2046;
+            const calcAnnual = (d) => {
+                if (condition === 0) return 0;
+                return Math.max(0, Math.round((totalCO2(d) - totalCO2(d - 0.2)) * condition));
+            };
+            
+            const current = calcAnnual(dbh);
+            document.getElementById('display-co2').innerText = current.toLocaleString();
+            document.getElementById('display-value').innerText = (current * 0.09).toFixed(2);
+            document.getElementById('hidden_co2').value = current;
+            document.getElementById('hidden_value').value = (current * 0.09).toFixed(2);
+
+            myChart.data.datasets[0].data = [0, 5, 10, 15, 20].map(y => calcAnnual(dbh + (y * 0.2)));
+            myChart.update();
+        }
+    }
+
+    document.getElementById('circ_input').oninput = function() {
+        document.getElementById('dbh_input').value = (this.value / Math.PI).toFixed(1);
+        updateMath();
+    };
+    document.getElementById('dbh_input').oninput = function() {
+        document.getElementById('circ_input').value = (this.value * Math.PI).toFixed(1);
+        updateMath();
+    };
+
+    function getDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371e3;
+        const dLat = (lat2-lat1) * Math.PI/180;
+        const dLon = (lon2-lon1) * Math.PI/18
