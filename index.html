@@ -31,25 +31,25 @@
                 <h1 class="text-xl font-black italic uppercase tracking-tighter text-white">NC STATE UNIVERSITY</h1>
                 <p class="text-red-500 text-[10px] font-bold uppercase mt-1 tracking-widest">Campus Planning & Strategic Investment</p>
             </div>
-            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Annual Performance v5.1</div>
+            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Annual Performance v5.2</div>
         </div>
 
         <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
             
             <form id="treeForm" class="space-y-4">
                 <div>
-                    <label class="block text-[10px] font-black text-zinc-500 uppercase">Surveyor Unity ID</label>
+                    <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Surveyor Unity ID</label>
                     <input type="text" name="A:Surveyor" id="unity_id" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" placeholder="e.g. jdoe2" required>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[10px] font-black text-zinc-500 uppercase">Circumference (In)</label>
-                        <input type="number" id="circ_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold" placeholder="37.7">
+                        <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Circumference (In)</label>
+                        <input type="number" id="circ_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" placeholder="37.7">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-black text-zinc-500 uppercase">DBH (Inches)</label>
-                        <input type="number" name="F:Calculated_DBH" id="dbh_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold" required>
+                        <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">DBH (Inches)</label>
+                        <input type="number" name="F:Calculated_DBH" id="dbh_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" required>
                     </div>
                 </div>
 
@@ -80,6 +80,15 @@
                     <p id="species-help-text" class="text-[11px] leading-snug text-zinc-300 italic font-medium"></p>
                 </div>
 
+                <div id="proximity_note_container" class="bg-orange-50 border-2 border-orange-200 p-4 rounded-lg hidden">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-2xl">🧌</span>
+                        <p class="text-[10px] font-black text-orange-700 uppercase tracking-widest">Troll Alert: Proximity Triggered</p>
+                    </div>
+                    <textarea name="M:Proximity_Note" id="prox_note" class="w-full p-2 text-sm border-2 rounded font-medium focus:border-orange-500 outline-none" placeholder="Explain why you are logging this close to the previous entry..."></textarea>
+                    <input type="hidden" name="L:Troll Catch" id="troll_flag">
+                </div>
+
                 <div class="pt-2 space-y-3">
                     <button type="button" id="gps_verify_btn" onclick="handleGPS()" class="w-full bg-zinc-800 text-white p-4 rounded-lg font-black text-[10px] uppercase tracking-widest active:bg-black transition-all">🛰️ Capture & Verify Location</button>
                     <div id="status-box" class="bg-zinc-100 border-2 border-dashed border-zinc-300 rounded-lg p-4 text-center">
@@ -93,70 +102,4 @@
 
                 <button type="submit" id="submit_btn" class="w-full ncsu-red text-white p-5 rounded-xl font-black uppercase tracking-widest shadow-xl transition-transform active:scale-95">Confirm Tree Entry</button>
                 
-                <a href="https://docs.google.com/forms/d/e/1FAIpQLScSlYjJBIPVpbNBrg1xE11q8-ShIrGuR-c242hEcaFVytwq3g/viewform?usp=sharing" target="_blank" class="block text-center text-[9px] font-bold text-zinc-400 uppercase tracking-widest hover:text-red-600 transition-colors pt-2">
-                    🛠️ Report Technical Bug
-                </a>
-            </form>
-
-            <div class="space-y-6">
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-zinc-900 text-white p-6 rounded-2xl border-b-4 border-red-600 shadow-lg">
-                        <p class="text-red-500 font-black text-[10px] uppercase tracking-widest">Annual CO2 Offset</p>
-                        <p class="text-4xl font-black italic mt-1"><span id="display-co2">0</span> <span class="not-italic text-sm text-zinc-500 font-bold">Lbs/Yr</span></p>
-                    </div>
-                    <div class="bg-zinc-900 text-white p-6 rounded-2xl border-b-4 border-green-500 shadow-lg">
-                        <p class="text-green-500 font-black text-[10px] uppercase tracking-widest">Annual Social Value</p>
-                        <p class="text-4xl font-black italic mt-1">$<span id="display-value">0.00</span></p>
-                    </div>
-                </div>
-                <div class="bg-zinc-50 border-2 border-zinc-100 rounded-2xl p-4 shadow-inner">
-                    <p class="text-[10px] font-black text-zinc-400 uppercase text-center mb-4 tracking-widest">Future Annual Performance Forecast</p>
-                    <div id="chart-container"><canvas id="growthChart"></canvas></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-zinc-100 p-8 text-zinc-600 border-t-2 border-zinc-200">
-            <h2 class="text-sm font-black text-zinc-900 uppercase tracking-tighter mb-6 border-b-2 border-zinc-300 pb-2">Scientific Methodology & Citations</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 text-[11px] leading-relaxed">
-                <div>
-                    <h3 class="font-black text-zinc-800 uppercase text-[10px] mb-2 tracking-widest">I. Annual Increment Modeling</h3>
-                    <p class="mb-4">Calculations utilize total above-ground biomass (AGB) equations from <strong>Jenkins, J.C., et al. (2003)</strong>. Annual sequestration is derived via the <i>Current Annual Increment</i> (CAI) method, assuming a mean radial growth of 0.2"/year adjusted by health factor.</p>
-                </div>
-                <div>
-                    <h3 class="font-black text-zinc-800 uppercase text-[10px] mb-2 tracking-widest">II. Carbon & Economic Indexing</h3>
-                    <p class="mb-2"><strong>Molecular Ratio:</strong> Biomass is ~50% carbon; CO2e utilizes the 3.6663 atomic weight ratio.</p>
-                    <p><strong>Valuation:</strong> Calculated via EPA Social Cost of Carbon (~$190/metric ton or $0.09/lb CO2e).</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-<script>
-    const jenkins = { "hardwood": [-2.0127, 2.4342], "soft_hardwood": [-2.48, 2.4835], "evergreen": [-2.5356, 2.4349], "small_ornate": [-0.7152, 1.7029] };
-    let myChart = null;
-
-    window.onload = () => {
-        const ctx = document.getElementById('growthChart').getContext('2d');
-        myChart = new Chart(ctx, { 
-            type: 'line', 
-            data: { 
-                labels: ['Today', '+5y', '+10y', '+15y', '+20y'], 
-                datasets: [{ 
-                    label: 'Lbs CO2/Yr', 
-                    borderColor: '#CC0000', 
-                    backgroundColor: 'rgba(204,0,0,0.1)', 
-                    fill: true, 
-                    tension: 0.3, 
-                    borderWidth: 4, 
-                    data: [0,0,0,0,0] 
-                }] 
-            }, 
-            options: { 
-                responsive: true, 
-                maintainAspectRatio: false, 
-                plugins: { legend: { display: false } }, 
-                scales: { y: { beginAtZero: true } } 
-            } 
-        });
-        document.getElementById('unity_id').value = localStorage.getItem('ncsu_unity_id') || "";
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLScSlYjJBIPVpbNBrg1xE11q8-ShIrGuR-c242hEcaFVytwq3g/viewform?usp=sharing" target="_blank" class="block text-center text-[9px] font-bold text-zinc-400 uppercase tracking-widest hover:
