@@ -31,7 +31,7 @@
                 <h1 class="text-xl font-black italic uppercase tracking-tighter">NC STATE UNIVERSITY</h1>
                 <p class="text-red-500 text-[10px] font-bold uppercase mt-1 tracking-widest">Campus Planning & Strategic Investment</p>
             </div>
-            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Registry Engine v6.2 (Final)</div>
+            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Registry Engine v6.3</div>
         </div>
 
         <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -76,13 +76,12 @@
 
                 <div id="proximity_note_container" class="bg-orange-50 border-2 border-orange-200 p-4 rounded-lg">
                     <p class="text-[10px] font-black text-orange-700 uppercase tracking-widest mb-2">🧌 Troll Alert: Proximity Triggered</p>
-                    <p class="text-[9px] text-orange-600 mb-2 uppercase font-bold">This tree is within 25ft of your last survey.</p>
-                    <textarea name="M:Proximity_Note" id="prox_note" class="w-full p-2 text-sm border-2 rounded outline-none" placeholder="Explain why this is a different tree..."></textarea>
+                    <textarea name="M:Proximity_Note" id="prox_note" class="w-full p-2 text-sm border-2 rounded outline-none" placeholder="Explain proximity..."></textarea>
                     <input type="hidden" name="L:Troll Catch" id="troll_flag">
                 </div>
 
                 <div class="pt-2 space-y-3">
-                    <button type="button" id="gps_btn" onclick="handleGPS()" class="w-full bg-zinc-800 text-white p-4 rounded-lg font-black text-[10px] uppercase tracking-widest">🛰️ Capture & Verify Location</button>
+                    <button type="button" onclick="handleGPS()" class="w-full bg-zinc-800 text-white p-4 rounded-lg font-black text-[10px] uppercase tracking-widest">🛰️ Capture & Verify Location</button>
                     <div id="status-box" class="bg-zinc-100 border-2 border-dashed border-zinc-300 rounded-lg p-4 text-center">
                         <p id="gps-msg" class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Awaiting GPS Hardware Signal</p>
                     </div>
@@ -90,6 +89,10 @@
 
                 <button type="submit" id="submit_btn" class="w-full ncsu-red text-white p-5 rounded-xl font-black uppercase tracking-widest shadow-xl">Confirm Tree Entry</button>
                 
+                <a href="https://lookerstudio.google.com/reporting/YOUR_LINK_HERE" target="_blank" class="block w-full text-center border-2 border-zinc-300 text-zinc-600 p-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-zinc-100 transition-colors">
+                    📊 View Global Registry Analytics
+                </a>
+
                 <input type="hidden" name="E:GPS" id="coords">
                 <input type="hidden" name="G:CO2_Lbs" id="hidden_co2">
                 <input type="hidden" name="H:Asset_Value" id="hidden_value">
@@ -152,7 +155,6 @@
     function updateSpeciesHelper() {
         const group = document.getElementById('species_group').value;
         const helpBox = document.getElementById('species-help-box');
-        const helpText = document.getElementById('species-help-text');
         const descs = {
             "hardwood": "🌳 STURDY: High-density wood (Oaks/Hickories). Stores maximum carbon.",
             "soft_hardwood": "🍃 FAST: Medium-density (Maples/Poplars). Rapid annual sequestration.",
@@ -160,7 +162,7 @@
             "small_ornate": "🌸 SMALL: Understory trees with lower annual biomass production."
         };
         if (descs[group]) {
-            helpText.innerText = descs[group];
+            document.getElementById('species-help-text').innerText = descs[group];
             helpBox.classList.remove('hidden');
         }
         updateMath();
@@ -222,11 +224,9 @@
             const { latitude: lat, longitude: lng } = pos.coords;
             document.getElementById('coords').value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
             window.tempGPS = { lat, lng };
-            
             const lastLat = localStorage.getItem('last_lat');
             const lastLng = localStorage.getItem('last_lng');
             const dist = lastLat ? getDistance(lat, lng, parseFloat(lastLat), parseFloat(lastLng)) : 999;
-            
             document.getElementById('submit_btn').style.display = "block";
             if (dist < 7.6) {
                 msg.innerText = "⚠️ PROXIMITY FLAG";
