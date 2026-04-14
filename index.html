@@ -70,10 +70,9 @@
                     </select>
                 </div>
 
-                <div id="species-help-box" class="hidden p-3 bg-zinc-900 rounded-lg border-l-4 border-red-600">
-                    <p id="species-help-text" class="text-[11px] leading-snug text-zinc-300 italic font-medium"></p>
-                </div>
-
+                <div id="species-help-box" class="hidden p-4 bg-zinc-900 rounded-lg border-l-4 border-red-600 mt-2">
+    <p id="species-help-text" class="text-[12px] leading-relaxed text-zinc-300 italic font-medium"></p>
+</div>
                 <div id="proximity_note_container" class="bg-orange-50 border-2 border-orange-200 p-4 rounded-lg">
                     <p class="text-[10px] font-black text-orange-700 uppercase tracking-widest mb-2">🧌 Troll Alert: Proximity Triggered</p>
                     <textarea name="M:Proximity_Note" id="prox_note" class="w-full p-2 text-sm border-2 rounded outline-none" placeholder="Explain proximity..."></textarea>
@@ -156,19 +155,26 @@
 <script>
     const jenkins = { "hardwood": [-2.0127, 2.4342], "soft_hardwood": [-2.48, 2.4835], "evergreen": [-2.5356, 2.4349], "small_ornate": [-0.7152, 1.7029] };
     
-    function updateSpeciesHelper() {
+  function updateSpeciesHelper() {
         const group = document.getElementById('species_group').value;
         const helpBox = document.getElementById('species-help-box');
+        const helpText = document.getElementById('species-help-text');
         const descs = {
             "hardwood": "🌳 STURDY: High-density wood (Oaks/Hickories). Stores maximum carbon.",
             "soft_hardwood": "🍃 FAST: Medium-density (Maples/Poplars). Rapid annual sequestration.",
             "evergreen": "🌲 EVERGREEN: Needle-bearing trees. Year-round active sequestration.",
             "small_ornate": "🌸 SMALL: Understory trees with lower annual biomass production."
         };
+
         if (descs[group]) {
-            document.getElementById('species-help-text').innerText = descs[group];
+            helpText.innerText = descs[group];
             helpBox.classList.remove('hidden');
+        } else {
+            // This is the critical missing piece to hide the box if selection is cleared
+            helpBox.classList.add('hidden');
         }
+        updateMath();
+    }
         updateMath();
     }
 
