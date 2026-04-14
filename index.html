@@ -31,7 +31,7 @@
                 <h1 class="text-xl font-black italic uppercase tracking-tighter text-white">NC STATE UNIVERSITY</h1>
                 <p class="text-red-500 text-[10px] font-bold uppercase mt-1 tracking-widest">Campus Planning & Strategic Investment</p>
             </div>
-            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest text-zinc-500">Asset Verification v4.0</div>
+            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest text-zinc-500">Asset Verification v4.1</div>
         </div>
 
         <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -53,18 +53,25 @@
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Species Grouping</label>
-                    <select name="C:Species Group" id="species_group" class="w-full border-2 p-3 rounded-lg font-bold bg-white focus:border-red-600 outline-none" onchange="updateSpeciesHelper()" required>
-                        <option value="" disabled selected>Tap to identify tree type...</option>
-                        <option value="hardwood">🌳 STURDY (Oak, Hickory, Walnut)</option>
-                        <option value="soft_hardwood">🍃 FAST (Maple, Poplar, Sycamore)</option>
-                        <option value="evergreen">🌲 EVERGREEN (Pine, Cedar, Spruce)</option>
-                        <option value="small_ornate">🌸 SMALL (Dogwood, Redbud, Holly)</option>
-                    </select>
-                    <div id="species-help-box" class="hidden mt-2 p-3 bg-zinc-900 rounded-lg border-l-4 border-red-600">
-                        <p id="species-help-text" class="text-[11px] leading-snug text-zinc-300 italic font-medium"></p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Species Grouping</label>
+                        <select name="C:Species Group" id="species_group" class="w-full border-2 p-3 rounded-lg font-bold bg-white focus:border-red-600 outline-none" onchange="updateSpeciesHelper()" required>
+                            <option value="" disabled selected>Identify type...</option>
+                            <option value="hardwood">🌳 STURDY (Oak, Hickory)</option>
+                            <option value="soft_hardwood">🍃 FAST (Maple, Poplar)</option>
+                            <option value="evergreen">🌲 EVERGREEN (Pine, Cedar)</option>
+                            <option value="small_ornate">🌸 SMALL (Dogwood, Holly)</option>
+                        </select>
                     </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Condition Factor</label>
+                        <input type="text" name="D:Condition" id="condition_input" value="0.8" class="w-full border-2 p-3 rounded-lg font-bold bg-zinc-100 text-zinc-400" readonly>
+                    </div>
+                </div>
+
+                <div id="species-help-box" class="hidden p-3 bg-zinc-900 rounded-lg border-l-4 border-red-600">
+                    <p id="species-help-text" class="text-[11px] leading-snug text-zinc-300 italic font-medium"></p>
                 </div>
 
                 <div id="proximity_note_container" class="bg-orange-50 border-2 border-orange-200 p-4 rounded-lg">
@@ -78,7 +85,6 @@
                         <p id="gps-msg" class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Awaiting GPS Hardware Signal</p>
                     </div>
                     <input type="hidden" name="E:GPS" id="coords" required>
-                    <input type="hidden" name="D:Condition" value="0.8">
                     <input type="hidden" name="G:CO2_Lbs" id="hidden_co2">
                     <input type="hidden" name="H:Asset_Value" id="hidden_value">
                     <input type="hidden" name="I:Timestamp" id="timestamp">
@@ -106,10 +112,6 @@
                 <a href="https://lookerstudio.google.com/reporting/d92171ad-111b-4cd0-8fce-09dd1835a50b" target="_blank" class="block w-full text-center bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest py-4 rounded-xl shadow-lg transition-colors text-[12px]">
                     📊 View Class Registry Results
                 </a>
-
-                <div class="mt-4 pt-4 border-t border-zinc-100">
-                    <a href="https://docs.google.com/forms/d/e/1FAIpQLScSlYjJBIPVpbNBrg1xE11q8-ShIrGuR-c242hEcaFVytwq3g/viewform?usp=sharing&ouid=104711575431062600600" target="_blank" class="block text-center text-[10px] font-black text-zinc-400 uppercase tracking-widest hover:text-red-600 transition-colors">🛠️ Report a System Bug / Issue</a>
-                </div>
             </div>
         </div>
 
@@ -188,61 +190,74 @@
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     }
 
-function handleGPS() {
-    const statusBox = document.getElementById('status-box');
-    const gpsMsg = document.getElementById('gps-msg');
-    const submitBtn = document.getElementById('submit_btn');
-    gpsMsg.innerText = "🛰️ REQUESTING SIGNAL...";
-    
-    navigator.geolocation.getCurrentPosition((pos) => {
-        const lat = pos.coords.latitude, lng = pos.coords.longitude;
-        const accuracy = pos.coords.accuracy; // Precision in meters
+    function handleGPS() {
+        const statusBox = document.getElementById('status-box');
+        const gpsMsg = document.getElementById('gps-msg');
+        const submitBtn = document.getElementById('submit_btn');
+        gpsMsg.innerText = "🛰️ REQUESTING SIGNAL...";
         
-        document.getElementById('coords').value = lat.toFixed(6) + ", " + lng.toFixed(6);
-        window.tempGPS = { lat, lng };
-        
-        // 1. FIRST: Check if the signal is actually accurate (e.g., within 15 meters)
-        if (accuracy > 15) {
-            gpsMsg.innerText = `❌ POOR SIGNAL (${Math.round(accuracy)}m)`;
-            statusBox.style.backgroundColor = "#fee2e2"; // Red background
-            submitBtn.style.display = "none"; // Block submission
-            return; // Stop here
-        }
+        navigator.geolocation.getCurrentPosition((pos) => {
+            const lat = pos.coords.latitude, lng = pos.coords.longitude;
+            const accuracy = pos.coords.accuracy;
+            
+            document.getElementById('coords').value = lat.toFixed(6) + ", " + lng.toFixed(6);
+            window.tempGPS = { lat, lng };
+            
+            if (accuracy > 15) {
+                gpsMsg.innerText = `❌ POOR SIGNAL (${Math.round(accuracy)}m)`;
+                statusBox.style.backgroundColor = "#fee2e2";
+                submitBtn.style.display = "none";
+                return;
+            }
 
-        // 2. SECOND: Check Proximity
-        const dist = localStorage.getItem('last_lat') ? getDistance(lat, lng, parseFloat(localStorage.getItem('last_lat')), parseFloat(localStorage.getItem('last_lng'))) : 999;
-        
-        submitBtn.style.display = "block";
+            const dist = localStorage.getItem('last_lat') ? getDistance(lat, lng, parseFloat(localStorage.getItem('last_lat')), parseFloat(localStorage.getItem('last_lng'))) : 999;
+            submitBtn.style.display = "block";
 
-        if (dist < 7.62) {
-            gpsMsg.innerText = "⚠️ PROXIMITY FLAG";
-            statusBox.style.backgroundColor = "#fff7ed";
-            document.getElementById('proximity_note_container').style.display = "block";
-            document.getElementById('prox_note').required = true;
-        } else {
-            gpsMsg.innerText = `✅ VERIFIED (+/- ${Math.round(accuracy)}m)`;
-            statusBox.style.backgroundColor = "#f0fdf4";
-            document.getElementById('proximity_note_container').style.display = "none";
-            document.getElementById('prox_note').required = false;
-        }
-    }, (err) => { 
-        gpsMsg.innerText = "❌ GPS ERROR: ENABLE LOCATION"; 
-    }, { 
-        enableHighAccuracy: true, 
-        timeout: 10000, 
-        maximumAge: 0 
-    });
-}
+            if (dist < 7.62) {
+                gpsMsg.innerText = "⚠️ PROXIMITY FLAG";
+                statusBox.style.backgroundColor = "#fff7ed";
+                document.getElementById('proximity_note_container').style.display = "block";
+                document.getElementById('prox_note').required = true;
+            } else {
+                gpsMsg.innerText = `✅ VERIFIED (+/- ${Math.round(accuracy)}m)`;
+                statusBox.style.backgroundColor = "#f0fdf4";
+                document.getElementById('proximity_note_container').style.display = "none";
+                document.getElementById('prox_note').required = false;
+            }
+        }, (err) => { 
+            gpsMsg.innerText = "❌ GPS ERROR: ENABLE LOCATION"; 
+        }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+    }
 
     document.getElementById('treeForm').onsubmit = async (e) => {
         e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+        
+        // Explicitly ensuring the Condition field is captured
+        formData.set('D:Condition', '0.8');
+        
         document.getElementById('overlay').style.display = 'flex';
         document.getElementById('timestamp').value = new Date().toLocaleString();
-        localStorage.setItem('last_lat', window.tempGPS.lat);
-        localStorage.setItem('last_lng', window.tempGPS.lng);
+        formData.set('I:Timestamp', document.getElementById('timestamp').value);
+        
+        if(window.tempGPS) {
+            localStorage.setItem('last_lat', window.tempGPS.lat);
+            localStorage.setItem('last_lng', window.tempGPS.lng);
+        }
         localStorage.setItem('ncsu_unity_id', document.getElementById('unity_id').value);
-        await fetch("https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG", { method: 'POST', body: new FormData(e.target), mode: 'no-cors' });
-        location.reload();
+
+        try {
+            await fetch("https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG", { 
+                method: 'POST', 
+                body: formData, 
+                mode: 'no-cors' 
+            });
+            location.reload();
+        } catch (err) {
+            alert("Transmission Error. Check connection.");
+            document.getElementById('overlay').style.display = 'none';
+        }
     };
 </script>
 </body>
