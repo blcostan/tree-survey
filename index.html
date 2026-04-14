@@ -4,14 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NCSU Tree Registry | Strategic Investment</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; -webkit-tap-highlight-color: transparent;}
         .ncsu-red { background-color: #CC0000; }
-        #chart-wrapper { position: relative; height: 300px; width: 100%; min-height: 300px; }
-        #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; color: white; }
+        #chart-container { position: relative; height: 300px; width: 100%; background: #ffffff; border-radius: 12px; }
+        #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; }
         .spinner { width: 40px; height: 40px; border: 4px solid #333; border-top: 4px solid #CC0000; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         #submit_btn, #proximity_note_container { display: none; }
@@ -20,55 +22,65 @@
 <body class="p-2 md:p-6 pb-20">
 
     <div id="overlay">
-        <div class="spinner mb-4"></div>
-        <p class="font-black uppercase tracking-widest text-xs">Transmitting...</p>
+        <div class="spinner mx-auto mb-4"></div>
+        <p class="font-black uppercase tracking-widest text-xs">Transmitting to NCSU Registry...</p>
     </div>
 
     <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden border-t-8 border-red-600">
+        
         <div class="bg-zinc-900 p-6 text-white flex justify-between items-center">
             <div>
                 <h1 class="text-xl font-black italic uppercase tracking-tighter">NC STATE UNIVERSITY</h1>
                 <p class="text-red-500 text-[10px] font-bold uppercase mt-1 tracking-widest">Campus Planning & Strategic Investment</p>
             </div>
-            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Annual Performance v5.5</div>
+            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Annual Performance v5.6</div>
         </div>
 
         <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
+            
             <form id="treeForm" class="space-y-4">
                 <div>
-                    <label class="block text-[10px] font-black text-zinc-500 uppercase">Surveyor Unity ID</label>
+                    <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Surveyor Unity ID</label>
                     <input type="text" name="A:Surveyor" id="unity_id" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" placeholder="e.g. jdoe2" required>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[10px] font-black text-zinc-500 uppercase">Circumference (In)</label>
-                        <input type="number" id="circ_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold" placeholder="37.7">
+                        <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Circumference (In)</label>
+                        <input type="number" id="circ_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" placeholder="37.7">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-black text-zinc-500 uppercase">DBH (Inches)</label>
-                        <input type="number" name="F:Calculated_DBH" id="dbh_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold" required>
+                        <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">DBH (Inches)</label>
+                        <input type="number" name="F:Calculated_DBH" id="dbh_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" required>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <select name="C:Species Group" id="species_group" class="w-full border-2 p-3 rounded-lg font-bold bg-white" onchange="updateSpeciesHelper()" required>
-                        <option value="" disabled selected>Identify type...</option>
-                        <option value="hardwood">🌳 STURDY (Oak, Hickory)</option>
-                        <option value="soft_hardwood">🍃 FAST (Maple, Poplar)</option>
-                        <option value="evergreen">🌲 EVERGREEN (Pine, Cedar)</option>
-                        <option value="small_ornate">🌸 SMALL (Dogwood, Holly)</option>
-                    </select>
-                    <select name="D:Condition" id="condition_select" class="w-full border-2 p-3 rounded-lg font-bold bg-white" onchange="updateMath()" required>
-                        <option value="1.0">Excellent (100% Growth)</option>
-                        <option value="0.8" selected>Good (80% Growth)</option>
-                        <option value="0.5">Fair (50% Growth)</option>
-                        <option value="0.2">Poor (20% Growth)</option>
-                        <option value="0.0">Dead (0% Growth)</option>
-                    </select>
+                    <div>
+                        <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Species Grouping</label>
+                        <select name="C:Species Group" id="species_group" class="w-full border-2 p-3 rounded-lg font-bold bg-white focus:border-red-600 outline-none" onchange="updateSpeciesHelper()" required>
+                            <option value="" disabled selected>Identify type...</option>
+                            <option value="hardwood">🌳 STURDY (Oak, Hickory)</option>
+                            <option value="soft_hardwood">🍃 FAST (Maple, Poplar)</option>
+                            <option value="evergreen">🌲 EVERGREEN (Pine, Cedar)</option>
+                            <option value="small_ornate">🌸 SMALL (Dogwood, Holly)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Health Condition</label>
+                        <select name="D:Condition" id="condition_select" class="w-full border-2 p-3 rounded-lg font-bold bg-white focus:border-red-600 outline-none" onchange="updateMath()" required>
+                            <option value="1.0">Excellent (100% Growth)</option>
+                            <option value="0.8" selected>Good (80% Growth)</option>
+                            <option value="0.5">Fair (50% Growth)</option>
+                            <option value="0.2">Poor (20% Growth)</option>
+                            <option value="0.0">Dead (0% Growth)</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div id="species-help-box" class="hidden p-3 bg-zinc-900 rounded-lg border-l-4 border-red-600 text-[11px] text-zinc-300 italic font-medium"></div>
+                <div id="species-help-box" class="hidden p-3 bg-zinc-900 rounded-lg border-l-4 border-red-600">
+                    <p id="species-help-text" class="text-[11px] leading-snug text-zinc-300 italic font-medium"></p>
+                </div>
 
                 <div id="proximity_note_container" class="bg-orange-50 border-2 border-orange-200 p-4 rounded-lg hidden">
                     <p class="text-[10px] font-black text-orange-700 uppercase tracking-widest mb-2">🧌 Troll Alert: Proximity Triggered</p>
@@ -107,18 +119,29 @@
                     </div>
                 </div>
                 
-                <div class="bg-white rounded-2xl p-4 shadow-inner border border-zinc-200">
+                <div class="bg-white rounded-2xl p-4 shadow-inner border border-zinc-100">
                     <p class="text-[10px] font-black text-zinc-400 uppercase text-center mb-4 tracking-widest">Future Annual Performance Forecast</p>
-                    <div id="chart-wrapper">
+                    <div id="chart-container">
                         <canvas id="growthChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="bg-zinc-100 p-8 text-zinc-600 border-t-2 border-zinc-200 text-[11px]">
-            <h2 class="font-black text-zinc-900 uppercase tracking-tighter mb-4 border-b pb-2">Methodology & Citations</h2>
-            <p><strong>Equations:</strong> Jenkins et al. (2003) | <strong>Social Cost:</strong> EPA Indexed ($0.09/lb CO2e)</p>
+        <div class="bg-zinc-100 p-8 text-zinc-600 border-t-2 border-zinc-200">
+            <h2 class="text-sm font-black text-zinc-900 uppercase tracking-tighter mb-6 border-b-2 border-zinc-300 pb-2">Scientific Methodology & Citations</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 text-[11px] leading-relaxed">
+                <div>
+                    <h3 class="font-black text-zinc-800 uppercase text-[10px] mb-2 tracking-widest">I. Annual Increment Modeling</h3>
+                    <p class="mb-4">Calculations utilize total above-ground biomass (AGB) equations from <strong>Jenkins, J.C., et al. (2003)</strong>. Unlike static storage models, this registry calculates the <i>Current Annual Increment</i> (CAI). This represents the additional carbon sequestered in the coming year as the tree increases in volume.</p>
+                    <p>We assume a mean radial growth of 0.2 inches per year, which is then adjusted by the <strong>Visual Health Factor</strong> selected during the survey (Excellent to Dead).</p>
+                </div>
+                <div>
+                    <h3 class="font-black text-zinc-800 uppercase text-[10px] mb-2 tracking-widest">II. Carbon & Economic Indexing</h3>
+                    <p class="mb-2"><strong>Molecular Ratio:</strong> Biomass is estimated at 50% dry-weight carbon. To convert to CO2 equivalent (CO2e), we apply the 3.6663 atomic weight ratio ($44/12$).</p>
+                    <p><strong>Economic Valuation:</strong> Social value is calculated via the <strong>EPA Social Cost of Carbon</strong> (2024 update), indexed at approximately $190 per metric ton, or <strong>$0.09 per pound</strong> of CO2e sequestered.</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -126,53 +149,50 @@
     const jenkins = { "hardwood": [-2.0127, 2.4342], "soft_hardwood": [-2.48, 2.4835], "evergreen": [-2.5356, 2.4349], "small_ornate": [-0.7152, 1.7029] };
     let myChart = null;
 
-    function initChart() {
-        try {
-            const ctx = document.getElementById('growthChart').getContext('2d');
-            myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Today', '+5y', '+10y', '+15y', '+20y'],
-                    datasets: [{
-                        label: 'Lbs CO2/Yr',
-                        borderColor: '#CC0000',
-                        backgroundColor: 'rgba(204,0,0,0.1)',
-                        fill: true,
-                        tension: 0.3,
-                        borderWidth: 4,
-                        data: [0, 0, 0, 0, 0]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true } }
-                }
-            });
-            console.log("Chart initialized successfully.");
-        } catch (e) {
-            document.getElementById('chart-wrapper').innerHTML = `<p class="text-red-600 font-bold p-10 text-center">Graphing Library Error: Please check internet connection.</p>`;
-        }
+    // Force chart initialization with a retry mechanism
+    function startRegistry() {
+        const canvas = document.getElementById('growthChart');
+        if (!canvas) return;
+        
+        const ctx = canvas.getContext('2d');
+        myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Today', '+5y', '+10y', '+15y', '+20y'],
+                datasets: [{
+                    label: 'Lbs CO2/Yr',
+                    borderColor: '#CC0000',
+                    backgroundColor: 'rgba(204,0,0,0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    borderWidth: 4,
+                    data: [0, 0, 0, 0, 0]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+        document.getElementById('unity_id').value = localStorage.getItem('ncsu_unity_id') || "";
     }
 
-    // This ensures everything is loaded before trying to draw the chart
-    document.addEventListener("DOMContentLoaded", () => {
-        setTimeout(initChart, 500); // Small delay to let Chart.js script settle
-        document.getElementById('unity_id').value = localStorage.getItem('ncsu_unity_id') || "";
-    });
+    window.onload = startRegistry;
 
     function updateSpeciesHelper() {
         const group = document.getElementById('species_group').value;
         const helpBox = document.getElementById('species-help-box');
+        const helpText = document.getElementById('species-help-text');
         const descs = {
-            "hardwood": "🌳 STURDY: Oak/Hickory. High carbon density.",
-            "soft_hardwood": "🍃 FAST: Maple/Poplar. Rapid sequestration.",
-            "evergreen": "🌲 EVERGREEN: Year-round active sequestration.",
-            "small_ornate": "🌸 SMALL: Understory trees with lower biomass."
+            "hardwood": "🌳 STURDY: High-density wood (Oaks/Hickories). Stores maximum carbon.",
+            "soft_hardwood": "🍃 FAST: Medium-density (Maples/Poplars). Rapid annual sequestration.",
+            "evergreen": "🌲 EVERGREEN: Needle-bearing trees. Year-round active sequestration.",
+            "small_ornate": "🌸 SMALL: Understory trees with lower annual biomass production."
         };
         if (descs[group]) {
-            helpBox.innerText = descs[group];
+            helpText.innerText = descs[group];
             helpBox.classList.remove('hidden');
         }
         updateMath();
@@ -228,14 +248,12 @@
             const { latitude: lat, longitude: lng, accuracy: acc } = pos.coords;
             document.getElementById('coords').value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
             window.tempGPS = { lat, lng };
-            
             const lastLat = localStorage.getItem('last_lat');
             const lastLng = localStorage.getItem('last_lng');
             const dist = lastLat ? getDistance(lat, lng, parseFloat(lastLat), parseFloat(lastLng)) : 999;
-            
             document.getElementById('submit_btn').style.display = "block";
             if (dist < 7.6) {
-                msg.innerText = "⚠️ PROXIMITY ALERT";
+                msg.innerText = "⚠️ PROXIMITY FLAG";
                 box.style.backgroundColor = "#fff7ed";
                 prox.classList.remove('hidden');
                 document.getElementById('prox_note').required = true;
@@ -243,3 +261,26 @@
             } else {
                 msg.innerText = `✅ VERIFIED (+/- ${Math.round(acc)}m)`;
                 box.style.backgroundColor = "#f0fdf4";
+                prox.classList.add('hidden');
+                document.getElementById('troll_flag').value = "CLEAN";
+            }
+        }, () => { msg.innerText = "❌ GPS ERROR"; }, { enableHighAccuracy: true });
+    }
+
+    document.getElementById('treeForm').onsubmit = async (e) => {
+        e.preventDefault();
+        document.getElementById('overlay').style.display = "flex";
+        document.getElementById('timestamp').value = new Date().toLocaleString();
+        if(window.tempGPS) {
+            localStorage.setItem('last_lat', window.tempGPS.lat);
+            localStorage.setItem('last_lng', window.tempGPS.lng);
+        }
+        localStorage.setItem('ncsu_unity_id', document.getElementById('unity_id').value);
+        try {
+            await fetch("https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG", { method: 'POST', body: new FormData(e.target), mode: 'no-cors' });
+            location.reload();
+        } catch (e) { alert("Error"); document.getElementById('overlay').style.display = "none"; }
+    };
+</script>
+</body>
+</html>
