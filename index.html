@@ -105,11 +105,11 @@
             <div class="space-y-6">
                 <div class="grid grid-cols-2 gap-4">
                     <div class="bg-zinc-900 p-6 rounded-2xl border-b-4 border-red-600 shadow-lg">
-                        <p class="text-red-500 font-black text-[10px] uppercase tracking-widest">Annual CO2 Offset</p>
+                        <p class="text-red-500 font-black text-[10px] uppercase tracking-widest">Total Carbon Bank (Lifetime)</p>
                         <p class="text-4xl font-black italic text-white mt-1"><span id="display-co2">0</span> <span class="not-italic text-sm text-zinc-500 font-bold">Lbs</span></p>
                     </div>
                     <div class="bg-zinc-900 p-6 rounded-2xl border-b-4 border-green-500 shadow-lg">
-                        <p class="text-green-500 font-black text-[10px] uppercase tracking-widest">Annual Social Value</p>
+                        <p class="text-green-500 font-black text-[10px] uppercase tracking-widest">Total Social Asset Value</p>
                         <p class="text-4xl font-black italic text-white mt-1">$<span id="display-value">0.00</span></p>
                     </div>
                 </div>
@@ -139,14 +139,14 @@
             <h2 class="text-sm font-black text-zinc-900 uppercase tracking-tighter mb-6 border-b-2 border-zinc-300 pb-2">Scientific Methodology & Citations</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-10 text-[11px] leading-relaxed">
                 <div>
-                    <h3 class="font-black text-zinc-800 uppercase text-[10px] mb-2 tracking-widest">I. Annual Increment Modeling</h3>
-                    <p class="mb-4">Calculations utilize total above-ground biomass (AGB) equations from <strong>Jenkins, J.C., et al. (2003)</strong>. Unlike static storage models, this registry calculates the <i>Current Annual Increment</i> (CAI). This represents the additional carbon sequestered in the coming year as the tree increases in volume.</p>
+                    <h3 class="font-black text-zinc-800 uppercase text-[10px] mb-2 tracking-widest">I. Lifetime Storage Modeling</h3>
+                    <p class="mb-4">Calculations utilize total above-ground biomass (AGB) equations from Jenkins, J.C., et al. (2003). This registry calculates the Total Carbon Bank, representing the cumulative $CO_2$ sequestered and stored over the tree's entire lifespan to date.</p>
                     <p>We assume a mean radial growth of 0.2 inches per year, which is then adjusted by the <strong>Visual Health Factor</strong> selected during the survey (Excellent to Dead).</p>
                 </div>
                 <div>
                     <h3 class="font-black text-zinc-800 uppercase text-[10px] mb-2 tracking-widest">II. Carbon & Economic Indexing</h3>
                     <p class="mb-2"><strong>Molecular Ratio:</strong> Biomass is estimated at 50% dry-weight carbon. To convert to CO2 equivalent (CO2e), we apply the 3.6663 atomic weight ratio (44/12).</p>
-                    <p><strong>Economic Valuation:</strong> Social value is calculated via the <strong>EPA Social Cost of Carbon</strong> (2024 update), indexed at approximately $190 per metric ton, or <strong>$0.09 per pound</strong> of CO2e sequestered.</p>
+                   <p><strong>Economic Valuation:</strong> Social value represents the <strong>Total Asset Value</strong> of the stored carbon based on the <strong>EPA Social Cost of Carbon</strong> ($190/metric ton), or <strong>$0.09 per pound</strong> of CO2e banked.</p>
                 </div>
             </div>
         </div>
@@ -175,23 +175,33 @@ function updateSpeciesHelper() {
         updateMath();
     }
 
-    function updateMath() {
+function updateMath() {
         const dbh = parseFloat(document.getElementById('dbh_input').value) || 0;
         const group = document.getElementById('species_group').value;
         const condition = parseFloat(document.getElementById('condition_select').value);
         
         if (dbh > 0 && group) {
             const params = jenkins[group];
-            const growth = 0.2 * condition; 
-            const biomassToday = Math.exp(params[0] + params[1] * Math.log(dbh));
-            const biomassFuture = Math.exp(params[0] + params[1] * Math.log(dbh + growth));
-            const annualCO2 = (biomassFuture - biomassToday) * 2.20462 * 0.5 * 3.6663;
-            const socialValue = annualCO2 * 0.09;
+            
+            // 1. Calculate TOTAL Biomass (the whole tree)
+            const biomassTotal = Math.exp(params[0] + params[1] * Math.log(dbh));
+            
+            // 2. Convert to Lbs of CO2 (Lifetime Storage)
+            // Note: We include the 'condition' as a multiplier so dead/poor trees show reduced asset value
+            const totalCO2 = biomassTotal * 2.20462 * 0.5 * 3.6663 * condition;
+            
+            // 3. Social value of the total stored asset ($0.09 per lb)
+            const socialValue = totalCO2 * 0.09;
 
-            document.getElementById('display-co2').innerText = annualCO2.toFixed(1);
-            document.getElementById('display-value').innerText = socialValue.toFixed(2);
-            document.getElementById('hidden_co2').value = annualCO2.toFixed(4);
-            document.getElementById('hidden_value').value = socialValue.toFixed(4);
+            // 4. Update the display boxes on your screen
+            document.getElementById('display-co2').innerText = Math.round(totalCO2).toLocaleString();
+            document.getElementById('display-value').innerText = socialValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            
+            // 5. Update the hidden fields so Sheet Monkey sends the TOTALS to your Google Sheet
+            document.getElementById('hidden_co2').value = totalCO2.toFixed(2);
+            document.getElementById('hidden_value').value = socialValue.toFixed(2);
+            
+            // Keep your graph logic running (it will now forecast future total storage)
             updateGraph(dbh, params, condition);
         }
     }
@@ -199,17 +209,22 @@ function updateSpeciesHelper() {
     function updateGraph(dbh, params, condition) {
         const growth = 0.2 * condition;
         let points = [];
+        // Calculate total storage at 0, 5, 10, 15, and 20 years in the future
         for (let i = 0; i < 5; i++) {
             const futureDbh = dbh + (i * 5 * growth);
-            const b1 = Math.exp(params[0] + params[1] * Math.log(futureDbh));
-            const b2 = Math.exp(params[0] + params[1] * Math.log(futureDbh + growth));
-            const co2 = (b2 - b1) * 2.20462 * 0.5 * 3.6663;
-            points.push(co2);
+            const futureBiomass = Math.exp(params[0] + params[1] * Math.log(futureDbh));
+            const futureCO2 = futureBiomass * 2.20462 * 0.5 * 3.6663 * condition;
+            points.push(futureCO2);
         }
-        const max = Math.max(...points) * 1.2;
+        
+        const min = Math.min(...points);
+        const max = Math.max(...points);
+        const range = max - min || 1; 
+
         const svgPoints = points.map((p, i) => {
             const x = 40 + (i * 85);
-            const y = 160 - (p / max * 140);
+            // Dynamic scaling so the line reflects the growth in the "Bank"
+            const y = 160 - ((p - min) / range * 100 + 20); 
             document.getElementById(`p${i+1}`).setAttribute('cy', y);
             return `${x} ${y}`;
         });
