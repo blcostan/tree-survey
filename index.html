@@ -193,6 +193,16 @@
     // 2. The Master Math Engine (Unit-Corrected)
     function updateMath() {
         const dbhInches = parseFloat(document.getElementById('dbh_input').value) || 0;
+
+        // --- DATA VALIDATION ---
+        if (dbhInches > 100) {
+            alert("⚠️ DATA ERROR: DBH exceeds 100 inches. Please verify measurement.");
+            document.getElementById('dbh_input').value = "";
+            document.getElementById('circ_input').value = "";
+            return; 
+        }
+        // -----------------------
+
         const group = document.getElementById('species_group').value;
         const condition = parseFloat(document.getElementById('condition_select').value);
         
@@ -221,6 +231,7 @@
             updateGraph(dbhInches, params, condition);
         }
     }
+    
 
     // 3. Forecast Graph Logic
     function updateGraph(dbhInches, params, condition) {
