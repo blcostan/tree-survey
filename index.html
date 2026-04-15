@@ -38,15 +38,15 @@
             <button type="button" onclick="showPage('form')" id="btn-form" class="flex-1 p-4 font-black uppercase text-[10px] tracking-widest transition-all bg-white text-red-600 border-b-4 border-red-600">
                 📝 Entry
             </button>
-            <button type="button" onclick="showPage('map')" id="btn-map" class="flex-1 p-4 font-black uppercase text-[10px] tracking-widest transition-all text-zinc-400 hover:text-zinc-600">
+            <button type="button" onclick="showPage('map')" id="btn-map" class="flex-1 p-4 font-black uppercase text-[10px] tracking-widest transition-all text-zinc-400 hover:text-zinc-600 bg-zinc-50">
                 🗺️ Map
             </button>
-            <button type="button" onclick="showPage('leader')" id="btn-leader" class="flex-1 p-4 font-black uppercase text-[10px] tracking-widest transition-all text-zinc-400 hover:text-zinc-600">
+            <button type="button" onclick="showPage('leader')" id="btn-leader" class="flex-1 p-4 font-black uppercase text-[10px] tracking-widest transition-all text-zinc-400 hover:text-zinc-600 bg-zinc-50">
                 🏆 Leaderboard
             </button>
         </div>
 
-        <div id="page-form">
+        <div id="page-form" class="block">
             <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
                 <form id="treeForm" class="space-y-4">
                     <div>
@@ -83,14 +83,12 @@
                     </div>
 
                     <div id="species-help-box" class="hidden p-4 bg-zinc-900 rounded-lg border-l-4 border-red-600 mt-2">
-                        <p id="species-help-text" class="text-[12px] leading-relaxed text-zinc-300 italic font-medium"></p>
+                        <p id="species-help-text" class="text-[12px] font-medium text-zinc-300 italic"></p>
                     </div>
 
                     <div id="proximity_note_container" class="bg-orange-50 border-2 border-orange-200 p-4 rounded-lg">
-                        <p class="text-2xl font-black text-orange-700 uppercase tracking-widest mb-4">
-                            <span class="text-5xl block mb-2">🧌</span> Troll Alert: Proximity Triggered
-                        </p>
-                        <textarea name="M:Proximity_Note" id="prox_note" class="w-full p-2 text-sm border-2 rounded outline-none" placeholder="This tree is very close to your last entry..."></textarea>
+                        <p class="text-xl font-black text-orange-700 uppercase tracking-widest mb-2">🧌 Troll Alert: Proximity</p>
+                        <textarea name="M:Proximity_Note" id="prox_note" class="w-full p-2 text-sm border-2 rounded outline-none" placeholder="Explain why this tree is close to the last entry..."></textarea>
                         <input type="hidden" name="L:Troll Catch" id="troll_flag">
                     </div>
 
@@ -103,6 +101,12 @@
 
                     <button type="submit" id="submit_btn" class="w-full ncsu-red text-white p-5 rounded-xl font-black uppercase tracking-widest shadow-xl">Confirm Tree Entry</button>
 
+                    <div class="pt-4">
+                        <a href="https://docs.google.com/forms/d/e/1FAIpQLScSlYjJBIPVpbNBrg1xE11q8-ShIrGuR-c242hEcaFVytwq3g/viewform?usp=sharing" target="_blank" class="block text-center text-[9px] font-bold text-zinc-400 uppercase tracking-widest hover:text-red-600 transition-colors">
+                            🛠️ Report Technical Bug / System Error
+                        </a>
+                    </div>
+
                     <input type="hidden" name="E:GPS" id="coords">
                     <input type="hidden" name="G:CO2_Lbs" id="hidden_co2">
                     <input type="hidden" name="H:Asset_Value" id="hidden_value">
@@ -112,17 +116,17 @@
                 <div class="space-y-6">
                     <div class="grid grid-cols-2 gap-4">
                         <div class="bg-zinc-900 p-6 rounded-2xl border-b-4 border-red-600 shadow-lg">
-                            <p class="text-red-500 font-black text-[10px] uppercase tracking-widest">Total Carbon Bank (Lifetime)</p>
+                            <p class="text-red-500 font-black text-[10px] uppercase tracking-widest">Total Carbon Bank</p>
                             <p class="text-4xl font-black italic text-white mt-1"><span id="display-co2">0</span> <span class="not-italic text-sm text-zinc-500 font-bold">Lbs</span></p>
                         </div>
                         <div class="bg-zinc-900 p-6 rounded-2xl border-b-4 border-green-500 shadow-lg">
-                            <p class="text-green-500 font-black text-[10px] uppercase tracking-widest">Total Social Asset Value</p>
+                            <p class="text-green-500 font-black text-[10px] uppercase tracking-widest">Social Asset Value</p>
                             <p class="text-4xl font-black italic text-white mt-1">$<span id="display-value">0.00</span></p>
                         </div>
                     </div>
                     
                     <div class="bg-white rounded-2xl p-4 shadow-inner border border-zinc-200">
-                        <p class="text-[10px] font-black text-zinc-400 uppercase text-center mb-4 tracking-widest">Future Annual Performance Forecast</p>
+                        <p class="text-[10px] font-black text-zinc-400 uppercase text-center mb-4 tracking-widest">20-Year Performance Forecast</p>
                         <div class="relative h-[250px] w-full bg-zinc-50 rounded-lg overflow-hidden border border-zinc-100">
                             <svg id="svgGraph" viewBox="0 0 400 200" class="w-full h-full p-4">
                                 <line x1="40" y1="160" x2="380" y2="160" stroke="#d1d5db" stroke-width="2" />
@@ -155,12 +159,12 @@
             <h2 class="text-sm font-black text-zinc-900 uppercase tracking-tighter mb-6 border-b-2 border-zinc-300 pb-2">Scientific Methodology & Citations</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-10 text-[11px] leading-relaxed">
                 <div>
-                    <h3 class="font-black text-zinc-800 uppercase text-[10px] mb-2 tracking-widest">I. Lifetime Storage Modeling</h3>
-                    <p class="mb-4">Calculations utilize total above-ground biomass (AGB) equations from Jenkins, J.C., et al. (2003). This registry calculates the Total Carbon Bank, representing the cumulative $CO_2$ sequestered and stored over the tree's entire lifespan to date.</p>
+                    <h3 class="font-black text-zinc-800 uppercase text-[10px] mb-2 tracking-widest">I. Biomass Modeling</h3>
+                    <p>Equations utilize Jenkins, J.C., et al. (2003) for above-ground biomass. We calculate the cumulative $CO_2$ banked over the tree's lifespan.</p>
                 </div>
                 <div>
-                    <h3 class="font-black text-zinc-800 uppercase text-[10px] mb-2 tracking-widest">II. Carbon & Economic Indexing</h3>
-                    <p><strong>Economic Valuation:</strong> Social value represents the <strong>Total Asset Value</strong> of the stored carbon based on the <strong>EPA Social Cost of Carbon</strong> ($190/metric ton), or <strong>$0.09 per pound</strong> of CO2e banked.</p>
+                    <h3 class="font-black text-zinc-800 uppercase text-[10px] mb-2 tracking-widest">II. Economic Indexing</h3>
+                    <p>Valuation based on the <strong>EPA Social Cost of Carbon</strong> (~$190/metric ton), roughly <strong>$0.09/lb</strong> of CO2e.</p>
                 </div>
             </div>
         </div>
@@ -174,7 +178,7 @@
         "small_ornate": [-0.7152, 1.7029] 
     };
 
-    // TAB NAVIGATION BRAIN
+    // TAB SYSTEM
     function showPage(pageId) {
         const pages = ['form', 'map', 'leader'];
         pages.forEach(p => {
@@ -191,39 +195,61 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    window.addEventListener('load', () => {
-        const savedID = localStorage.getItem('ncsu_unity_id');
-        if (savedID) {
-            document.getElementById('unity_id').value = savedID;
-        }
-    });
+    // TROLL CATCH (PROXIMITY)
+    function checkProximity(newLat, newLng) {
+        const lastLat = localStorage.getItem('last_lat');
+        const lastLng = localStorage.getItem('last_lng');
+        const box = document.getElementById('proximity_note_container');
+        const flag = document.getElementById('troll_flag');
+        const note = document.getElementById('prox_note');
 
-    function updateSpeciesHelper() {
-        const group = document.getElementById('species_group').value;
-        const helpBox = document.getElementById('species-help-box');
-        const helpText = document.getElementById('species-help-text');
-        const descs = {
-            "hardwood": "🌳 STURDY: High-density wood (Oaks/Hickories). Stores maximum carbon.",
-            "soft_hardwood": "🍃 FAST: Medium-density (Maples/Poplars). Rapid annual sequestration.",
-            "evergreen": "🌲 EVERGREEN: Needle-bearing trees. Year-round active sequestration.",
-            "small_ornate": "🌸 SMALL: Understory trees with lower annual biomass production."
-        };
-        if (descs[group]) {
-            helpText.innerText = descs[group];
-            helpBox.classList.remove('hidden');
-        } else {
-            helpBox.classList.add('hidden');
+        if (lastLat && lastLng) {
+            const R = 6371e3;
+            const dLat = (newLat - lastLat) * Math.PI/180;
+            const dLng = (newLng - lastLng) * Math.PI/180;
+            const a = Math.sin(dLat/2)**2 + Math.cos(lastLat*Math.PI/180)*Math.cos(newLat*Math.PI/180)*Math.sin(dLng/2)**2;
+            const distance = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+            if (distance < 3) {
+                box.style.display = 'block';
+                note.required = true;
+                flag.value = "TROLL";
+            } else {
+                box.style.display = 'none';
+                note.required = false;
+                flag.value = "CLEAR";
+            }
         }
-        updateMath();
+        localStorage.setItem('last_lat', newLat);
+        localStorage.setItem('last_lng', newLng);
     }
 
+    // GPS ENGINE
+    async function handleGPS() {
+        const btn = document.getElementById('gps_btn');
+        const msg = document.getElementById('gps-msg');
+        btn.disabled = true;
+        btn.innerText = "⏳ Verifying Position...";
+        navigator.geolocation.getCurrentPosition((pos) => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            checkProximity(lat, lng);
+            document.getElementById('coords').value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+            document.getElementById('timestamp').value = new Date().toISOString();
+            document.getElementById('status-box').className = "bg-green-50 border-2 border-green-500 rounded-lg p-4 text-center";
+            msg.innerHTML = "✅ LOCATION VERIFIED";
+            btn.classList.add('hidden');
+            document.getElementById('submit_btn').style.display = 'block';
+        }, (err) => {
+            msg.innerText = "❌ Precision Error: Please Enable Location";
+            btn.disabled = false;
+        }, { enableHighAccuracy: true });
+    }
+
+    // MATH ENGINE
     function updateMath() {
         const dbhInches = parseFloat(document.getElementById('dbh_input').value) || 0;
-        if (dbhInches > 100) {
-            alert("⚠️ DATA ERROR: DBH exceeds 100 inches.");
-            document.getElementById('dbh_input').value = "";
-            return; 
-        }
+        if (dbhInches > 100) { alert("⚠️ Check DBH measurement."); return; }
         const group = document.getElementById('species_group').value;
         const condition = parseFloat(document.getElementById('condition_select').value);
         if (dbhInches > 0 && group) {
@@ -241,17 +267,16 @@
     }
 
     function updateGraph(dbhInches, params, condition) {
-        const growthInches = 0.2 * condition;
+        const growth = 0.2 * condition;
         let points = [];
         for (let i = 0; i < 5; i++) {
-            const futureDbhCm = (dbhInches + (i * 5 * growthInches)) * 2.54;
-            const futureKG = Math.exp(params[0] + params[1] * Math.log(futureDbhCm));
-            const futureCO2 = (futureKG * 2.20462) * 0.5 * 3.6663 * condition;
-            points.push(futureCO2);
+            const fDbhCm = (dbhInches + (i * 5 * growth)) * 2.54;
+            const fKG = Math.exp(params[0] + params[1] * Math.log(fDbhCm));
+            points.push((fKG * 2.20462) * 0.5 * 3.6663 * condition);
         }
         const min = Math.min(...points);
         const max = Math.max(...points);
-        const range = max - min || 1; 
+        const range = max - min || 1;
         const svgPoints = points.map((p, i) => {
             const x = 40 + (i * 85);
             const y = 160 - ((p - min) / range * 100 + 20); 
@@ -261,24 +286,18 @@
         document.getElementById('svgPath').setAttribute('d', `M ${svgPoints.join(' L ')}`);
     }
 
-    async function handleGPS() {
-        const btn = document.getElementById('gps_btn');
-        const msg = document.getElementById('gps-msg');
-        btn.disabled = true;
-        btn.innerText = "⏳ Verifying Position...";
-        navigator.geolocation.getCurrentPosition((pos) => {
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
-            document.getElementById('coords').value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-            document.getElementById('timestamp').value = new Date().toISOString();
-            document.getElementById('status-box').className = "bg-green-50 border-2 border-green-500 rounded-lg p-4 text-center";
-            msg.innerHTML = `✅ LOCATION VERIFIED`;
-            btn.classList.add('hidden');
-            document.getElementById('submit_btn').style.display = 'block';
-        }, (err) => {
-            msg.innerText = "❌ Precision Error: Please Enable Location";
-            btn.disabled = false;
-        }, { enableHighAccuracy: true });
+    function updateSpeciesHelper() {
+        const group = document.getElementById('species_group').value;
+        const box = document.getElementById('species-help-box');
+        const txt = document.getElementById('species-help-text');
+        const descs = {
+            "hardwood": "🌳 STURDY: Oak/Hickory. High-density wood.",
+            "soft_hardwood": "🍃 FAST: Maple/Poplar. Rapid sequestration.",
+            "evergreen": "🌲 EVERGREEN: Pines. Year-round active storage.",
+            "small_ornate": "🌸 SMALL: Understory production (Dogwood/Holly)."
+        };
+        if (descs[group]) { txt.innerText = descs[group]; box.classList.remove('hidden'); }
+        updateMath();
     }
 
     document.getElementById('circ_input').addEventListener('input', (e) => {
@@ -297,8 +316,13 @@
         localStorage.setItem('ncsu_unity_id', document.getElementById('unity_id').value);
         document.getElementById('overlay').style.display = 'flex';
         fetch('https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG', { method: 'POST', body: new FormData(this)})
-            .then(() => { alert('Registry Updated Successfully!'); location.reload(); })
+            .then(() => { alert('Registry Updated!'); location.reload(); })
             .catch(() => { document.getElementById('overlay').style.display = 'none'; alert('Sync Error.'); });
+    });
+
+    window.addEventListener('load', () => {
+        const savedID = localStorage.getItem('ncsu_unity_id');
+        if (savedID) document.getElementById('unity_id').value = savedID;
     });
 </script>
 </body>
