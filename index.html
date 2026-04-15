@@ -162,7 +162,13 @@
         "evergreen": [-2.5356, 2.4349], 
         "small_ornate": [-0.7152, 1.7029] 
     };
-    
+    window.addEventListener('load', () => {
+        const savedID = localStorage.getItem('ncsu_unity_id');
+        if (savedID) {
+            document.getElementById('unity_id').value = savedID;
+        }
+    });
+    // ---------------------------------
     // 1. Species Helper Logic
     function updateSpeciesHelper() {
         const group = document.getElementById('species_group').value;
@@ -308,9 +314,13 @@
         updateMath();
     });
 
-    // 7. Form Submission to Sheet Monkey
+ // 7. Form Submission to Sheet Monkey
     document.getElementById('treeForm').addEventListener('submit', function(e) {
         e.preventDefault();
+
+        // >>> ADD THIS LINE TO SAVE THE ID FOR NEXT TIME <<<
+        localStorage.setItem('ncsu_unity_id', document.getElementById('unity_id').value);
+
         document.getElementById('overlay').style.display = 'flex';
         fetch('https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG', { method: 'POST', body: new FormData(this)})
             .then(() => { alert('Registry Updated Successfully!'); location.reload(); })
