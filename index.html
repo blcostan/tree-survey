@@ -33,7 +33,19 @@
             </div>
             <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Registry Engine v6.5</div>
         </div>
+<div class="flex border-b-2 border-zinc-200 bg-zinc-50">
+            <button type="button" onclick="showPage('form')" id="btn-form" class="flex-1 p-4 font-black uppercase text-[10px] tracking-widest transition-all bg-white text-red-600 border-b-4 border-red-600">
+                📝 Entry
+            </button>
+            <button type="button" onclick="showPage('map')" id="btn-map" class="flex-1 p-4 font-black uppercase text-[10px] tracking-widest transition-all text-zinc-400 hover:text-zinc-600">
+                🗺️ Map
+            </button>
+            <button type="button" onclick="showPage('leader')" id="btn-leader" class="flex-1 p-4 font-black uppercase text-[10px] tracking-widest transition-all text-zinc-400 hover:text-zinc-600">
+                🏆 Leaderboard
+            </button>
+        </div>
 
+        <div id="page-form" class="contents">
         <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
             
             <form id="treeForm" class="space-y-4">
