@@ -224,26 +224,50 @@
         localStorage.setItem('last_lng', newLng);
     }
 
-    // GPS ENGINE
-    async function handleGPS() {
+async function handleGPS() {
         const btn = document.getElementById('gps_btn');
         const msg = document.getElementById('gps-msg');
+        const MAX_ACCURACY = 25; // Define acceptable accuracy in meters
+
         btn.disabled = true;
-        btn.innerText = "⏳ Verifying Position...";
+        btn.innerText = "⏳ Verifying Signal Quality...";
+        msg.innerHTML = "📡 Checking satellite fix...";
+
         navigator.geolocation.getCurrentPosition((pos) => {
             const lat = pos.coords.latitude;
             const lng = pos.coords.longitude;
+            const accuracy = pos.coords.accuracy; // This is the magic number (in meters)
+
+            console.log(`GPS Accuracy: ${accuracy} meters`);
+
+            if (accuracy > MAX_ACCURACY) {
+                // If the signal is too fuzzy, reject it
+                msg.innerHTML = `⚠️ Signal Poor (${Math.round(accuracy)}m).<br>Move to open sky and retry.`;
+                btn.disabled = false;
+                btn.innerText = "🛰️ Retry Location";
+                return;
+            }
+
+            // If we are here, accuracy is acceptable
             checkProximity(lat, lng);
             document.getElementById('coords').value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
             document.getElementById('timestamp').value = new Date().toISOString();
+            
             document.getElementById('status-box').className = "bg-green-50 border-2 border-green-500 rounded-lg p-4 text-center";
-            msg.innerHTML = "✅ LOCATION VERIFIED";
+            msg.innerHTML = `✅ LOCATION VERIFIED<br><span class="text-[9px]">Accuracy: ${Math.round(accuracy)}m</span>`;
+            
             btn.classList.add('hidden');
             document.getElementById('submit_btn').style.display = 'block';
+            
         }, (err) => {
             msg.innerText = "❌ Precision Error: Please Enable Location";
             btn.disabled = false;
-        }, { enableHighAccuracy: true });
+            btn.innerText = "🛰️ Capture & Verify Location";
+        }, { 
+            enableHighAccuracy: true,
+            timeout: 10000, // 10 second timeout
+            maximumAge: 0 // Force fresh reading
+        });
     }
 
     // MATH ENGINE
