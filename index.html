@@ -200,81 +200,88 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // TROLL CATCH (PROXIMITY)
-    function checkProximity(newLat, newLng) {
-        const lastLat = localStorage.getItem('last_lat');
-        const lastLng = localStorage.getItem('last_lng');
-        const box = document.getElementById('proximity_note_container');
-        const flag = document.getElementById('troll_flag');
-        const note = document.getElementById('prox_note');
+// 1. TROLL CATCH (PROXIMITY) - UPDATED
+function checkProximity(newLat, newLng, accuracy) {
+    const lastLat = localStorage.getItem('last_lat');
+    const lastLng = localStorage.getItem('last_lng');
+    const box = document.getElementById('proximity_note_container');
+    const flag = document.getElementById('troll_flag');
+    const note = document.getElementById('prox_note');
 
-        if (lastLat && lastLng) {
-            const R = 6371e3;
-            const dLat = (newLat - lastLat) * Math.PI/180;
-            const dLng = (newLng - lastLng) * Math.PI/180;
-            const a = Math.sin(dLat/2)**2 + Math.cos(lastLat*Math.PI/180)*Math.cos(newLat*Math.PI/180)*Math.sin(dLng/2)**2;
-            const distance = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    // ONLY check proximity if accuracy is GOOD (<= 20 meters)
+    if (accuracy > 20) {
+        console.log("GPS fuzzy, skipping troll check.");
+        box.style.display = 'none';
+        note.required = false;
+        flag.value = "CLEAR";
+    } else if (lastLat && lastLng) {
+        const R = 6371e3;
+        const dLat = (newLat - lastLat) * Math.PI/180;
+        const dLng = (newLng - lastLng) * Math.PI/180;
+        const a = Math.sin(dLat/2)**2 + Math.cos(lastLat*Math.PI/180)*Math.cos(newLat*Math.PI/180)*Math.sin(dLng/2)**2;
+        const distance = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
-            if (distance < 10) {
-                box.style.display = 'block';
-                note.required = true;
-                flag.value = "TROLL";
-            } else {
-                box.style.display = 'none';
-                note.required = false;
-                flag.value = "CLEAR";
-            }
+        // Threshold increased to 15m to ignore minor GPS drift
+        if (distance < 15) {
+            box.style.display = 'block';
+            note.required = true;
+            flag.value = "TROLL";
+        } else {
+            box.style.display = 'none';
+            note.required = false;
+            flag.value = "CLEAR";
         }
-        localStorage.setItem('last_lat', newLat);
-        localStorage.setItem('last_lng', newLng);
     }
+    
+    // Always save the latest location
+    localStorage.setItem('last_lat', newLat);
+    localStorage.setItem('last_lng', newLng);
+}
 
+// 2. HANDLE GPS - UPDATED TO PASS ACCURACY DATA
 async function handleGPS() {
-        const btn = document.getElementById('gps_btn');
-        const msg = document.getElementById('gps-msg');
-        const MAX_ACCURACY = 25; // Define acceptable accuracy in meters
+    const btn = document.getElementById('gps_btn');
+    const msg = document.getElementById('gps-msg');
+    const MAX_ACCURACY = 25; 
 
-        btn.disabled = true;
-        btn.innerText = "⏳ Verifying Signal Quality...";
-        msg.innerHTML = "📡 Checking satellite fix...";
+    btn.disabled = true;
+    btn.innerText = "⏳ Verifying Signal Quality...";
+    msg.innerHTML = "📡 Checking satellite fix...";
 
-        navigator.geolocation.getCurrentPosition((pos) => {
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
-            const accuracy = pos.coords.accuracy; // This is the magic number (in meters)
+    navigator.geolocation.getCurrentPosition((pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const accuracy = pos.coords.accuracy;
 
-            console.log(`GPS Accuracy: ${accuracy} meters`);
-
-            if (accuracy > MAX_ACCURACY) {
-                // If the signal is too fuzzy, reject it
-                msg.innerHTML = `⚠️ Signal Poor (${Math.round(accuracy)}m).<br>Move to open sky and retry.`;
-                btn.disabled = false;
-                btn.innerText = "🛰️ Retry Location";
-                return;
-            }
-
-            // If we are here, accuracy is acceptable
-            checkProximity(lat, lng);
-            document.getElementById('coords').value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-            document.getElementById('timestamp').value = new Date().toISOString();
-            
-            document.getElementById('status-box').className = "bg-green-50 border-2 border-green-500 rounded-lg p-4 text-center";
-            msg.innerHTML = `✅ LOCATION VERIFIED<br><span class="text-[9px]">Accuracy: ${Math.round(accuracy)}m</span>`;
-            
-            btn.classList.add('hidden');
-            document.getElementById('submit_btn').style.display = 'block';
-            
-        }, (err) => {
-            msg.innerText = "❌ Precision Error: Please Enable Location";
+        if (accuracy > MAX_ACCURACY) {
+            msg.innerHTML = `⚠️ Signal Poor (${Math.round(accuracy)}m).<br>Move to open sky and retry.`;
             btn.disabled = false;
-            btn.innerText = "🛰️ Capture & Verify Location";
-        }, { 
-            enableHighAccuracy: true,
-            timeout: 10000, // 10 second timeout
-            maximumAge: 0 // Force fresh reading
-        });
-    }
+            btn.innerText = "🛰️ Retry Location";
+            return;
+        }
 
+        // Pass the accuracy number into the checkProximity function
+        checkProximity(lat, lng, accuracy);
+        
+        document.getElementById('coords').value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        document.getElementById('timestamp').value = new Date().toISOString();
+        
+        document.getElementById('status-box').className = "bg-green-50 border-2 border-green-500 rounded-lg p-4 text-center";
+        msg.innerHTML = `✅ LOCATION VERIFIED<br><span class="text-[9px]">Accuracy: ${Math.round(accuracy)}m</span>`;
+        
+        btn.classList.add('hidden');
+        document.getElementById('submit_btn').style.display = 'block';
+        
+    }, (err) => {
+        msg.innerText = "❌ Precision Error: Please Enable Location";
+        btn.disabled = false;
+        btn.innerText = "🛰️ Capture & Verify Location";
+    }, { 
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0 
+    });
+}
     // MATH ENGINE
     function updateMath() {
         const dbhInches = parseFloat(document.getElementById('dbh_input').value) || 0;
@@ -379,13 +386,14 @@ document.getElementById('treeForm').addEventListener('submit', function(e) {
         if (savedID) document.getElementById('unity_id').value = savedID;
     });
     // DEBUG: Skip GPS hardware and force the form to unlock
+// DEBUG: Skip GPS hardware and force the form to unlock
 function devBypassGPS() {
     console.log("DEBUG: Bypassing GPS...");
     const lat = 35.7866; // NC State coords
     const lng = -78.6816;
     
-    // 1. Run the check (this triggers the Troll Alert if needed)
-    checkProximity(lat, lng);
+    // 1. Run the check - PASS 5 as the accuracy so the logic treats it as "Perfect"
+    checkProximity(lat, lng, 5);
     
     // 2. Fill the hidden form fields
     document.getElementById('coords').value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
