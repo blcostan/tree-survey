@@ -336,14 +336,38 @@ async function handleGPS() {
         updateMath();
     });
 
-    document.getElementById('treeForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        localStorage.setItem('ncsu_unity_id', document.getElementById('unity_id').value);
-        document.getElementById('overlay').style.display = 'flex';
-        fetch('https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG', { method: 'POST', body: new FormData(this)})
-            .then(() => { alert('Registry Updated!'); location.reload(); })
-            .catch(() => { document.getElementById('overlay').style.display = 'none'; alert('Sync Error.'); });
+document.getElementById('treeForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Save the user ID so the app remembers who is submitting
+    localStorage.setItem('ncsu_unity_id', document.getElementById('unity_id').value);
+    
+    // Show loading overlay
+    document.getElementById('overlay').style.display = 'flex';
+    
+    const formData = new FormData(this);
+
+    fetch('https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG', { 
+        method: 'POST', 
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            // If the server rejects the request, we catch the error here
+            return response.text().then(text => { throw new Error(text); });
+        }
+        return response.text();
+    })
+    .then(() => { 
+        alert('Registry Updated!'); 
+        location.reload(); 
+    })
+    .catch((err) => { 
+        document.getElementById('overlay').style.display = 'none';
+        console.error("Submission Error Details:", err);
+        alert('Sync Error. Open the Console (F12) to see exactly why it failed.'); 
     });
+});
 
     window.addEventListener('load', () => {
         const savedID = localStorage.getItem('ncsu_unity_id');
