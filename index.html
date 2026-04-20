@@ -210,7 +210,7 @@
             const a = Math.sin(dLat/2)**2 + Math.cos(lastLat*Math.PI/180)*Math.cos(newLat*Math.PI/180)*Math.sin(dLng/2)**2;
             const distance = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
-            if (distance < 3) {
+            if (distance < 1) {
                 box.style.display = 'block';
                 note.required = true;
                 flag.value = "TROLL";
