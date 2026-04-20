@@ -350,6 +350,15 @@ async function handleGPS() {
 
 document.getElementById('treeForm').addEventListener('submit', function(e) {
     e.preventDefault();
+    // YOUR NEW CODE GOES HERE, STARTING ON THIS LINE
+    const trollFlag = document.getElementById('troll_flag').value;
+    const proxNote = document.getElementById('prox_note').value;
+    
+    if (trollFlag === "TROLL" && proxNote.trim() === "") {
+        alert("⚠️ You are very close to the last entry. Please explain why in the Proximity Note.");
+        document.getElementById('prox_note').focus();
+        return; 
+    }
     
     // Save the user ID so the app remembers who is submitting
     localStorage.setItem('ncsu_unity_id', document.getElementById('unity_id').value);
