@@ -269,6 +269,13 @@ async function handleGPS() {
         document.getElementById('status-box').className = "bg-green-50 border-2 border-green-500 rounded-lg p-4 text-center";
         msg.innerHTML = `✅ LOCATION VERIFIED<br><span class="text-[9px]">Accuracy: ${Math.round(accuracy)}m</span>`;
         
+        // YOUR NEW CODE GOES HERE:
+        document.getElementById('submit_btn').style.display = 'block';
+        document.getElementById('dbh_input').readOnly = true; 
+        document.getElementById('circ_input').readOnly = true;
+        
+        btn.classList.add('hidden');
+        // --- END OF SUCCESS BLOCK ---
         btn.classList.add('hidden');
         document.getElementById('submit_btn').style.display = 'block';
         
