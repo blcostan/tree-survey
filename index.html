@@ -221,8 +221,8 @@ function checkProximity(newLat, newLng, accuracy) {
         const a = Math.sin(dLat/2)**2 + Math.cos(lastLat*Math.PI/180)*Math.cos(newLat*Math.PI/180)*Math.sin(dLng/2)**2;
         const distance = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
-        // Threshold increased to 15m to ignore minor GPS drift
-        if (distance < 15) {
+        // Threshold increased to 5m to ignore minor GPS drift
+        if (distance < 5) {
             box.style.display = 'block';
             note.required = true;
             flag.value = "TROLL";
