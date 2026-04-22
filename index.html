@@ -221,7 +221,10 @@ function checkProximity(newLat, newLng, accuracy) {
         const a = Math.sin(dLat/2)**2 + Math.cos(lastLat*Math.PI/180)*Math.cos(newLat*Math.PI/180)*Math.sin(dLng/2)**2;
         const distance = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
-        // Threshold decreased to 3m because it was too sensitive.
+        // DEBUGGING: This will show you the exact math in your console
+        console.log("Calculated Distance: " + Math.round(distance) + " meters");
+
+        // Threshold set to 3m
         if (distance < 3) {
             box.style.display = 'block';
             note.required = true;
@@ -237,7 +240,6 @@ function checkProximity(newLat, newLng, accuracy) {
     localStorage.setItem('last_lat', newLat);
     localStorage.setItem('last_lng', newLng);
 }
-
 // 2. HANDLE GPS - UPDATED TO PASS ACCURACY DATA
 async function handleGPS() {
     const btn = document.getElementById('gps_btn');
