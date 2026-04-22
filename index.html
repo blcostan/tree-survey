@@ -95,10 +95,7 @@
                 <div class="pt-2 space-y-3">
     <button type="button" id="gps_btn" onclick="handleGPS()" class="w-full bg-zinc-800 text-white p-4 rounded-lg font-black text-[10px] uppercase tracking-widest">🛰️ Capture & Verify Location</button>
     
-    <button type="button" onclick="devBypassGPS()" class="w-full bg-yellow-500 text-white p-2 rounded-lg font-black text-[9px] uppercase tracking-widest hover:bg-yellow-600 transition-colors">
-        🛠️ DEV: BYPASS GPS
-    </button>
-
+  
     <div id="status-box" class="bg-zinc-100 border-2 border-dashed border-zinc-300 rounded-lg p-4 text-center">
         <p id="gps-msg" class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Awaiting GPS Hardware Signal</p>
     </div>
@@ -403,28 +400,7 @@ document.getElementById('treeForm').addEventListener('submit', function(e) {
         const savedID = localStorage.getItem('ncsu_unity_id');
         if (savedID) document.getElementById('unity_id').value = savedID;
     });
-    // DEBUG: Skip GPS hardware and force the form to unlock
-// DEBUG: Skip GPS hardware and force the form to unlock
-function devBypassGPS() {
-    console.log("DEBUG: Bypassing GPS...");
-    const lat = 35.7866; // NC State coords
-    const lng = -78.6816;
-    
-    // 1. Run the check - PASS 5 as the accuracy so the logic treats it as "Perfect"
-    checkProximity(lat, lng, 5);
-    
-    // 2. Fill the hidden form fields
-    document.getElementById('coords').value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-    document.getElementById('timestamp').value = new Date().toISOString();
-    
-    // 3. UI Updates: Make the form look "Verified"
-    document.getElementById('status-box').className = "bg-green-50 border-2 border-green-500 rounded-lg p-4 text-center";
-    document.getElementById('gps-msg').innerHTML = `✅ GPS BYPASSED (Desktop Mode)`;
-    
-    // 4. Reveal the Submit button
-    document.getElementById('gps_btn').classList.add('hidden');
-    document.getElementById('submit_btn').style.display = 'block';
-}
+
 </script>
 </body>
 </html>
