@@ -196,8 +196,6 @@
         });
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-
-// 1. TROLL CATCH (PROXIMITY) - UPDATED
 function checkProximity(newLat, newLng, accuracy) {
     const lastLat = localStorage.getItem('last_lat');
     const lastLng = localStorage.getItem('last_lng');
@@ -209,7 +207,7 @@ function checkProximity(newLat, newLng, accuracy) {
     if (accuracy > 20) {
         console.log("GPS fuzzy, skipping troll check.");
         box.style.display = 'none';
-        note.required = false;
+        note.required = false; 
         flag.value = "CLEAR";
     } else if (lastLat && lastLng) {
         const R = 6371e3;
@@ -218,25 +216,28 @@ function checkProximity(newLat, newLng, accuracy) {
         const a = Math.sin(dLat/2)**2 + Math.cos(lastLat*Math.PI/180)*Math.cos(newLat*Math.PI/180)*Math.sin(dLng/2)**2;
         const distance = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
-        // DEBUGGING: This will show you the exact math in your console
         console.log("Calculated Distance: " + Math.round(distance) + " meters");
 
-        // Threshold set to 3m
         if (distance < 3) {
             box.style.display = 'block';
-            note.;
+            note.required = true; // Makes the note mandatory if it's a troll
             flag.value = "TROLL";
         } else {
             box.style.display = 'none';
-            note.;
+            note.required = false; // Makes it not required if clear
             flag.value = "CLEAR";
         }
+    } else {
+        // Fallback for first run
+        box.style.display = 'none';
+        flag.value = "CLEAR";
     }
     
     // Always save the latest location
     localStorage.setItem('last_lat', newLat);
     localStorage.setItem('last_lng', newLng);
 }
+
 // 2. HANDLE GPS - UPDATED TO PASS ACCURACY DATA
 async function handleGPS() {
     const btn = document.getElementById('gps_btn');
