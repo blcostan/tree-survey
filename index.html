@@ -9,7 +9,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; -webkit-tap-highlight-color: transparent;}
         .ncsu-red { background-color: #CC0000; }
-        #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; }
+        #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; }
         .spinner { width: 40px; height: 40px; border: 4px solid #333; border-top: 4px solid #CC0000; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         #submit_btn, #proximity_note_container { display: none; }
@@ -31,19 +31,13 @@
                 <h1 class="text-xl font-black italic uppercase tracking-tighter">NC STATE UNIVERSITY</h1>
                 <p class="text-red-500 text-[10px] font-bold uppercase mt-1 tracking-widest">Campus Planning & Strategic Investment</p>
             </div>
-            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Registry Engine v6.5</div>
+            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Registry Engine v6.6</div>
         </div>
 
         <div class="flex border-b-2 border-zinc-200 bg-zinc-50">
-            <button type="button" onclick="showPage('form')" id="btn-form" class="flex-1 inline-flex items-center justify-center gap-2 p-4 font-black uppercase text-[10px] tracking-widest transition-all bg-white text-red-600 border-b-4 border-red-600">
-                <span class="text-base">📝</span> Entry
-            </button>
-            <button type="button" onclick="showPage('map')" id="btn-map" class="flex-1 inline-flex items-center justify-center gap-2 p-4 font-black uppercase text-[10px] tracking-widest transition-all text-zinc-400 hover:text-zinc-600 bg-zinc-50">
-                <span class="text-base">🗺️</span> Map
-            </button>
-            <button type="button" onclick="showPage('leader')" id="btn-leader" class="flex-1 inline-flex items-center justify-center gap-2 p-4 font-black uppercase text-[10px] tracking-widest transition-all text-zinc-400 hover:text-zinc-600 bg-zinc-50">
-                <span class="text-base">🏆</span> Leaderboard
-            </button>
+            <button type="button" onclick="showPage('form')" id="btn-form" class="flex-1 inline-flex items-center justify-center gap-2 p-4 font-black uppercase text-[10px] tracking-widest transition-all bg-white text-red-600 border-b-4 border-red-600">📝 Entry</button>
+            <button type="button" onclick="showPage('map')" id="btn-map" class="flex-1 inline-flex items-center justify-center gap-2 p-4 font-black uppercase text-[10px] tracking-widest transition-all text-zinc-400 hover:text-zinc-600 bg-zinc-50">🗺️ Map</button>
+            <button type="button" onclick="showPage('leader')" id="btn-leader" class="flex-1 inline-flex items-center justify-center gap-2 p-4 font-black uppercase text-[10px] tracking-widest transition-all text-zinc-400 hover:text-zinc-600 bg-zinc-50">🏆 Leaderboard</button>
         </div>
 
         <div id="page-form" class="block">
@@ -58,7 +52,7 @@
                     <div>
                         <div class="flex justify-between items-end mb-1">
                             <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Species Group</label>
-                            <button type="button" onclick="toggleModal()" class="text-sm font-black text-red-600 uppercase border-b border-red-600 tracking-tighter hover:text-zinc-900 hover:border-zinc-900 transition-colors">❓ ID Guide</button>
+                            <button type="button" onclick="openModal('idModal')" class="text-sm font-black text-red-600 uppercase border-b border-red-600 tracking-tighter hover:text-zinc-900 transition-colors">❓ ID Guide</button>
                         </div>
                         <select name="C:Species Group" id="species_group" class="w-full border-2 p-3 rounded-lg font-bold bg-white" onchange="updateSpeciesHelper()" required>
                             <option value="" disabled selected>Identify type...</option>
@@ -83,7 +77,7 @@
                     <div>
                         <div class="flex justify-between items-end mb-1">
                             <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Tree Condition</label>
-                            <button type="button" onclick="toggleConditionModal()" class="text-sm font-black text-red-600 uppercase border-b-2 border-red-600 tracking-tighter hover:text-zinc-900 hover:border-zinc-900 transition-colors py-1">❓ Health Guide</button>
+                            <button type="button" onclick="openModal('conditionModal')" class="text-sm font-black text-red-600 uppercase border-b-2 border-red-600 tracking-tighter hover:text-zinc-900 transition-colors py-1">❓ Health Guide</button>
                         </div>
                         <select name="D:Condition" id="condition_select" class="w-full border-2 p-3 rounded-lg font-bold bg-white" onchange="updateMath()" required>
                             <option value="1.0">Excellent</option>
@@ -97,8 +91,78 @@
                     <div class="space-y-2 mt-4">
                         <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Community Value</label>
                         <div class="relative">
-                            <button type="button" onclick="toggleLikes()" id="likes_trigger" class="w-full border-2 p-3 rounded-lg font-bold bg-white text-left flex justify-between items-center focus:border-red-600 outline-none">
+                            <button type="button" id="likes_trigger" onclick="toggleLikes(event)" class="w-full border-2 p-3 rounded-lg font-bold bg-white text-left flex justify-between items-center focus:border-red-600 outline-none transition-all">
                                 <span id="likes_label" class="text-sm text-zinc-400">Select value(s)...</span>
                                 <span class="text-zinc-400">▼</span>
                             </button>
-                            <div
+                            <div id="likes_menu" class="hidden absolute z-20 w-full mt-1 bg-white border-2 border-zinc-200 rounded-lg shadow-xl p-2 space-y-1">
+                                <p class="text-[9px] font-black text-zinc-400 uppercase p-2 border-b mb-1">Select all that apply:</p>
+                                <label class="flex items-center gap-3 p-3 hover:bg-zinc-50 rounded-md cursor-pointer"><input type="checkbox" name="N:Likes[]" value="shade" onchange="updateLikesLabel()" class="w-5 h-5 accent-red-600"><span class="text-sm font-bold text-zinc-700">☂️ Provides shade</span></label>
+                                <label class="flex items-center gap-3 p-3 hover:bg-zinc-50 rounded-md cursor-pointer"><input type="checkbox" name="N:Likes[]" value="beauty" onchange="updateLikesLabel()" class="w-5 h-5 accent-red-600"><span class="text-sm font-bold text-zinc-700">✨ Is beautiful</span></label>
+                                <label class="flex items-center gap-3 p-3 hover:bg-zinc-50 rounded-md cursor-pointer"><input type="checkbox" name="N:Likes[]" value="noise" onchange="updateLikesLabel()" class="w-5 h-5 accent-red-600"><span class="text-sm font-bold text-zinc-700">🔇 Buffers noise</span></label>
+                                <label class="flex items-center gap-3 p-3 hover:bg-zinc-50 rounded-md cursor-pointer"><input type="checkbox" name="N:Likes[]" value="wind" onchange="updateLikesLabel()" class="w-5 h-5 accent-red-600"><span class="text-sm font-bold text-zinc-700">🌬️ Buffers wind</span></label>
+                                <label class="flex items-center gap-3 p-3 hover:bg-zinc-50 rounded-md cursor-pointer"><input type="checkbox" name="N:Likes[]" value="wildlife" onchange="updateLikesLabel()" class="w-5 h-5 accent-red-600"><span class="text-sm font-bold text-zinc-700">🐿️ Wildlife habitat</span></label>
+                                <button type="button" onclick="toggleLikes(event)" class="w-full mt-2 bg-zinc-900 text-white text-[10px] font-black uppercase p-2 rounded">Close & Save</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="species-help-box" class="hidden p-4 bg-zinc-900 rounded-lg border-l-4 border-red-600 mt-2">
+                        <p id="species-help-text" class="text-[12px] font-medium text-zinc-300 italic"></p>
+                    </div> 
+
+                    <div id="proximity_note_container" class="bg-orange-50 border-2 border-orange-200 p-4 rounded-lg mt-4 hidden">
+                        <p class="text-xl font-black text-orange-700 uppercase tracking-widest mb-2">🧌 Troll Alert</p>
+                        <textarea name="M:Proximity_Note" id="prox_note" class="w-full p-2 text-sm border-2 rounded outline-none" placeholder="Explain location proximity..."></textarea>
+                        <input type="hidden" name="L:Troll Catch" id="troll_flag">
+                    </div>
+
+                    <div class="pt-2 space-y-3">
+                        <button type="button" id="gps_btn" onclick="handleGPS()" class="w-full bg-zinc-800 text-white p-4 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-black transition-colors">🛰️ Capture Location</button>
+                        <div id="status-box" class="bg-zinc-100 border-2 border-dashed border-zinc-300 rounded-lg p-4 text-center">
+                            <p id="gps-msg" class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Awaiting GPS Signal</p>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="submit_btn" class="w-full ncsu-red text-white p-5 rounded-xl font-black uppercase tracking-widest shadow-xl">Confirm Tree Entry</button>
+
+                    <input type="hidden" name="E:GPS" id="coords">
+                    <input type="hidden" name="G:CO2_Lbs" id="hidden_co2">
+                    <input type="hidden" name="H:Asset_Value" id="hidden_value">
+                    <input type="hidden" name="I:Timestamp" id="timestamp">
+                </form>
+
+                <div class="space-y-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-zinc-900 p-6 rounded-2xl border-b-4 border-red-600 shadow-lg">
+                            <p class="text-red-500 font-black text-[10px] uppercase tracking-widest">Carbon Bank</p>
+                            <p class="text-4xl font-black italic text-white mt-1"><span id="display-co2">0</span> <span class="not-italic text-sm text-zinc-500 font-bold">Lbs</span></p>
+                        </div>
+                        <div class="bg-zinc-900 p-6 rounded-2xl border-b-4 border-green-500 shadow-lg">
+                            <p class="text-green-500 font-black text-[10px] uppercase tracking-widest">Asset Value</p>
+                            <p class="text-4xl font-black italic text-white mt-1">$<span id="display-value">0.00</span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl p-4 shadow-inner border border-zinc-200">
+                        <p class="text-[10px] font-black text-zinc-400 uppercase text-center mb-4 tracking-widest">20-Year Performance Forecast</p>
+                        <div class="relative h-[280px] w-full bg-zinc-50 rounded-lg overflow-hidden border border-zinc-100">
+                            <svg id="svgGraph" viewBox="0 0 400 220" class="w-full h-full p-4">
+                                <path id="svgPath" class="graph-line" d="M 40 160 L 40 160" />
+                                <circle id="p1" cx="40" cy="160" r="5" class="graph-point" />
+                                <circle id="p2" cx="125" cy="160" r="5" class="graph-point" />
+                                <circle id="p3" cx="210" cy="160" r="5" class="graph-point" />
+                                <circle id="p4" cx="295" cy="160" r="5" class="graph-point" />
+                                <circle id="p5" cx="380" cy="160" r="5" class="graph-point" />
+                            </svg>
+                            <div class="flex justify-between px-10 text-[9px] font-black text-zinc-400 uppercase -mt-12 pb-8">
+                                <span>Today</span><span>+5y</span><span>+10y</span><span>+15y</span><span>+20y</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-map" class="hidden min-h-[70vh] w-full p-2 bg-zinc-900">
+            <iframe width="100%" height="600" src="
