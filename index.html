@@ -48,24 +48,12 @@
 
         <div id="page-form" class="block">
             <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
-                <form id="treeForm" class="space-y-4">
-                    <div>
-                        <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Surveyor Unity ID</label>
-                        <input type="text" name="A:Surveyor" id="unity_id" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" placeholder="e.g. jdoe2" required>
-                    </div>
+           <form id="treeForm" class="space-y-4">
+    <div>
+        <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Surveyor Unity ID</label>
+        <input type="text" name="A:Surveyor" id="unity_id" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" placeholder="e.g. jdoe2" required>
+    </div>
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Circumference (In)</label>
-                            <input type="number" id="circ_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" placeholder="37.7">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">DBH (Inches)</label>
-                            <input type="number" name="F:Calculated_DBH" id="dbh_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" required>
-                        </div>
-                    </div>
-
-                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div>
         <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Species Group</label>
         <select name="C:Species Group" id="species_group" class="w-full border-2 p-3 rounded-lg font-bold bg-white" onchange="updateSpeciesHelper()" required>
@@ -75,6 +63,17 @@
             <option value="evergreen">🌲 EVERGREEN (Pine, Cedar)</option>
             <option value="small_ornate">🌸 SMALL (Dogwood, Holly)</option>
         </select>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+        <div>
+            <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Circumference (In)</label>
+            <input type="number" id="circ_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" placeholder="37.7">
+        </div>
+        <div>
+            <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">DBH (Inches)</label>
+            <input type="number" name="F:Calculated_DBH" id="dbh_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" required>
+        </div>
     </div>
 
     <div>
@@ -87,8 +86,6 @@
             <option value="0.25">Dead</option>
         </select>
     </div>
-</div>
-
                     <div id="species-help-box" class="hidden p-4 bg-zinc-900 rounded-lg border-l-4 border-red-600 mt-2">
                         <p id="species-help-text" class="text-[12px] font-medium text-zinc-300 italic"></p>
                     </div>
