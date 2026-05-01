@@ -337,10 +337,27 @@ function showPage(id) {
         updateMath();
     }
 
-    document.getElementById('circ_input').addEventListener('input', (e) => {
-        document.getElementById('dbh_input').value = (e.target.value / Math.PI).toFixed(1);
-        updateMath();
-    });
+  // Sync Circumference -> DBH
+document.getElementById('circ_input').addEventListener('input', (e) => {
+    const circ = parseFloat(e.target.value);
+    if (circ > 0) {
+        document.getElementById('dbh_input').value = (circ / Math.PI).toFixed(1);
+    } else {
+        document.getElementById('dbh_input').value = '';
+    }
+    updateMath();
+});
+
+// Sync DBH -> Circumference
+document.getElementById('dbh_input').addEventListener('input', (e) => {
+    const dbh = parseFloat(e.target.value);
+    if (dbh > 0) {
+        document.getElementById('circ_input').value = (dbh * Math.PI).toFixed(1);
+    } else {
+        document.getElementById('circ_input').value = '';
+    }
+    updateMath();
+});
 
     function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
     function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
