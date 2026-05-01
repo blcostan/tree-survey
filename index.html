@@ -416,7 +416,16 @@ document.getElementById('treeForm').addEventListener('submit', function(e) {
         const savedID = localStorage.getItem('ncsu_unity_id');
         if (savedID) document.getElementById('unity_id').value = savedID;
     });
-
+function toggleModal() {
+    const modal = document.getElementById('idModal');
+    modal.classList.toggle('hidden');
+    // This ensures it uses 'flex' to center the popup when it's not hidden
+    if (!modal.classList.contains('hidden')) {
+        modal.classList.add('flex');
+    } else {
+        modal.classList.remove('flex');
+    }
+}
 </script>
     <div id="idModal" class="fixed inset-0 z-[2000] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
     <div class="bg-white w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl">
