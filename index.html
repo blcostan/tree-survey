@@ -165,4 +165,156 @@
         </div>
 
         <div id="page-map" class="hidden min-h-[70vh] w-full p-2 bg-zinc-900">
-            <iframe width="100%" height="600" src="
+            <iframe width="100%" height="600" src="https://datastudio.google.com/embed/reporting/26194913-cee7-423f-80e6-25a715c079bc/page/erJvF" frameborder="0" style="border:0; border-radius: 12px;" allowfullscreen></iframe>
+        </div>
+
+        <div id="page-leader" class="hidden min-h-[70vh] w-full p-2 bg-zinc-100">
+            <iframe width="100%" height="600" src="https://datastudio.google.com/embed/reporting/da2596e8-8e09-41ed-83d5-5378e2a256c7/page/u16sFncaDb4" frameborder="0" style="border:0; border-radius: 12px;" allowfullscreen></iframe>
+        </div>
+
+        <div class="bg-zinc-100 p-8 text-zinc-600 border-t-2 border-zinc-200">
+            <h2 class="text-sm font-black text-zinc-900 uppercase tracking-tighter mb-4 border-b-2 border-zinc-300 pb-2">Scientific Methodology</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-[11px] leading-relaxed">
+                <div>
+                    <h3 class="font-black text-zinc-800 uppercase mb-1">I. Biomass Modeling</h3>
+                    <p>Jenkins, J.C., et al. (2003). $B = \exp(\beta_0 + \beta_1 \ln(DBH))$.</p>
+                </div>
+                <div>
+                    <h3 class="font-black text-zinc-800 uppercase mb-1">II. Carbon Value</h3>
+                    <p>EPA Social Cost of Carbon (~$190/mt), indexed to $0.09/lb.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="idModal" class="fixed inset-0 z-[4000] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-lg rounded-2xl overflow-hidden">
+            <div class="ncsu-red p-4 text-white flex justify-between items-center">
+                <h2 class="font-black uppercase tracking-widest text-sm">Species ID Guide</h2>
+                <button onclick="closeModal('idModal')" class="text-2xl font-bold">&times;</button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-xs font-bold border-l-4 border-red-600 pl-2">Hardwood: Oaks, Hickories. Sturdy limbs.</p>
+                <p class="text-xs font-bold border-l-4 border-green-600 pl-2">Soft Hardwood: Maples, Poplars. Fast growth.</p>
+                <p class="text-xs font-bold border-l-4 border-zinc-600 pl-2">Evergreen: Pines, Cedars. Needles.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="conditionModal" class="fixed inset-0 z-[4000] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-lg rounded-2xl overflow-hidden">
+            <div class="bg-zinc-900 p-4 text-white flex justify-between items-center">
+                <h2 class="font-black uppercase tracking-widest text-sm">Condition Guide</h2>
+                <button onclick="closeModal('conditionModal')" class="text-2xl font-bold">&times;</button>
+            </div>
+            <div class="p-6 text-sm">
+                <ul class="space-y-2 font-bold">
+                    <li>1.0 Excellent | 0.8 Good | 0.6 Fair | 0.4 Poor | 0.25 Dead</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const jenkins = { "hardwood": [-2.0127, 2.4342], "soft_hardwood": [-2.48, 2.4835], "evergreen": [-2.5356, 2.4349], "small_ornate": [-0.7152, 1.7029] };
+
+    function showPage(id) {
+        ['form', 'map', 'leader'].forEach(p => {
+            document.getElementById('page-' + p).classList.add('hidden');
+            document.getElementById('btn-' + p).className = "flex-1 inline-flex items-center justify-center gap-2 p-4 font-black uppercase text-[10px] tracking-widest text-zinc-400 bg-zinc-50";
+        });
+        document.getElementById('page-' + id).classList.remove('hidden');
+        document.getElementById('btn-' + id).className = "flex-1 inline-flex items-center justify-center gap-2 p-4 font-black uppercase text-[10px] tracking-widest bg-white text-red-600 border-b-4 border-red-600";
+    }
+
+    function toggleLikes(e) {
+        e.stopPropagation();
+        const menu = document.getElementById('likes_menu');
+        menu.classList.toggle('hidden');
+    }
+
+    function updateLikesLabel() {
+        const checked = document.querySelectorAll('input[name="N:Likes[]"]:checked');
+        const label = document.getElementById('likes_label');
+        if (checked.length > 0) {
+            label.innerText = `${checked.length} Selection(s) Added`;
+            label.className = "text-sm text-red-600 font-black";
+        } else {
+            label.innerText = "Select value(s)...";
+            label.className = "text-sm text-zinc-400 font-bold";
+        }
+    }
+
+    async function handleGPS() {
+        const btn = document.getElementById('gps_btn');
+        btn.innerText = "⏳ Verifying...";
+        navigator.geolocation.getCurrentPosition((pos) => {
+            const lat = pos.coords.latitude; const lng = pos.coords.longitude;
+            document.getElementById('coords').value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+            document.getElementById('timestamp').value = new Date().toISOString();
+            document.getElementById('gps-msg').innerText = "✅ LOCATION VERIFIED";
+            btn.classList.add('hidden');
+            document.getElementById('submit_btn').style.display = 'block';
+            if(localStorage.getItem('last_lat') && Math.abs(lat - localStorage.getItem('last_lat')) < 0.00003) {
+                document.getElementById('proximity_note_container').style.display = 'block';
+                document.getElementById('troll_flag').value = "TROLL";
+            }
+            localStorage.setItem('last_lat', lat);
+        }, () => { alert("Enable GPS to submit."); btn.innerText = "🛰️ Retry GPS"; });
+    }
+
+    function updateMath() {
+        const dbh = parseFloat(document.getElementById('dbh_input').value) || 0;
+        const group = document.getElementById('species_group').value;
+        const cond = parseFloat(document.getElementById('condition_select').value);
+        if (dbh > 0 && group) {
+            const p = jenkins[group];
+            const biomassKG = Math.exp(p[0] + p[1] * Math.log(dbh * 2.54));
+            const co2 = (biomassKG * 2.20462) * 0.5 * 3.6663 * cond;
+            document.getElementById('display-co2').innerText = Math.round(co2).toLocaleString();
+            document.getElementById('display-value').innerText = (co2 * 0.09).toFixed(2);
+            document.getElementById('hidden_co2').value = co2.toFixed(2);
+            document.getElementById('hidden_value').value = (co2 * 0.09).toFixed(2);
+            updateGraph(dbh, p, cond);
+        }
+    }
+
+    function updateGraph(dbh, p, cond) {
+        let points = [];
+        for (let i = 0; i < 5; i++) points.push(Math.exp(p[0] + p[1] * Math.log((dbh + (i * 0.5)) * 2.54)) * 2.2 * 0.5 * 3.6 * cond);
+        const max = Math.max(...points);
+        const svgPoints = points.map((val, i) => {
+            const x = 40 + (i * 85), y = 160 - (val / max * 100);
+            document.getElementById(`p${i+1}`).setAttribute('cy', y);
+            return `${x} ${y}`;
+        });
+        document.getElementById('svgPath').setAttribute('d', `M ${svgPoints.join(' L ')}`);
+    }
+
+    function updateSpeciesHelper() {
+        document.getElementById('species-help-box').classList.remove('hidden');
+        document.getElementById('species-help-text').innerText = `Applying equations for ${document.getElementById('species_group').value}.`;
+        updateMath();
+    }
+
+    document.getElementById('circ_input').addEventListener('input', (e) => {
+        document.getElementById('dbh_input').value = (e.target.value / Math.PI).toFixed(1);
+        updateMath();
+    });
+
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
+
+    window.onclick = function(e) {
+        if (!e.target.closest('.relative')) document.getElementById('likes_menu').classList.add('hidden');
+    };
+
+    document.getElementById('treeForm').onsubmit = function(e) {
+        e.preventDefault();
+        document.getElementById('overlay').style.display = 'flex';
+        fetch('https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG', { method: 'POST', body: new FormData(this) })
+        .then(() => { alert('Tree Registered!'); location.reload(); });
+    };
+</script>
+</body>
+</html>
