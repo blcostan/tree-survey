@@ -83,15 +83,39 @@
         <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Tree Condition</label>
         <button type="button" onclick="toggleConditionModal()" class="text-sm font-black text-red-600 uppercase border-b-2 border-red-600 tracking-tighter hover:text-zinc-900 hover:border-zinc-900 transition-colors py-1">❓ Health Guide</button>
     </div>
-    <select name="D:Condition" id="condition_select" class="w-full border-2 p-3 rounded-lg font-bold bg-white" onchange="updateMath()" required>
-        <option value="1.0">Excellent</option>
-        <option value="0.8" selected>Good</option>
-        <option value="0.6">Fair</option>
-        <option value="0.4">Poor</option>
-        <option value="0.25">Dead</option>
-    </select>
-</div>
-   
+  <select name="D:Condition" id="condition_select" class="w-full border-2 p-3 rounded-lg font-bold bg-white" onchange="updateMath()" required>
+            <option value="1.0">Excellent</option>
+            <option value="0.8" selected>Good</option>
+            <option value="0.6">Fair</option>
+            <option value="0.4">Poor</option>
+            <option value="0.25">Dead</option>
+        </select>
+    </div> <div class="space-y-2 mt-4">
+        <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Community Value</label>
+        <div class="grid grid-cols-1 gap-2 bg-zinc-50 p-4 rounded-lg border-2 border-zinc-200">
+            <p class="text-[10px] font-bold text-zinc-400 uppercase mb-1 italic">I like this tree because it...</p>
+            <label class="flex items-center gap-3 text-sm font-bold text-zinc-700 cursor-pointer hover:bg-white p-1 rounded transition-colors">
+                <input type="checkbox" name="N:Likes[]" value="shade" class="w-5 h-5 accent-red-600"> ☂️ Provides shade
+            </label>
+            <label class="flex items-center gap-3 text-sm font-bold text-zinc-700 cursor-pointer hover:bg-white p-1 rounded transition-colors">
+                <input type="checkbox" name="N:Likes[]" value="beauty" class="w-5 h-5 accent-red-600"> ✨ Is beautiful to look at
+            </label>
+            <label class="flex items-center gap-3 text-sm font-bold text-zinc-700 cursor-pointer hover:bg-white p-1 rounded transition-colors">
+                <input type="checkbox" name="N:Likes[]" value="noise" class="w-5 h-5 accent-red-600"> 🔇 Buffers street noise
+            </label>
+            <label class="flex items-center gap-3 text-sm font-bold text-zinc-700 cursor-pointer hover:bg-white p-1 rounded transition-colors">
+                <input type="checkbox" name="N:Likes[]" value="wind" class="w-5 h-5 accent-red-600"> 🌬️ Buffers wind
+            </label>
+            <label class="flex items-center gap-3 text-sm font-bold text-zinc-700 cursor-pointer hover:bg-white p-1 rounded transition-colors">
+                <input type="checkbox" name="N:Likes[]" value="wildlife" class="w-5 h-5 accent-red-600"> 🐿️ Supports wildlife
+            </label>
+        </div>
+    </div>
+
+    <div id="species-help-box" class="hidden p-4 bg-zinc-900 rounded-lg border-l-4 border-red-600 mt-2">
+        <p id="species-help-text" class="text-[12px] font-medium text-zinc-300 italic"></p>
+    </div> 
+<div id="species-help-box" class="hidden p-4 bg-zinc-900 ...">
                     <div id="species-help-box" class="hidden p-4 bg-zinc-900 rounded-lg border-l-4 border-red-600 mt-2">
                         <p id="species-help-text" class="text-[12px] font-medium text-zinc-300 italic"></p>
                     </div>
