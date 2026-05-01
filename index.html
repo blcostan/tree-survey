@@ -131,24 +131,32 @@
                         </div>
                     </div>
                     
-                    <div class="bg-white rounded-2xl p-4 shadow-inner border border-zinc-200">
-                        <p class="text-[10px] font-black text-zinc-400 uppercase text-center mb-4 tracking-widest">20-Year Performance Forecast</p>
-                        <div class="relative h-[250px] w-full bg-zinc-50 rounded-lg overflow-hidden border border-zinc-100">
-                            <svg id="svgGraph" viewBox="0 0 400 200" class="w-full h-full p-4">
-                                <line x1="40" y1="160" x2="380" y2="160" stroke="#d1d5db" stroke-width="2" />
-                                <line x1="40" y1="20" x2="40" y2="160" stroke="#d1d5db" stroke-width="2" />
-                                <path id="svgPath" class="graph-line" d="M 40 160 L 40 160" />
-                                <circle id="p1" cx="40" cy="160" r="5" class="graph-point" />
-                                <circle id="p2" cx="125" cy="160" r="5" class="graph-point" />
-                                <circle id="p3" cx="210" cy="160" r="5" class="graph-point" />
-                                <circle id="p4" cx="295" cy="160" r="5" class="graph-point" />
-                                <circle id="p5" cx="380" cy="160" r="5" class="graph-point" />
-                            </svg>
-                            <div class="flex justify-between px-10 text-[9px] font-black text-zinc-400 uppercase">
-                                <span>Today</span><span>+5y</span><span>+10y</span><span>+15y</span><span>+20y</span>
-                            </div>
-                        </div>
-                    </div>
+             <div class="bg-white rounded-2xl p-4 shadow-inner border border-zinc-200">
+    <p class="text-[10px] font-black text-zinc-400 uppercase text-center mb-4 tracking-widest">20-Year Performance Forecast</p>
+    
+    <div class="relative h-[280px] w-full bg-zinc-50 rounded-lg overflow-hidden border border-zinc-100">
+        
+        <svg id="svgGraph" viewBox="0 0 400 220" class="w-full h-full p-4">
+            <text x="-90" y="15" transform="rotate(-90)" fill="#a1a1aa" font-size="10" font-weight="900" class="uppercase tracking-widest">CO2 (Lbs)</text>
+            
+            <text x="210" y="210" text-anchor="middle" fill="#a1a1aa" font-size="10" font-weight="900" class="uppercase tracking-widest">Forecast Period (Years)</text>
+
+            <line x1="40" y1="160" x2="380" y2="160" stroke="#d1d5db" stroke-width="2" />
+            <line x1="40" y1="20" x2="40" y2="160" stroke="#d1d5db" stroke-width="2" />
+            
+            <path id="svgPath" class="graph-line" d="M 40 160 L 40 160" />
+            <circle id="p1" cx="40" cy="160" r="5" class="graph-point" />
+            <circle id="p2" cx="125" cy="160" r="5" class="graph-point" />
+            <circle id="p3" cx="210" cy="160" r="5" class="graph-point" />
+            <circle id="p4" cx="295" cy="160" r="5" class="graph-point" />
+            <circle id="p5" cx="380" cy="160" r="5" class="graph-point" />
+        </svg>
+
+        <div class="flex justify-between px-10 text-[9px] font-black text-zinc-400 uppercase -mt-12 pb-8">
+            <span>Today</span><span>+5y</span><span>+10y</span><span>+15y</span><span>+20y</span>
+        </div>
+    </div>
+</div>
                 </div>
             </div>
         </div>
