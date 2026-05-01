@@ -252,6 +252,13 @@
 </div>
 
 <script>
+    // Load Unity ID on page start
+window.addEventListener('DOMContentLoaded', () => {
+    const savedID = localStorage.getItem('saved_unity_id');
+    if (savedID) {
+        document.getElementById('unity_id').value = savedID;
+    }
+});
     const jenkins = { "hardwood": [-2.0127, 2.4342], "soft_hardwood": [-2.48, 2.4835], "evergreen": [-2.5356, 2.4349], "small_ornate": [-0.7152, 1.7029] };
 
 function showPage(id) {
@@ -372,6 +379,10 @@ document.getElementById('dbh_input').addEventListener('input', (e) => {
         fetch('https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG', { method: 'POST', body: new FormData(this) })
         .then(() => { alert('Tree Registered!'); location.reload(); });
     };
+    // Save Unity ID to local storage whenever it changes
+document.getElementById('unity_id').addEventListener('input', (e) => {
+    localStorage.setItem('saved_unity_id', e.target.value);
+});
 </script>
 </body>
 </html>
