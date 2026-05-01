@@ -78,17 +78,20 @@
             <input type="number" name="F:Calculated_DBH" id="dbh_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" required>
         </div>
     </div>
-
-    <div>
-        <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Tree Condition</label>
-        <select name="D:Condition" id="condition_select" class="w-full border-2 p-3 rounded-lg font-bold bg-white" onchange="updateMath()" required>
-            <option value="1.0">Excellent</option>
-            <option value="0.8" selected>Good</option>
-            <option value="0.6">Fair</option>
-            <option value="0.4">Poor</option>
-            <option value="0.25">Dead</option>
-        </select>
+<div>
+    <div class="flex justify-between items-end mb-1">
+        <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Tree Condition</label>
+        <button type="button" onclick="toggleConditionModal()" class="text-sm font-black text-red-600 uppercase border-b-2 border-red-600 tracking-tighter hover:text-zinc-900 hover:border-zinc-900 transition-colors py-1">❓ Health Guide</button>
     </div>
+    <select name="D:Condition" id="condition_select" class="w-full border-2 p-3 rounded-lg font-bold bg-white" onchange="updateMath()" required>
+        <option value="1.0">Excellent</option>
+        <option value="0.8" selected>Good</option>
+        <option value="0.6">Fair</option>
+        <option value="0.4">Poor</option>
+        <option value="0.25">Dead</option>
+    </select>
+</div>
+   
                     <div id="species-help-box" class="hidden p-4 bg-zinc-900 rounded-lg border-l-4 border-red-600 mt-2">
                         <p id="species-help-text" class="text-[12px] font-medium text-zinc-300 italic"></p>
                     </div>
@@ -460,5 +463,59 @@ function toggleModal() {
         </div>
     </div>
 </div>
+ <div id="conditionModal" class="fixed inset-0 z-[2000] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="bg-white w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl border-t-8 border-green-600">
+        <div class="bg-zinc-900 p-4 text-white flex justify-between items-center">
+            <h2 class="font-black uppercase tracking-widest text-base">Health Assessment Guide</h2>
+            <button onclick="toggleConditionModal()" class="text-3xl font-bold">&times;</button>
+        </div>
+        <div class="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+            
+            <div class="flex gap-4 items-start">
+                <div class="bg-green-100 text-green-700 p-2 rounded font-black text-xs">1.0</div>
+                <div>
+                    <h3 class="font-black text-zinc-900 uppercase text-sm">Excellent</h3>
+                    <p class="text-base text-zinc-600">Full canopy, no dead branches, perfect bark, vigorous growth.</p>
+                </div>
+            </div>
+
+            <div class="flex gap-4 items-start border-t pt-4">
+                <div class="bg-blue-100 text-blue-700 p-2 rounded font-black text-xs">0.8</div>
+                <div>
+                    <h3 class="font-black text-zinc-900 uppercase text-sm">Good</h3>
+                    <p class="text-base text-zinc-600">Minor deadwood (<10%), healthy leaf color, typical for campus.</p>
+                </div>
+            </div>
+
+            <div class="flex gap-4 items-start border-t pt-4">
+                <div class="bg-yellow-100 text-yellow-700 p-2 rounded font-black text-xs">0.6</div>
+                <div>
+                    <h3 class="font-black text-zinc-900 uppercase text-sm">Fair</h3>
+                    <p class="text-base text-zinc-600">Visible thinning, 10-30% dead branches, signs of stress or pests.</p>
+                </div>
+            </div>
+
+            <div class="flex gap-4 items-start border-t pt-4">
+                <div class="bg-orange-100 text-orange-700 p-2 rounded font-black text-xs">0.4</div>
+                <div>
+                    <h3 class="font-black text-zinc-900 uppercase text-sm">Poor</h3>
+                    <p class="text-base text-zinc-600">Major dieback (>30%), trunk decay, sparse or yellowing leaves.</p>
+                </div>
+            </div>
+
+            <div class="flex gap-4 items-start border-t pt-4">
+                <div class="bg-red-100 text-red-700 p-2 rounded font-black text-xs">0.25</div>
+                <div>
+                    <h3 class="font-black text-zinc-900 uppercase text-sm">Dead/Dying</h3>
+                    <p class="text-base text-zinc-600">No leaves, bark falling off, structurally unsound.</p>
+                </div>
+            </div>
+
+        </div>
+        <div class="p-4 bg-zinc-50 border-t text-center">
+            <button onclick="toggleConditionModal()" class="bg-zinc-900 text-white px-10 py-3 rounded-lg font-black uppercase text-xs tracking-widest">Got it</button>
+        </div>
+    </div>
+</div>   
 </body>
 </html>
