@@ -52,8 +52,7 @@
                 <form id="treeForm" class="space-y-4">
                     <div>
                         <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Surveyor Unity ID</label>
-                        <input type="text" name="A:Surveyor" id="unity_id" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" placeholder="e.g. jdoe2" required>
-                    </div>
+                        <input type="text" name="A:Surveyor" id="unity_id" oninput="this.value = this.value.toLowerCase()" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" placeholder="e.g. jdoe2" required>
 
                     <div>
                         <div class="flex justify-between items-end mb-1">
@@ -373,12 +372,29 @@ document.getElementById('dbh_input').addEventListener('input', (e) => {
         if (!e.target.closest('.relative')) document.getElementById('likes_menu').classList.add('hidden');
     };
 
-    document.getElementById('treeForm').onsubmit = function(e) {
-        e.preventDefault();
-        document.getElementById('overlay').style.display = 'flex';
-        fetch('https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG', { method: 'POST', body: new FormData(this) })
-        .then(() => { alert('Tree Registered!'); location.reload(); });
-    };
+   document.getElementById('treeForm').onsubmit = function(e) {
+    e.preventDefault();
+
+    // 1. Force lowercase one last time (prevents leaderboard splitting)
+    const unityInput = document.getElementById('unity_id');
+    unityInput.value = unityInput.value.toLowerCase().trim();
+
+    // 2. Save the cleaned ID to local storage for the next use
+    localStorage.setItem('saved_unity_id', unityInput.value);
+
+    // 3. Show the loading overlay
+    document.getElementById('overlay').style.display = 'flex';
+
+    // 4. Send the data
+    fetch('https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG', { 
+        method: 'POST', 
+        body: new FormData(this) 
+    })
+    .then(() => { 
+        alert('Tree Registered!'); 
+        location.reload(); 
+    });
+};
     // Save Unity ID to local storage whenever it changes
 document.getElementById('unity_id').addEventListener('input', (e) => {
     localStorage.setItem('saved_unity_id', e.target.value);
