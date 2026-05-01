@@ -429,6 +429,16 @@ function toggleModal() {
         modal.classList.remove('flex');
     }
 }
+    function toggleConditionModal() {
+    const modal = document.getElementById('conditionModal');
+    modal.classList.toggle('hidden');
+    // Use 'flex' for centering when visible
+    if (!modal.classList.contains('hidden')) {
+        modal.classList.add('flex');
+    } else {
+        modal.classList.remove('flex');
+    }
+}
 </script>
     <div id="idModal" class="fixed inset-0 z-[2000] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
     <div class="bg-white w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl">
