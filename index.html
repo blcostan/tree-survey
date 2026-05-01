@@ -65,22 +65,29 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <select name="C:Species Group" id="species_group" class="w-full border-2 p-3 rounded-lg font-bold bg-white" onchange="updateSpeciesHelper()" required>
-                            <option value="" disabled selected>Identify type...</option>
-                            <option value="hardwood">🌳 STURDY (Oak, Hickory)</option>
-                            <option value="soft_hardwood">🍃 FAST (Maple, Poplar)</option>
-                            <option value="evergreen">🌲 EVERGREEN (Pine, Cedar)</option>
-                            <option value="small_ornate">🌸 SMALL (Dogwood, Holly)</option>
-                        </select>
-                        <select name="D:Condition" id="condition_select" class="w-full border-2 p-3 rounded-lg font-bold bg-white" onchange="updateMath()" required>
-                            <option value="1.0">Excellent</option>
-                            <option value="0.8" selected>Good</option>
-                            <option value="0.6">Fair</option>
-                            <option value="0.4">Poor</option>
-                            <option value="0.25">Dead</option>
-                        </select>
-                    </div>
+                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+        <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Species Group</label>
+        <select name="C:Species Group" id="species_group" class="w-full border-2 p-3 rounded-lg font-bold bg-white" onchange="updateSpeciesHelper()" required>
+            <option value="" disabled selected>Identify type...</option>
+            <option value="hardwood">🌳 STURDY (Oak, Hickory)</option>
+            <option value="soft_hardwood">🍃 FAST (Maple, Poplar)</option>
+            <option value="evergreen">🌲 EVERGREEN (Pine, Cedar)</option>
+            <option value="small_ornate">🌸 SMALL (Dogwood, Holly)</option>
+        </select>
+    </div>
+
+    <div>
+        <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Tree Condition</label>
+        <select name="D:Condition" id="condition_select" class="w-full border-2 p-3 rounded-lg font-bold bg-white" onchange="updateMath()" required>
+            <option value="1.0">Excellent</option>
+            <option value="0.8" selected>Good</option>
+            <option value="0.6">Fair</option>
+            <option value="0.4">Poor</option>
+            <option value="0.25">Dead</option>
+        </select>
+    </div>
+</div>
 
                     <div id="species-help-box" class="hidden p-4 bg-zinc-900 rounded-lg border-l-4 border-red-600 mt-2">
                         <p id="species-help-text" class="text-[12px] font-medium text-zinc-300 italic"></p>
