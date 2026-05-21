@@ -6,7 +6,7 @@
     <title>NCSU Tree Registry | Campus Planning</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght=400;700;900&display=swap');
         body { 
             font-family: 'Inter', sans-serif; 
             background-color: #f3f4f6; 
@@ -36,7 +36,7 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         /* Visibility States */
-        #submit_btn { display: inline-block; } /* Adjusted to visible for testing/entry fallback */
+        #submit_btn { display: inline-block; }
         .graph-line { fill: none; stroke: #CC0000; stroke-width: 4; stroke-linecap: round; transition: all 0.5s ease; }
         .graph-point { fill: #CC0000; transition: all 0.5s ease; }
         .modal-active { display: flex !important; }
@@ -236,28 +236,66 @@
     </div>
 
     <div id="idModal" class="fixed inset-0 z-[6000] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl">
+        <div class="bg-white w-full max-w-xl rounded-2xl overflow-hidden shadow-2xl">
             <div class="ncsu-red p-4 text-white flex justify-between items-center">
-                <h2 class="font-black uppercase tracking-widest text-sm">Species ID Guide</h2>
-                <button type="button" onclick="closeModal('idModal')" class="text-3xl leading-none">&times;</button>
+                <h2 class="font-black uppercase tracking-widest text-sm">Species Classification Guide</h2>
+                <button type="button" onclick="closeModal('idModal')" class="text-3xl font-light leading-none hover:text-zinc-200">&times;</button>
             </div>
-            <div class="p-6 space-y-4">
+            <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto text-xs leading-relaxed text-zinc-700">
                 <div class="border-l-4 border-red-600 pl-3">
-                    <p class="text-xs font-black text-red-600 uppercase">🌳 Hardwood (Sturdy)</p>
-                    <p class="text-xs text-zinc-600 font-bold">Slow-growing, dense wood. Broad leaves. Includes: Oaks, Hickory, Walnut, and Beech.</p>
+                    <p class="font-black text-red-600 uppercase text-[11px] mb-0.5">🌳 Hardwood (Sturdy)</p>
+                    <p class="font-bold">Dense, slow-growing structural trees with broad leaves. Highly valued for long-term canopy architecture.</p>
+                    <p class="text-zinc-500 mt-1"><span class="font-black text-zinc-700">Includes:</span> White Oak, Willow Oak, Southern Red Oak, Shagbark Hickory, Walnut, and American Beech.</p>
+                </div>
+                <div class="border-l-4 border-amber-500 pl-3">
+                    <p class="font-black text-amber-600 uppercase text-[11px] mb-0.5">🍃 Soft Hardwood (Fast Growth)</p>
+                    <p class="font-bold">Deciduous trees with rapid cellular expansion patterns and lower fiber density levels.</p>
+                    <p class="text-zinc-500 mt-1"><span class="font-black text-zinc-700">Includes:</span> Red Maple, Sugar Maple, Tulip Poplar, Sweetgum, Sycamore, and River Birch.</p>
+                </div>
+                <div class="border-l-4 border-emerald-600 pl-3">
+                    <p class="font-black text-emerald-600 uppercase text-[11px] mb-0.5">🌲 Evergreen (Conifers)</p>
+                    <p class="font-bold">Needle-bearing specimens providing year-round environmental windbreak performance and shelter profiles.</p>
+                    <p class="text-zinc-500 mt-1"><span class="font-black text-zinc-700">Includes:</span> Loblolly Pine, Longleaf Pine, Eastern Redcedar, and Deodar Cedar.</p>
+                </div>
+                <div class="border-l-4 border-purple-600 pl-3">
+                    <p class="font-black text-purple-600 uppercase text-[11px] mb-0.5">🌸 Small / Ornate</p>
+                    <p class="font-bold">Understory species generally restricted to a lower maximum height, selected for aesthetic features.</p>
+                    <p class="text-zinc-500 mt-1"><span class="font-black text-zinc-700">Includes:</span> Flowering Dogwood, Redbud, American Holly, Yoshino Cherry, and Crape Myrtle.</p>
                 </div>
             </div>
         </div>
     </div>
     
     <div id="conditionModal" class="fixed inset-0 z-[6000] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl">
+        <div class="bg-white w-full max-w-xl rounded-2xl overflow-hidden shadow-2xl">
             <div class="ncsu-red p-4 text-white flex justify-between items-center">
-                <h2 class="font-black uppercase tracking-widest text-sm">Health Guide</h2>
-                <button type="button" onclick="closeModal('conditionModal')" class="text-3xl leading-none">&times;</button>
+                <h2 class="font-black uppercase tracking-widest text-sm">Tree Health Evaluation Guide</h2>
+                <button type="button" onclick="closeModal('conditionModal')" class="text-3xl font-light leading-none hover:text-zinc-200">&times;</button>
             </div>
-            <div class="p-6">
-                <p class="text-xs text-zinc-600 font-bold">Assess canopy health and bark condition to classify tree quality.</p>
+            <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto text-xs leading-relaxed text-zinc-700">
+                <p class="font-medium text-zinc-500 mb-2">Evaluate the tree's complete structural state using the following standard forestry baselines:</p>
+                <div class="space-y-3">
+                    <div class="bg-zinc-50 p-3 rounded-lg border border-zinc-200">
+                        <p class="font-black text-zinc-900 uppercase text-[10px]">⭐ Excellent (1.0)</p>
+                        <p class="mt-0.5">Full, robust canopy with ideal tip growth extension. No visible structural decay, trunk wounds, pest damage, or dead wood components within upper crown sections.</p>
+                    </div>
+                    <div class="bg-zinc-50 p-3 rounded-lg border border-zinc-200">
+                        <p class="font-black text-zinc-900 uppercase text-[10px]">🟢 Good (0.8)</p>
+                        <p class="mt-0.5">Minor structural flaws or isolated dead branch tips present. Canopy displays strong foliage color and density distribution (>80% functional leafy surface area).</p>
+                    </div>
+                    <div class="bg-zinc-50 p-3 rounded-lg border border-zinc-200">
+                        <p class="font-black text-zinc-900 uppercase text-[10px]">🟡 Fair (0.6)</p>
+                        <p class="mt-0.5">Moderate localized branch dieback or minor trunk hollows observed. Obvious signs of insect pressure or environmental stress, but core vigor remains stable.</p>
+                    </div>
+                    <div class="bg-zinc-50 p-3 rounded-lg border border-zinc-200">
+                        <p class="font-black text-zinc-900 uppercase text-[10px]">🟠 Poor (0.4)</p>
+                        <p class="mt-0.5">Severe operational decay or extensive skeletal dieback across the main structure (>50% canopy loss). Major bark peeling, mechanical fracturing, or foundational root damage.</p>
+                    </div>
+                    <div class="bg-zinc-50 p-3 rounded-lg border border-zinc-200">
+                        <p class="font-black text-zinc-900 uppercase text-[10px]">💀 Dead (0.25)</p>
+                        <p class="mt-0.5">No living green tissue or functional leaf arrays remaining. Structural elements represent a complete biomass loss profile, retained primarily for specialized wildlife habitat values.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -318,7 +356,6 @@
 
         // Placeholder for calculations system update framework
         function updateMath() {
-            // Your custom logic to calculate hidden variables (CO2, Asset Value) goes here
             console.log("Registry metrics re-evaluated based on DBH change.");
         }
     </script>
