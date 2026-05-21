@@ -236,4 +236,91 @@
     </div>
 
     <div id="idModal" class="fixed inset-0 z-[6000] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-        <div class="bg-white w
+        <div class="bg-white w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl">
+            <div class="ncsu-red p-4 text-white flex justify-between items-center">
+                <h2 class="font-black uppercase tracking-widest text-sm">Species ID Guide</h2>
+                <button type="button" onclick="closeModal('idModal')" class="text-3xl leading-none">&times;</button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="border-l-4 border-red-600 pl-3">
+                    <p class="text-xs font-black text-red-600 uppercase">🌳 Hardwood (Sturdy)</p>
+                    <p class="text-xs text-zinc-600 font-bold">Slow-growing, dense wood. Broad leaves. Includes: Oaks, Hickory, Walnut, and Beech.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="conditionModal" class="fixed inset-0 z-[6000] hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl">
+            <div class="ncsu-red p-4 text-white flex justify-between items-center">
+                <h2 class="font-black uppercase tracking-widest text-sm">Health Guide</h2>
+                <button type="button" onclick="closeModal('conditionModal')" class="text-3xl leading-none">&times;</button>
+            </div>
+            <div class="p-6">
+                <p class="text-xs text-zinc-600 font-bold">Assess canopy health and bark condition to classify tree quality.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // HORIZONTAL-SAFE NAVIGATION CONTROLLER
+        function showPage(id) {
+            const pages = ['form', 'map', 'leader'];
+            pages.forEach(p => {
+                document.getElementById('page-' + p).classList.add('hidden');
+                document.getElementById('btn-' + p).className = "flex-1 inline-flex items-center justify-center gap-1 sm:gap-2 p-3 sm:p-4 font-black uppercase text-[9px] sm:text-[10px] tracking-tight sm:tracking-widest transition-all text-zinc-400 hover:text-zinc-600 bg-zinc-50 border-b-4 border-transparent truncate";
+            });
+
+            document.getElementById('page-' + id).classList.remove('hidden');
+            document.getElementById('btn-' + id).className = "flex-1 inline-flex items-center justify-center gap-1 sm:gap-2 p-3 sm:p-4 font-black uppercase text-[9px] sm:text-[10px] tracking-tight sm:tracking-widest transition-all bg-white text-red-600 border-b-4 border-red-600 truncate";
+        }
+
+        function openModal(id) { document.getElementById(id).classList.add('modal-active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('modal-active'); }
+
+        // Placeholder functions to prevent form evaluation crashes
+        function updateSpeciesHelper() { console.log("Species helper triggered"); }
+        function toggleLikes(e) { e.preventDefault(); document.getElementById('likes_menu').classList.toggle('hidden'); }
+        function updateLikesLabel() { document.getElementById('likes_label').textContent = "Values updated..."; }
+        function handleGPS() { document.getElementById('gps-msg').textContent = "📍 Location locked!"; }
+
+        // CORE MATH ROUTINE: CONVERT CIRCUMFERENCE TO DBH & CHECK LIMITS
+        const circInput = document.getElementById('circ_input');
+        const dbhInput = document.getElementById('dbh_input');
+        const warningBox = document.getElementById('dbh-warning');
+
+        function processDiameterValidation(value) {
+            const parsedVal = parseFloat(value);
+            if (parsedVal > 100) {
+                warningBox.classList.remove('hidden');
+            } else {
+                warningBox.classList.add('hidden');
+            }
+            updateMath(); // Fires calculations framework update hooks safely
+        }
+
+        // 1. Calculate DBH from Circumference input dynamically
+        circInput.addEventListener('input', function() {
+            if (this.value) {
+                const calculatedDBH = (parseFloat(this.value) / Math.PI).toFixed(1);
+                dbhInput.value = calculatedDBH;
+                processDiameterValidation(calculatedDBH);
+            } else {
+                dbhInput.value = '';
+                warningBox.classList.add('hidden');
+            }
+        });
+
+        // 2. Fallback validator if DBH is manually typed or changed
+        dbhInput.addEventListener('input', function() {
+            processDiameterValidation(this.value);
+        });
+
+        // Placeholder for calculations system update framework
+        function updateMath() {
+            // Your custom logic to calculate hidden variables (CO2, Asset Value) goes here
+            console.log("Registry metrics re-evaluated based on DBH change.");
+        }
+    </script>
+</body>
+</html>
