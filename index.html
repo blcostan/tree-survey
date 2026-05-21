@@ -101,8 +101,7 @@
                         </div>
                         <div>
                             <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">DBH (Inches)</label>
-                            <input type="number" name="F:Calculated_DBH" id="dbh_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" required>
-                        </div>
+                            <input type="number" name="F:Calculated_DBH" id="dbh_input" step="0.1" max="100" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" required>
                     </div>
 
                     <div>
@@ -397,18 +396,31 @@
             updateMath();
         }
 
-        // Bi-directional conversion listeners
-        document.getElementById('circ_input').addEventListener('input', (e) => {
-            const circ = parseFloat(e.target.value);
-            document.getElementById('dbh_input').value = circ > 0 ? (circ / Math.PI).toFixed(1) : '';
-            updateMath();
-        });
+// Bi-directional conversion listeners with 100-inch DBH Cap
+document.getElementById('circ_input').addEventListener('input', (e) => {
+    const circ = parseFloat(e.target.value);
+    let calculatedDbh = circ > 0 ? (circ / Math.PI) : 0;
+    
+    if (calculatedDbh > 100) {
+        calculatedDbh = 100;
+        document.getElementById('circ_input').value = (100 * Math.PI).toFixed(1);
+    }
+    
+    document.getElementById('dbh_input').value = calculatedDbh > 0 ? calculatedDbh.toFixed(1) : '';
+    updateMath();
+});
 
-        document.getElementById('dbh_input').addEventListener('input', (e) => {
-            const dbh = parseFloat(e.target.value);
-            document.getElementById('circ_input').value = dbh > 0 ? (dbh * Math.PI).toFixed(1) : '';
-            updateMath();
-        });
+document.getElementById('dbh_input').addEventListener('input', (e) => {
+    let dbh = parseFloat(e.target.value) || 0;
+    
+    if (dbh > 100) {
+        dbh = 100;
+        e.target.value = 100;
+    }
+    
+    document.getElementById('circ_input').value = dbh > 0 ? (dbh * Math.PI).toFixed(1) : '';
+    updateMath();
+});
 
         // Close multi-select menu on outside click
         window.onclick = function(e) { 
