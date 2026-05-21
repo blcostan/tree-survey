@@ -97,11 +97,19 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Circumference (In)</label>
-                            <input type="number" id="circ_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" placeholder="37.7">
+                            <input type="number" id="circ_input" step="0.1" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" placeholder="314.1">
                         </div>
                         <div>
                             <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">DBH (Inches)</label>
-                            <input type="number" name="F:Calculated_DBH" id="dbh_input" step="0.1" max="100" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" required>
+                            <input type="number" name="F:Calculated_DBH" id="dbh_input" step="0.1" max="150" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" required>
+                        </div>
+                    </div>
+
+                    <div id="dbh-warning" class="hidden p-3 bg-amber-50 border-l-4 border-amber-500 rounded text-amber-900 flex items-start gap-2.5 shadow-sm">
+                        <span class="text-base mt-0.5">🌳</span>
+                        <div>
+                            <p class="text-[11px] font-black uppercase tracking-wide">Significant Campus Specimen Detected</p>
+                            <p class="text-[10px] font-medium leading-normal mt-0.5 text-amber-800">This DBH exceeds 100". You are registering an exceptional heritage giant on NC State grounds! Double check your alignment to ensure accuracy.</p>
                         </div>
                     </div>
 
@@ -257,6 +265,16 @@
 
         function openModal(id) { document.getElementById(id).classList.add('modal-active'); }
         function closeModal(id) { document.getElementById(id).classList.remove('modal-active'); }
+
+        // MONITOR DBH INPUT FOR EXTREME HERITAGE TREE VALUES (>100 INCHES)
+        document.getElementById('dbh_input').addEventListener('input', function() {
+            const warningBox = document.getElementById('dbh-warning');
+            if (parseFloat(this.value) > 100) {
+                warningBox.classList.remove('hidden');
+            } else {
+                warningBox.classList.add('hidden');
+            }
+        });
     </script>
 </body>
 </html>
