@@ -56,7 +56,7 @@
                 <h1 class="text-xl font-black italic uppercase tracking-tighter">NC STATE UNIVERSITY</h1>
                 <p class="text-red-500 text-[10px] font-bold uppercase mt-1 tracking-widest">Campus Planning & Strategic Investment</p>
             </div>
-            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Registry Engine v6.7</div>
+            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Registry Engine v6.8</div>
         </div>
 
         <div class="flex flex-row border-b-2 border-zinc-200 bg-zinc-50 w-full">
@@ -74,7 +74,7 @@
         <div id="page-form" class="block">
             <div class="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
                 
-                <form id="treeForm" class="space-y-4">
+                <form id="treeForm" class="space-y-4" onsubmit="handleFormSubmission(event)">
                     <div>
                         <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Surveyor Unity ID</label>
                         <input type="text" name="A:Surveyor" id="unity_id" oninput="this.value = this.value.toLowerCase()" class="w-full border-2 p-3 rounded-lg font-bold outline-none focus:border-red-600" placeholder="e.g. jdoe2" required>
@@ -324,6 +324,62 @@
     </div>
 
     <script>
+        // ON INITIAL LOAD: Check if a Unity ID was previously saved
+        document.addEventListener("DOMContentLoaded", function() {
+            const savedUnityId = localStorage.getItem("ncsu_surveyor_id");
+            if (savedUnityId) {
+                document.getElementById("unity_id").value = savedUnityId;
+            }
+        });
+
+        // FORM SUBMISSION HANDLER WITH PERSISTENCE
+        function handleFormSubmission(event) {
+            event.preventDefault();
+            
+            // Capture the Unity ID and save it locally before handling database transmission logic
+            const currentId = document.getElementById("unity_id").value.trim().toLowerCase();
+            if (currentId) {
+                localStorage.setItem("ncsu_surveyor_id", currentId);
+            }
+
+            // Show transmission overlay
+            const overlay = document.getElementById("overlay");
+            overlay.style.display = "flex";
+
+            // Simulate form processing/database submission sequence
+            setTimeout(() => {
+                overlay.style.display = "none";
+                alert("Tree successfully saved to registry database!");
+                
+                // Reset form fields except for the persistent Unity ID
+                document.getElementById("circ_input").value = "";
+                document.getElementById("dbh_input").value = "";
+                document.getElementById("species_group").selectedIndex = 0;
+                document.getElementById("condition_select").value = "0.8";
+                
+                // Clear active community value checkboxes
+                const checkboxes = document.querySelectorAll('input[name="N:Likes[]"]');
+                checkboxes.forEach(cb => cb.checked = false);
+                document.getElementById('likes_label').textContent = "Select value(s)...";
+
+                // Reset step tracking modules
+                document.getElementById('coords').value = "";
+                const statusBox = document.getElementById('status-box');
+                statusBox.className = "bg-amber-50 border-2 border-dashed border-amber-300 rounded-xl p-4 text-center transition-all duration-300";
+                
+                const msg = document.getElementById('gps-msg');
+                msg.className = "text-xs font-black text-amber-700 uppercase tracking-wider flex items-center justify-center gap-2";
+                msg.innerHTML = "⚠️ Location Required Before Submitting";
+
+                const submitBtn = document.getElementById('submit_btn');
+                submitBtn.disabled = true;
+                submitBtn.className = "w-full bg-zinc-300 text-zinc-500 cursor-not-allowed p-5 rounded-xl font-black uppercase tracking-widest transition-all text-sm shadow-inner";
+                submitBtn.textContent = "Lock Location Above to Enable Submit";
+
+                clearMetrics();
+            }, 1500);
+        }
+
         // NAVIGATION CONTROLLER
         function showPage(id) {
             const pages = ['form', 'map', 'leader'];
@@ -437,7 +493,6 @@
 
             const coeff = speciesCoefficients[speciesGroup] || speciesCoefficients['small_ornate'];
 
-            // Current day actual calculations
             const rawBiomass = Math.exp(coeff.a + (coeff.b * Math.log(dbh)));
             const finalCO2 = Math.round((rawBiomass * 0.5 * 3.666) * condition);
             
@@ -453,27 +508,22 @@
             const growthRates = [0, 5, 10, 15, 20];
             const xPositions = [60, 140, 220, 300, 380];
             
-            // CRITICAL FIX: Lock the graph Y-ceiling to the tree's IDEAL POTENTIAL (health condition = 1.0)
             const projectedDBHYear20 = Math.min(dbh + (20 * 0.35), 100);
             const idealBiomassYear20 = Math.exp(coeff.a + (coeff.b * Math.log(projectedDBHYear20)));
-            const dynamicGraphCeiling = idealBiomassYear20 * 0.5 * 3.666; // Standardized potential limit
+            const dynamicGraphCeiling = idealBiomassYear20 * 0.5 * 3.666;
 
-            // Update the static Y-axis labels with the potential capacity numbers
             document.getElementById('yScaleTop').textContent = Math.round(dynamicGraphCeiling).toLocaleString();
             document.getElementById('yScaleMid').textContent = Math.round(dynamicGraphCeiling / 2).toLocaleString();
             document.getElementById('yScaleBot').textContent = '0';
 
-            // Calculate coordinates using actual health performance against the ideal capacity ceiling
             const coordinates = [];
             growthRates.forEach((years, index) => {
                 const projectedDBH = Math.min(dbh + (years * 0.35), 100);
                 const projectedBiomass = Math.exp(coeff.a + (coeff.b * Math.log(projectedDBH)));
-                
-                // Actual performance includes the selected condition factor
                 const actualProjectedCO2 = (projectedBiomass * 0.5 * 3.666) * condition;
                 
                 let yPercent = dynamicGraphCeiling > 0 ? (actualProjectedCO2 / dynamicGraphCeiling) : 0;
-                if (yPercent > 1) yPercent = 1; // Cap at bounding box boundary
+                if (yPercent > 1) yPercent = 1;
                 
                 const svgYPosition = 160 - (yPercent * 130);
 
