@@ -150,14 +150,27 @@
                         <p id="species-help-text" class="text-[12px] font-medium text-zinc-300 italic"></p>
                     </div> 
 
-                    <div class="pt-2 space-y-3">
-                        <button type="button" id="gps_btn" onclick="handleGPS()" class="w-full bg-zinc-800 text-white p-4 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-black transition-colors">🛰️ Capture Location</button>
-                        <div id="status-box" class="bg-zinc-100 border-2 border-dashed border-zinc-300 rounded-lg p-4 text-center">
-                            <p id="gps-msg" class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Awaiting GPS Signal</p>
+                    <div class="pt-4 border-t-2 border-zinc-200 mt-6 space-y-4">
+                        <div>
+                            <p class="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2">Step 1: Verify Location coordinates</p>
+                            <button type="button" id="gps_btn" onclick="handleGPS()" class="w-full bg-blue-600 text-white p-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 active:scale-[0.99] transition-all shadow-md border-b-4 border-blue-800">
+                                🛰️ Tap to Capture GPS Coordinates
+                            </button>
+                        </div>
+                        
+                        <div id="status-box" class="bg-amber-50 border-2 border-dashed border-amber-300 rounded-xl p-4 text-center transition-all duration-300">
+                            <p id="gps-msg" class="text-xs font-black text-amber-700 uppercase tracking-wider flex items-center justify-center gap-2">
+                                ⚠️ Location Required Before Submitting
+                            </p>
+                        </div>
+
+                        <div class="pt-2">
+                            <p class="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2">Step 2: Save to Database</p>
+                            <button type="submit" id="submit_btn" disabled class="w-full bg-zinc-300 text-zinc-500 cursor-not-allowed p-5 rounded-xl font-black uppercase tracking-widest transition-all text-sm shadow-inner">
+                                Lock Location Above to Enable Submit
+                            </button>
                         </div>
                     </div>
-
-                    <button type="submit" id="submit_btn" class="w-full ncsu-red text-white p-5 rounded-xl font-black uppercase tracking-widest shadow-xl hover:bg-red-700 transition-colors">Confirm Tree Entry</button>
 
                     <input type="hidden" name="E:GPS" id="coords">
                     <input type="hidden" name="G:CO2_Lbs" id="hidden_co2">
@@ -320,7 +333,26 @@
         function updateSpeciesHelper() { console.log("Species type registered."); updateMath(); }
         function toggleLikes(e) { e.preventDefault(); document.getElementById('likes_menu').classList.toggle('hidden'); }
         function updateLikesLabel() { document.getElementById('likes_label').textContent = "Values updated..."; }
-        function handleGPS() { document.getElementById('gps-msg').textContent = "📍 Location locked!"; }
+        
+        // INTERACTION REWIRE HANDLER
+        function handleGPS() { 
+            // Mocking a successful coordinate registration step
+            document.getElementById('coords').value = "35.7847,-78.6821"; 
+            
+            // Transform status display to emerald success theme
+            const statusBox = document.getElementById('status-box');
+            statusBox.className = "bg-emerald-50 border-2 border-dashed border-emerald-500 rounded-xl p-4 text-center transition-all duration-300";
+            
+            const msg = document.getElementById('gps-msg');
+            msg.className = "text-xs font-black text-emerald-700 uppercase tracking-wider flex items-center justify-center gap-2";
+            msg.innerHTML = "✅ GPS Coordinates Saved (35.7847, -78.6821)";
+
+            // Unlock the entry submit option seamlessly
+            const submitBtn = document.getElementById('submit_btn');
+            submitBtn.disabled = false;
+            submitBtn.className = "w-full ncsu-red text-white p-5 rounded-xl font-black uppercase tracking-widest shadow-xl hover:bg-red-700 active:scale-[0.99] transition-all text-sm cursor-pointer border-b-4 border-red-900";
+            submitBtn.textContent = "Confirm Tree Entry";
+        }
 
         // INPUT LISTENERS AND OBJECT ACCESSORS
         const circInput = document.getElementById('circ_input');
@@ -334,7 +366,7 @@
             } else {
                 warningBox.classList.add('hidden');
             }
-            updateMath(); // Fire calculations engine
+            updateMath();
         }
 
         circInput.addEventListener('input', function() {
@@ -381,50 +413,37 @@
 
             const condition = parseFloat(document.getElementById('condition_select').value);
 
-            // 1. Carbon Logic Framework (Jenkins Power Law Curve approximation)
-            // Weight (lbs) = exp(-2.48 + 2.48 * ln(DBH))
             const rawBiomass = Math.exp(-2.48 + (2.48 * Math.log(dbh)));
-            // Formula: Biomass * 0.5 (carbon fraction) * 3.666 (molecular conversion ratio CO2) * condition modifier
             const finalCO2 = Math.round((rawBiomass * 0.5 * 3.666) * condition);
             
             document.getElementById('display-co2').textContent = finalCO2.toLocaleString();
             document.getElementById('hidden_co2').value = finalCO2;
 
-            // 2. Financial Valuation Framework (Trunk Formula Technique Baseline)
-            // Cross sectional area = pi * (diameter/2)^2
             const trunkArea = Math.PI * Math.pow((dbh / 2), 2);
-            // Multiplied by standard local landscape base cost factor ($2.50 / sq in) * health condition
             const assetValue = (trunkArea * 2.50 * condition);
             
             document.getElementById('display-value').textContent = assetValue.toFixed(2);
             document.getElementById('hidden_value').value = assetValue.toFixed(2);
 
-            // 3. Dynamic 20-Year Future Path Vector Graph Generator
-            // Estimate standard campus tree ring development speed (approx 0.35 inches diameter addition per fiscal year)
             const growthRates = [0, 5, 10, 15, 20];
             const coordinates = [];
             const xPositions = [40, 125, 210, 295, 380];
 
-            // Maximum bounds baseline mapping limit constants for SVG display scale
-            const maxGraphValue = Math.exp(-2.48 + (2.48 * Math.log(100))) * 0.5 * 3.666; // Max cap limits baseline
+            const maxGraphValue = Math.exp(-2.48 + (2.48 * Math.log(100))) * 0.5 * 3.666;
 
             growthRates.forEach((years, index) => {
                 const projectedDBH = Math.min(dbh + (years * 0.35), 100);
                 const projectedBiomass = Math.exp(-2.48 + (2.48 * Math.log(projectedDBH)));
                 const projectedCO2 = (projectedBiomass * 0.5 * 3.666) * condition;
 
-                // Map value dynamically into the SVG bounding coordinates grid zone (Y-Axis bounds: 20 to 160)
                 let yPercent = projectedCO2 / maxGraphValue;
                 if(yPercent > 1) yPercent = 1;
-                const svgYPosition = 160 - (yPercent * 130); // Dynamic interpolation height conversion array
+                const svgYPosition = 160 - (yPercent * 130);
 
                 coordinates.push(`${xPositions[index]} ${svgYPosition}`);
-                
-                // Relocate specific coordinate point elements
                 document.getElementById('p' + (index + 1)).setAttribute('cy', svgYPosition);
             });
 
-            // Reconstruct active graph line trajectory descriptor attribute string
             const pathDataString = "M " + coordinates.join(" L ");
             document.getElementById('svgPath').setAttribute('d', pathDataString);
         }
