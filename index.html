@@ -406,6 +406,7 @@
             path.setAttribute('d', 'M 60 160 L 140 160 L 220 160 L 300 160 L 380 160');
             for(let i=1; i<=5; i++) {
                 document.getElementById('p'+i).setAttribute('cy', '160');
+                document.getElementById('p'+i).setAttribute('cx', 60 + (i-1)*80);
             }
         }
 
@@ -445,7 +446,7 @@
             // Dynamic SVG Forecast Track Generator
             const growthRates = [0, 5, 10, 15, 20];
             const coordinates = [];
-            const xPositions = [60, 140, 220, 300, 380]; // Shifted right slightly to allow space for the Y-label
+            const xPositions = [60, 140, 220, 300, 380];
 
             const maxGraphValue = Math.exp(-2.0127 + (2.4342 * Math.log(100))) * 0.5 * 3.666;
 
