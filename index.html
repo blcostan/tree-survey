@@ -329,17 +329,19 @@
         function openModal(id) { document.getElementById(id).classList.add('modal-active'); }
         function closeModal(id) { document.getElementById(id).classList.remove('modal-active'); }
 
-        // Field Helpers
-        function updateSpeciesHelper() { console.log("Species type registered."); updateMath(); }
+        // Dropdown Value Updates Helper
+        function updateSpeciesHelper() { 
+            console.log("Species change detected."); 
+            updateMath(); 
+        }
+        
         function toggleLikes(e) { e.preventDefault(); document.getElementById('likes_menu').classList.toggle('hidden'); }
         function updateLikesLabel() { document.getElementById('likes_label').textContent = "Values updated..."; }
         
-        // INTERACTION REWIRE HANDLER
+        // GIS Workflow Coordination Handler
         function handleGPS() { 
-            // Mocking a successful coordinate registration step
             document.getElementById('coords').value = "35.7847,-78.6821"; 
             
-            // Transform status display to emerald success theme
             const statusBox = document.getElementById('status-box');
             statusBox.className = "bg-emerald-50 border-2 border-dashed border-emerald-500 rounded-xl p-4 text-center transition-all duration-300";
             
@@ -347,14 +349,13 @@
             msg.className = "text-xs font-black text-emerald-700 uppercase tracking-wider flex items-center justify-center gap-2";
             msg.innerHTML = "✅ GPS Coordinates Saved (35.7847, -78.6821)";
 
-            // Unlock the entry submit option seamlessly
             const submitBtn = document.getElementById('submit_btn');
             submitBtn.disabled = false;
             submitBtn.className = "w-full ncsu-red text-white p-5 rounded-xl font-black uppercase tracking-widest shadow-xl hover:bg-red-700 active:scale-[0.99] transition-all text-sm cursor-pointer border-b-4 border-red-900";
             submitBtn.textContent = "Confirm Tree Entry";
         }
 
-        // INPUT LISTENERS AND OBJECT ACCESSORS
+        // INPUT LISTENERS AND CORE OBJECT ACCESSORS
         const circInput = document.getElementById('circ_input');
         const dbhInput = document.getElementById('dbh_input');
         const warningBox = document.getElementById('dbh-warning');
@@ -366,7 +367,7 @@
             } else {
                 warningBox.classList.add('hidden');
             }
-            updateMath();
+            updateMath(); 
         }
 
         circInput.addEventListener('input', function() {
@@ -406,34 +407,49 @@
             }
         }
 
-        // PRODUCTION ENGINE: SCIENTIFIC MATH FUNCTIONS
+        // SCIENTIFIC MATH CALCULATIONS ENGINE
         function updateMath() {
             const dbh = parseFloat(dbhInput.value);
             if (!dbh || isNaN(dbh) || dbh <= 0) return;
 
             const condition = parseFloat(document.getElementById('condition_select').value);
+            const speciesGroup = document.getElementById('species_group').value;
 
-            const rawBiomass = Math.exp(-2.48 + (2.48 * Math.log(dbh)));
+            // Jenkins Power Law Baseline Constants mapped by species choices
+            const speciesCoefficients = {
+                'hardwood':      { a: -2.0127, b: 2.4342 }, 
+                'soft_hardwood': { a: -2.2094, b: 2.3867 }, 
+                'evergreen':     { a: -2.5356, b: 2.4349 }, 
+                'small_ornate':  { a: -2.4800, b: 2.4800 }  
+            };
+
+            // Use baseline defaults if field calculations are called before group assignment
+            const coeff = speciesCoefficients[speciesGroup] || speciesCoefficients['small_ornate'];
+
+            // Biomass Equation implementation
+            const rawBiomass = Math.exp(coeff.a + (coeff.b * Math.log(dbh)));
             const finalCO2 = Math.round((rawBiomass * 0.5 * 3.666) * condition);
             
             document.getElementById('display-co2').textContent = finalCO2.toLocaleString();
             document.getElementById('hidden_co2').value = finalCO2;
 
+            // Asset Cost Estimation Framework
             const trunkArea = Math.PI * Math.pow((dbh / 2), 2);
             const assetValue = (trunkArea * 2.50 * condition);
             
             document.getElementById('display-value').textContent = assetValue.toFixed(2);
             document.getElementById('hidden_value').value = assetValue.toFixed(2);
 
+            // Dynamic SVG Forecast Track Generator
             const growthRates = [0, 5, 10, 15, 20];
             const coordinates = [];
             const xPositions = [40, 125, 210, 295, 380];
 
-            const maxGraphValue = Math.exp(-2.48 + (2.48 * Math.log(100))) * 0.5 * 3.666;
+            const maxGraphValue = Math.exp(-2.0127 + (2.4342 * Math.log(100))) * 0.5 * 3.666;
 
             growthRates.forEach((years, index) => {
                 const projectedDBH = Math.min(dbh + (years * 0.35), 100);
-                const projectedBiomass = Math.exp(-2.48 + (2.48 * Math.log(projectedDBH)));
+                const projectedBiomass = Math.exp(coeff.a + (coeff.b * Math.log(projectedDBH)));
                 const projectedCO2 = (projectedBiomass * 0.5 * 3.666) * condition;
 
                 let yPercent = projectedCO2 / maxGraphValue;
