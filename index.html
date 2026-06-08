@@ -193,15 +193,17 @@
                     <div class="bg-white rounded-2xl p-4 shadow-inner border border-zinc-200">
                         <p class="text-[10px] font-black text-zinc-400 uppercase text-center mb-4 tracking-widest">20-Year Performance Forecast</p>
                         <div class="relative h-[280px] w-full bg-zinc-50 rounded-lg overflow-hidden border border-zinc-100">
-                            <svg id="svgGraph" viewBox="0 0 400 220" class="w-full h-full p-4">
-                                <path id="svgPath" class="graph-line" d="M 40 160 L 125 160 L 210 160 L 295 160 L 380 160" />
-                                <circle id="p1" cx="40" cy="160" r="5" class="graph-point" />
-                                <circle id="p2" cx="125" cy="160" r="5" class="graph-point" />
-                                <circle id="p3" cx="210" cy="160" r="5" class="graph-point" />
-                                <circle id="p4" cx="295" cy="160" r="5" class="graph-point" />
+                            <svg id="svgGraph" viewBox="0 0 420 220" class="w-full h-full p-4">
+                                <text x="-105" y="16" transform="rotate(-90)" fill="#a1a1aa" font-size="9" font-weight="900" letter-spacing="1" text-anchor="middle" class="uppercase">Carbon Stored (Lbs)</text>
+                                
+                                <path id="svgPath" class="graph-line" d="M 60 160 L 140 160 L 220 160 L 300 160 L 380 160" />
+                                <circle id="p1" cx="60" cy="160" r="5" class="graph-point" />
+                                <circle id="p2" cx="140" cy="160" r="5" class="graph-point" />
+                                <circle id="p3" cx="220" cy="160" r="5" class="graph-point" />
+                                <circle id="p4" cx="300" cy="160" r="5" class="graph-point" />
                                 <circle id="p5" cx="380" cy="160" r="5" class="graph-point" />
                             </svg>
-                            <div class="flex justify-between px-10 text-[9px] font-black text-zinc-400 uppercase -mt-12 pb-8">
+                            <div class="flex justify-between pl-14 pr-10 text-[9px] font-black text-zinc-400 uppercase -mt-12 pb-8">
                                 <span>Today</span><span>+5y</span><span>+10y</span><span>+15y</span><span>+20y</span>
                             </div>
                         </div>
@@ -401,7 +403,7 @@
 
         function resetGraph() {
             const path = document.getElementById('svgPath');
-            path.setAttribute('d', 'M 40 160 L 125 160 L 210 160 L 295 160 L 380 160');
+            path.setAttribute('d', 'M 60 160 L 140 160 L 220 160 L 300 160 L 380 160');
             for(let i=1; i<=5; i++) {
                 document.getElementById('p'+i).setAttribute('cy', '160');
             }
@@ -443,7 +445,7 @@
             // Dynamic SVG Forecast Track Generator
             const growthRates = [0, 5, 10, 15, 20];
             const coordinates = [];
-            const xPositions = [40, 125, 210, 295, 380];
+            const xPositions = [60, 140, 220, 300, 380]; // Shifted right slightly to allow space for the Y-label
 
             const maxGraphValue = Math.exp(-2.0127 + (2.4342 * Math.log(100))) * 0.5 * 3.666;
 
@@ -458,6 +460,7 @@
 
                 coordinates.push(`${xPositions[index]} ${svgYPosition}`);
                 document.getElementById('p' + (index + 1)).setAttribute('cy', svgYPosition);
+                document.getElementById('p' + (index + 1)).setAttribute('cx', xPositions[index]);
             });
 
             const pathDataString = "M " + coordinates.join(" L ");
