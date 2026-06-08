@@ -56,7 +56,7 @@
                 <h1 class="text-xl font-black italic uppercase tracking-tighter">NC STATE UNIVERSITY</h1>
                 <p class="text-red-500 text-[10px] font-bold uppercase mt-1 tracking-widest">Campus Planning & Strategic Investment</p>
             </div>
-            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Registry Engine v6.6</div>
+            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Registry Engine v6.7</div>
         </div>
 
         <div class="flex flex-row border-b-2 border-zinc-200 bg-zinc-50 w-full">
@@ -194,8 +194,16 @@
                         <p class="text-[10px] font-black text-zinc-400 uppercase text-center mb-4 tracking-widest">20-Year Performance Forecast</p>
                         <div class="relative h-[280px] w-full bg-zinc-50 rounded-lg overflow-hidden border border-zinc-100">
                             <svg id="svgGraph" viewBox="0 0 420 220" class="w-full h-full p-4">
-                                <text x="-105" y="16" transform="rotate(-90)" fill="#a1a1aa" font-size="9" font-weight="900" letter-spacing="1" text-anchor="middle" class="uppercase">Carbon Stored (Lbs)</text>
+                                <text x="-95" y="14" transform="rotate(-90)" fill="#71717a" font-size="8" font-weight="900" letter-spacing="1" text-anchor="middle" class="uppercase">Carbon Stored (Lbs)</text>
                                 
+                                <text id="yScaleTop" x="50" y="34" fill="#a1a1aa" font-size="8" font-weight="700" text-anchor="end">0</text>
+                                <text id="yScaleMid" x="50" y="99" fill="#a1a1aa" font-size="8" font-weight="700" text-anchor="end">0</text>
+                                <text id="yScaleBot" x="50" y="164" fill="#a1a1aa" font-size="8" font-weight="700" text-anchor="end">0</text>
+
+                                <line x1="55" y1="30" x2="60" y2="30" stroke="#e4e4e7" stroke-width="1" />
+                                <line x1="55" y1="95" x2="60" y2="95" stroke="#e4e4e7" stroke-width="1" />
+                                <line x1="55" y1="160" x2="60" y2="160" stroke="#e4e4e7" stroke-width="1" />
+
                                 <path id="svgPath" class="graph-line" d="M 60 160 L 140 160 L 220 160 L 300 160 L 380 160" />
                                 <circle id="p1" cx="60" cy="160" r="5" class="graph-point" />
                                 <circle id="p2" cx="140" cy="160" r="5" class="graph-point" />
@@ -333,7 +341,6 @@
 
         // Dropdown Value Updates Helper
         function updateSpeciesHelper() { 
-            console.log("Species change detected."); 
             updateMath(); 
         }
         
@@ -408,6 +415,9 @@
                 document.getElementById('p'+i).setAttribute('cy', '160');
                 document.getElementById('p'+i).setAttribute('cx', 60 + (i-1)*80);
             }
+            document.getElementById('yScaleTop').textContent = '0';
+            document.getElementById('yScaleMid').textContent = '0';
+            document.getElementById('yScaleBot').textContent = '0';
         }
 
         // SCIENTIFIC MATH CALCULATIONS ENGINE
@@ -418,7 +428,6 @@
             const condition = parseFloat(document.getElementById('condition_select').value);
             const speciesGroup = document.getElementById('species_group').value;
 
-            // Jenkins Power Law Baseline Constants mapped by species choices
             const speciesCoefficients = {
                 'hardwood':      { a: -2.0127, b: 2.4342 }, 
                 'soft_hardwood': { a: -2.2094, b: 2.3867 }, 
@@ -428,41 +437,44 @@
 
             const coeff = speciesCoefficients[speciesGroup] || speciesCoefficients['small_ornate'];
 
-            // Biomass Equation implementation (Current Day)
+            // Current day actual calculations
             const rawBiomass = Math.exp(coeff.a + (coeff.b * Math.log(dbh)));
             const finalCO2 = Math.round((rawBiomass * 0.5 * 3.666) * condition);
             
             document.getElementById('display-co2').textContent = finalCO2.toLocaleString();
             document.getElementById('hidden_co2').value = finalCO2;
 
-            // Asset Cost Estimation Framework
             const trunkArea = Math.PI * Math.pow((dbh / 2), 2);
             const assetValue = (trunkArea * 2.50 * condition);
             
             document.getElementById('display-value').textContent = assetValue.toFixed(2);
             document.getElementById('hidden_value').value = assetValue.toFixed(2);
 
-            // Dynamic SVG Forecast Track Generator
             const growthRates = [0, 5, 10, 15, 20];
             const xPositions = [60, 140, 220, 300, 380];
             
-            // First step: Calculate the timeline raw values to find the dynamic ceiling
-            const rawCalculatedTimelineValues = growthRates.map(years => {
+            // CRITICAL FIX: Lock the graph Y-ceiling to the tree's IDEAL POTENTIAL (health condition = 1.0)
+            const projectedDBHYear20 = Math.min(dbh + (20 * 0.35), 100);
+            const idealBiomassYear20 = Math.exp(coeff.a + (coeff.b * Math.log(projectedDBHYear20)));
+            const dynamicGraphCeiling = idealBiomassYear20 * 0.5 * 3.666; // Standardized potential limit
+
+            // Update the static Y-axis labels with the potential capacity numbers
+            document.getElementById('yScaleTop').textContent = Math.round(dynamicGraphCeiling).toLocaleString();
+            document.getElementById('yScaleMid').textContent = Math.round(dynamicGraphCeiling / 2).toLocaleString();
+            document.getElementById('yScaleBot').textContent = '0';
+
+            // Calculate coordinates using actual health performance against the ideal capacity ceiling
+            const coordinates = [];
+            growthRates.forEach((years, index) => {
                 const projectedDBH = Math.min(dbh + (years * 0.35), 100);
                 const projectedBiomass = Math.exp(coeff.a + (coeff.b * Math.log(projectedDBH)));
-                return (projectedBiomass * 0.5 * 3.666) * condition;
-            });
-
-            // Set the ceiling to the Year-20 max value (index 4) instead of a hardcoded 100" limit
-            const dynamicGraphCeiling = rawCalculatedTimelineValues[4];
-
-            // Second step: Map coordinates onto the SVG canvas bounding space using our scale ceiling
-            const coordinates = [];
-            rawCalculatedTimelineValues.forEach((projectedCO2, index) => {
-                // Safeguard against dividing by zero if tree values evaluate layout anomalies
-                let yPercent = dynamicGraphCeiling > 0 ? (projectedCO2 / dynamicGraphCeiling) : 0;
                 
-                // Scale values cleanly inside a comfortable 130px viewing vector height box
+                // Actual performance includes the selected condition factor
+                const actualProjectedCO2 = (projectedBiomass * 0.5 * 3.666) * condition;
+                
+                let yPercent = dynamicGraphCeiling > 0 ? (actualProjectedCO2 / dynamicGraphCeiling) : 0;
+                if (yPercent > 1) yPercent = 1; // Cap at bounding box boundary
+                
                 const svgYPosition = 160 - (yPercent * 130);
 
                 coordinates.push(`${xPositions[index]} ${svgYPosition}`);
