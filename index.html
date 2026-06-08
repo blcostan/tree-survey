@@ -426,10 +426,9 @@
                 'small_ornate':  { a: -2.4800, b: 2.4800 }  
             };
 
-            // Use baseline defaults if field calculations are called before group assignment
             const coeff = speciesCoefficients[speciesGroup] || speciesCoefficients['small_ornate'];
 
-            // Biomass Equation implementation
+            // Biomass Equation implementation (Current Day)
             const rawBiomass = Math.exp(coeff.a + (coeff.b * Math.log(dbh)));
             const finalCO2 = Math.round((rawBiomass * 0.5 * 3.666) * condition);
             
@@ -445,18 +444,25 @@
 
             // Dynamic SVG Forecast Track Generator
             const growthRates = [0, 5, 10, 15, 20];
-            const coordinates = [];
             const xPositions = [60, 140, 220, 300, 380];
-
-            const maxGraphValue = Math.exp(-2.0127 + (2.4342 * Math.log(100))) * 0.5 * 3.666;
-
-            growthRates.forEach((years, index) => {
+            
+            // First step: Calculate the timeline raw values to find the dynamic ceiling
+            const rawCalculatedTimelineValues = growthRates.map(years => {
                 const projectedDBH = Math.min(dbh + (years * 0.35), 100);
                 const projectedBiomass = Math.exp(coeff.a + (coeff.b * Math.log(projectedDBH)));
-                const projectedCO2 = (projectedBiomass * 0.5 * 3.666) * condition;
+                return (projectedBiomass * 0.5 * 3.666) * condition;
+            });
 
-                let yPercent = projectedCO2 / maxGraphValue;
-                if(yPercent > 1) yPercent = 1;
+            // Set the ceiling to the Year-20 max value (index 4) instead of a hardcoded 100" limit
+            const dynamicGraphCeiling = rawCalculatedTimelineValues[4];
+
+            // Second step: Map coordinates onto the SVG canvas bounding space using our scale ceiling
+            const coordinates = [];
+            rawCalculatedTimelineValues.forEach((projectedCO2, index) => {
+                // Safeguard against dividing by zero if tree values evaluate layout anomalies
+                let yPercent = dynamicGraphCeiling > 0 ? (projectedCO2 / dynamicGraphCeiling) : 0;
+                
+                // Scale values cleanly inside a comfortable 130px viewing vector height box
                 const svgYPosition = 160 - (yPercent * 130);
 
                 coordinates.push(`${xPositions[index]} ${svgYPosition}`);
