@@ -56,7 +56,7 @@
                 <h1 class="text-xl font-black italic uppercase tracking-tighter">NC STATE UNIVERSITY</h1>
                 <p class="text-red-500 text-[10px] font-bold uppercase mt-1 tracking-widest">Campus Planning & Strategic Investment</p>
             </div>
-            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Registry Engine v7.2</div>
+            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Registry Engine v7.6</div>
         </div>
 
         <div class="flex flex-row border-b-2 border-zinc-200 bg-zinc-50 w-full">
@@ -85,7 +85,7 @@
                             <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest">Species Group</label>
                             <button type="button" onclick="openModal('idModal')" class="text-sm font-black text-red-600 uppercase border-b border-red-600 tracking-tighter hover:text-zinc-900 transition-colors">❓ ID Guide</button>
                         </div>
-                        <select name="C:Species Group" id="species_group" class="w-full border-2 p-3 rounded-lg font-bold bg-white" onchange="updateSpeciesHelper()" required>
+                        <select name="C:Species Group" id="species_group" class="w-full border-2 p-3 rounded-lg font-bold bg-white" onchange="updateMath()" required>
                             <option value="" disabled selected>Identify type...</option>
                             <option value="hardwood">🌳 STURDY (Oak, Magnolia, Hickory)</option>
                             <option value="soft_hardwood">🍃 FAST (Maple, Poplar)</option>
@@ -146,10 +146,6 @@
                         </div>
                     </div>
 
-                    <div id="species-help-box" class="hidden p-4 bg-zinc-900 rounded-lg border-l-4 border-red-600 mt-2">
-                        <p id="species-help-text" class="text-[12px] font-medium text-zinc-300 italic"></p>
-                    </div> 
-
                     <div class="pt-4 border-t-2 border-zinc-200 mt-6 space-y-4">
                         <div>
                             <p class="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2">Step 1: Verify Location coordinates</p>
@@ -164,6 +160,10 @@
                             </p>
                         </div>
 
+                        <div id="proximity-box" class="hidden rounded-xl p-4 text-center border-2 border-dashed transition-all duration-300">
+                            <p id="proximity-msg" class="text-xs font-bold"></p>
+                        </div>
+
                         <div class="pt-2">
                             <p class="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2">Step 2: Save to Database</p>
                             <button type="submit" id="submit_btn" disabled class="w-full bg-zinc-300 text-zinc-500 cursor-not-allowed p-5 rounded-xl font-black uppercase tracking-widest transition-all text-sm shadow-inner">
@@ -172,9 +172,11 @@
                         </div>
                     </div>
 
+                    <input type="hidden" name="B:Circumference" id="hidden_circ">
                     <input type="hidden" name="E:GPS" id="coords">
                     <input type="hidden" name="G:CO2_Lbs" id="hidden_co2">
                     <input type="hidden" name="H:Asset_Value" id="hidden_value">
+                    <input type="hidden" name="M:Proximity_Note" id="hidden_proximity" value="Initial workspace data point entry.">
                     <input type="hidden" name="I:Created_At" id="timestamp">
                 </form>
 
@@ -214,35 +216,6 @@
                             <div class="flex justify-between pl-14 pr-10 text-[9px] font-black text-zinc-400 uppercase -mt-12 pb-8">
                                 <span>Today</span><span>+5y</span><span>+10y</span><span>+15y</span><span>+20y</span>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="methodology-section" class="bg-zinc-100 p-8 text-zinc-600 border-t-2 border-zinc-200">
-                <h2 class="text-sm font-black text-zinc-900 uppercase tracking-tighter mb-4 border-b-2 border-zinc-300 pb-2">Scientific Methodology & Carbon Logic</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-[11px] leading-relaxed">
-                    <div class="space-y-4">
-                        <div>
-                            <h3 class="font-black text-zinc-800 uppercase mb-1">I. The Biomass Equation</h3>
-                            <p class="mb-2">We use the <strong>Jenkins Allometric Power Law</strong> to estimate total tree weight based on Diameter at Breast Height (DBH).</p>
-                            <div class="bg-white p-3 rounded border font-mono text-[10px] text-zinc-800">
-                                Mass = exp(Constant_A + Constant_B * ln(DBH))
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="font-black text-zinc-800 uppercase mb-1">II. Carbon Fraction</h3>
-                            <p>Approximately <strong>50%</strong> of a tree's dry mass is pure Carbon, physically sequestered from the atmosphere.</p>
-                        </div>
-                    </div>
-                    <div class="space-y-4">
-                        <div>
-                            <h3 class="font-black text-zinc-800 uppercase mb-1">III. Atmosphere to Wood</h3>
-                            <p>To find total $CO_2$ removed, we multiply the Carbon weight by <strong>3.666</strong>, representing the molecular ratio of $CO_2$ to $C$.</p>
-                        </div>
-                        <div class="bg-zinc-900 text-white p-4 rounded-lg border-l-4 border-red-600">
-                            <p class="font-black uppercase text-[9px] text-red-500 mb-2">Final Formula Logic:</p>
-                            <p class="italic">[(Biomass × 0.5) × 3.666] × Health Modifier = Total $CO_2$ Saved</p>
                         </div>
                     </div>
                 </div>
@@ -327,7 +300,7 @@
         // SHEETMONKEY PRODUCTION API GATEWAY ENDPOINT
         const GOOGLE_WEB_APP_URL = "https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG";
 
-        // ON INITIAL LOAD: Check if a Unity ID was previously saved in the local environment
+        // LOCAL SURVEYOR RETRIEVAL LAYER
         document.addEventListener("DOMContentLoaded", function() {
             const savedUnityId = localStorage.getItem("ncsu_surveyor_id");
             if (savedUnityId) {
@@ -335,36 +308,101 @@
             }
         });
 
-        // FORM SUBMISSION HANDLER WITH INTERCEPTED STORAGE LOOPS
+        // HAVERSINE MATHEMATICAL SPHERICAL DISTANCE ENGINE
+        function calculateDistanceInFeet(lat1, lon1, lat2, lon2) {
+            const R = 20902231; // Mean planetary radius calculation expressed in international feet
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // COORD SNAP HANDLER WITH 10FT TROLL CATCH FILTER
+        function handleGPS() { 
+            // Mock Location parameters targeting core monitoring sectors
+            const currentLat = 35.7847;
+            const currentLon = -78.6821;
+            
+            const currentCoordsString = `${currentLat},${currentLon}`;
+            document.getElementById('coords').value = currentCoordsString; 
+            
+            // Reconfigure physical layout display models
+            const statusBox = document.getElementById('status-box');
+            statusBox.className = "bg-emerald-50 border-2 border-dashed border-emerald-500 rounded-xl p-4 text-center transition-all duration-300";
+            document.getElementById('gps-msg').className = "text-xs font-black text-emerald-700 uppercase tracking-wider flex items-center justify-center gap-2";
+            document.getElementById('gps-msg').innerHTML = `✅ GPS Coordinates Saved (${currentCoordsString})`;
+
+            // EVALUATE SPATIAL HISTORY
+            const lastTreeJSON = localStorage.getItem("last_surveyed_tree");
+            const proximityBox = document.getElementById("proximity-box");
+            const proximityMsg = document.getElementById("proximity-msg");
+            const hiddenProxInput = document.getElementById("hidden_proximity");
+
+            if (lastTreeJSON) {
+                const lastTree = JSON.parse(lastTreeJSON);
+                const distance = calculateDistanceInFeet(currentLat, currentLon, lastTree.lat, lastTree.lon);
+                
+                proximityBox.classList.remove("hidden");
+                
+                // CRITICAL 10-FOOT THRESHOLD TRIGGER (THE TROLL CATCH)
+                if (distance <= 10) {
+                    proximityBox.className = "rounded-xl p-4 text-center border-2 border-dashed bg-red-50 border-red-400 text-red-900";
+                    proximityMsg.innerHTML = `⚠️ Troll Catch Warning: High proximity event detected! Distance to previous entry: ${distance.toFixed(1)} feet.`;
+                    hiddenProxInput.value = `TROLL`;
+                } else {
+                    proximityBox.className = "rounded-xl p-4 text-center border-2 border-dashed bg-zinc-50 border-zinc-300 text-zinc-700";
+                    proximityMsg.innerHTML = `🟢 Distance validation clear. Previous asset is ${distance.toFixed(0)} feet away.`;
+                    hiddenProxInput.value = `CLEAR`;
+                }
+            } else {
+                hiddenProxInput.value = "CLEAR";
+            }
+
+            const submitBtn = document.getElementById('submit_btn');
+            submitBtn.disabled = false;
+            submitBtn.className = "w-full ncsu-red text-white p-5 rounded-xl font-black uppercase tracking-widest shadow-xl hover:bg-red-700 active:scale-[0.99] transition-all text-sm cursor-pointer border-b-4 border-red-900";
+            submitBtn.textContent = "Confirm Tree Entry";
+        }
+
+        // BALANCED PAYLOAD PACKER AND NET TRANSMITTER
         function handleFormSubmission(event) {
             event.preventDefault();
             
-            // Capture the user ID string and preserve it within browser cache
             const currentId = document.getElementById("unity_id").value.trim().toLowerCase();
             if (currentId) {
                 localStorage.setItem("ncsu_surveyor_id", currentId);
             }
 
-            // Create standard tracking timestamp right at execution moment
             document.getElementById('timestamp').value = new Date().toLocaleString();
 
-            // Ignite interface processing overlay
             const overlay = document.getElementById("overlay");
             overlay.style.display = "flex";
 
-            const formElement = document.getElementById('treeForm');
-            const formData = new FormData(formElement);
+            // Extract geolocation metrics to register historical parameters prior to canvas clear
+            const coordString = document.getElementById('coords').value;
+            const [savedLat, savedLon] = coordString.split(',').map(Number);
 
-            // Forward structural profiles directly to SheetMonkey's servers via fetch
+            const formElement = document.getElementById('treeForm');
+            
+            // CONVERT TO RAW URL ENCODED FORMAT TO FORCIBLY ALIGN SHEETMONKEY MATRIX CELLS
+            const urlEncodedData = new URLSearchParams(new FormData(formElement));
+
             fetch(GOOGLE_WEB_APP_URL, {
                 method: 'POST',
-                body: formData
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: urlEncodedData.toString()
             })
             .then(response => {
                 overlay.style.display = "none";
                 alert("Tree data logged successfully to operational spreadsheet!");
                 
-                // Clear out physical tree structures, preserving the stored Surveyor field
+                // Write successful target parameters into spatial hardware storage loop
+                localStorage.setItem("last_surveyed_tree", JSON.stringify({ lat: savedLat, lon: savedLon }));
+
+                // Clear layout structures, leaving the identity token safe
                 document.getElementById("circ_input").value = "";
                 document.getElementById("dbh_input").value = "";
                 document.getElementById("species_group").selectedIndex = 0;
@@ -374,8 +412,10 @@
                 checkboxes.forEach(cb => cb.checked = false);
                 document.getElementById('likes_label').textContent = "Select value(s)...";
 
-                // Wipe location arrays and engage validation locks for subsequent runs
+                // Re-arm form execution sequence blocks
                 document.getElementById('coords').value = "";
+                document.getElementById('proximity-box').classList.add('hidden');
+                
                 const statusBox = document.getElementById('status-box');
                 statusBox.className = "bg-amber-50 border-2 border-dashed border-amber-300 rounded-xl p-4 text-center transition-all duration-300";
                 
@@ -392,85 +432,63 @@
             })
             .catch(error => {
                 overlay.style.display = "none";
-                console.error("SheetMonkey Connectivity Fault:", error);
-                alert("Network error: Data failed to establish communication with SheetMonkey endpoint.");
+                console.error("SheetMonkey Data Terminal Exception:", error);
+                alert("Network error: Transmission path failed to respond.");
             });
         }
 
-        // NAVIGATION CONTROLLER
+        // TABS ROUTING CORE ROUTINES
         function showPage(id) {
             const pages = ['form', 'map', 'leader'];
             pages.forEach(p => {
                 document.getElementById('page-' + p).classList.add('hidden');
                 document.getElementById('btn-' + p).className = "flex-1 inline-flex items-center justify-center gap-1 sm:gap-2 p-3 sm:p-4 font-black uppercase text-[9px] sm:text-[10px] tracking-tight sm:tracking-widest transition-all text-zinc-400 hover:text-zinc-600 bg-zinc-50 border-b-4 border-transparent truncate";
             });
-
             document.getElementById('page-' + id).classList.remove('hidden');
             document.getElementById('btn-' + id).className = "flex-1 inline-flex items-center justify-center gap-1 sm:gap-2 p-3 sm:p-4 font-black uppercase text-[9px] sm:text-[10px] tracking-tight sm:tracking-widest transition-all bg-white text-red-600 border-b-4 border-red-600 truncate";
         }
 
         function openModal(id) { document.getElementById(id).classList.add('modal-active'); }
         function closeModal(id) { document.getElementById(id).classList.remove('modal-active'); }
-
-        function updateSpeciesHelper() { 
-            updateMath(); 
-        }
-        
         function toggleLikes(e) { e.preventDefault(); document.getElementById('likes_menu').classList.toggle('hidden'); }
         function updateLikesLabel() { document.getElementById('likes_label').textContent = "Values updated..."; }
-        
-        // GIS Location Interception Handler
-        function handleGPS() { 
-            document.getElementById('coords').value = "35.7847,-78.6821"; 
-            
-            const statusBox = document.getElementById('status-box');
-            statusBox.className = "bg-emerald-50 border-2 border-dashed border-emerald-500 rounded-xl p-4 text-center transition-all duration-300";
-            
-            const msg = document.getElementById('gps-msg');
-            msg.className = "text-xs font-black text-emerald-700 uppercase tracking-wider flex items-center justify-center gap-2";
-            msg.innerHTML = "✅ GPS Coordinates Saved (35.7847, -78.6821)";
 
-            const submitBtn = document.getElementById('submit_btn');
-            submitBtn.disabled = false;
-            submitBtn.className = "w-full ncsu-red text-white p-5 rounded-xl font-black uppercase tracking-widest shadow-xl hover:bg-red-700 active:scale-[0.99] transition-all text-sm cursor-pointer border-b-4 border-red-900";
-            submitBtn.textContent = "Confirm Tree Entry";
-        }
-
-        // PHYSICAL CALCULATORS AND OBJECT LISTENERS
+        // PHYSICAL FORM CALCULATIONS TRACKING MATRICES
         const circInput = document.getElementById('circ_input');
         const dbhInput = document.getElementById('dbh_input');
         const warningBox = document.getElementById('dbh-warning');
 
         function processDiameterValidation(value) {
-            const parsedVal = parseFloat(value);
-            if (parsedVal > 100) {
-                warningBox.classList.remove('hidden');
-            } else {
-                warningBox.classList.add('hidden');
-            }
+            if (parseFloat(value) > 100) { warningBox.classList.remove('hidden'); } 
+            else { warningBox.classList.add('hidden'); }
             updateMath(); 
         }
 
         circInput.addEventListener('input', function() {
             if (this.value) {
-                const calculatedDBH = (parseFloat(this.value) / Math.PI).toFixed(1);
-                dbhInput.value = calculatedDBH;
-                processDiameterValidation(calculatedDBH);
-            } else {
-                dbhInput.value = '';
-                warningBox.classList.add('hidden');
-                clearMetrics();
+                const calcDBH = (parseFloat(this.value) / Math.PI).toFixed(1);
+                dbhInput.value = calcDBH;
+                document.getElementById('hidden_circ').value = parseFloat(this.value).toFixed(1);
+                processDiameterValidation(calcDBH);
+            } else { 
+                dbhInput.value = ''; 
+                document.getElementById('hidden_circ').value = '';
+                warningBox.classList.add('hidden'); 
+                clearMetrics(); 
             }
         });
 
         dbhInput.addEventListener('input', function() {
             if (this.value) {
-                circInput.value = (parseFloat(this.value) * Math.PI).toFixed(1);
+                const calcCirc = (parseFloat(this.value) * Math.PI).toFixed(1);
+                circInput.value = calcCirc;
+                document.getElementById('hidden_circ').value = calcCirc;
                 processDiameterValidation(this.value);
-            } else {
-                circInput.value = '';
-                warningBox.classList.add('hidden');
-                clearMetrics();
+            } else { 
+                circInput.value = ''; 
+                document.getElementById('hidden_circ').value = '';
+                warningBox.classList.add('hidden'); 
+                clearMetrics(); 
             }
         });
 
@@ -481,24 +499,19 @@
         }
 
         function resetGraph() {
-            const path = document.getElementById('svgPath');
-            path.setAttribute('d', 'M 60 160 L 140 160 L 220 160 L 300 160 L 380 160');
-            for(let i=1; i<=5; i++) {
-                document.getElementById('p'+i).setAttribute('cy', '160');
-                document.getElementById('p'+i).setAttribute('cx', 60 + (i-1)*80);
-            }
+            document.getElementById('svgPath').setAttribute('d', 'M 60 160 L 140 160 L 220 160 L 300 160 L 380 160');
+            for(let i=1; i<=5; i++) { document.getElementById('p'+i).setAttribute('cy', '160'); }
             document.getElementById('yScaleTop').textContent = '0';
             document.getElementById('yScaleMid').textContent = '0';
-            document.getElementById('yScaleBot').textContent = '0';
         }
 
-        // FORESTRY AND ENVIRONMENTAL MATHEMATICS LOGIC ENGINE
         function updateMath() {
             const dbh = parseFloat(dbhInput.value);
             if (!dbh || isNaN(dbh) || dbh <= 0) return;
 
             const condition = parseFloat(document.getElementById('condition_select').value);
             const speciesGroup = document.getElementById('species_group').value;
+            if (!speciesGroup) return;
 
             const speciesCoefficients = {
                 'hardwood':      { a: -2.0127, b: 2.4342 }, 
@@ -508,7 +521,6 @@
             };
 
             const coeff = speciesCoefficients[speciesGroup] || speciesCoefficients['small_ornate'];
-
             const rawBiomass = Math.exp(coeff.a + (coeff.b * Math.log(dbh)));
             const finalCO2 = Math.round((rawBiomass * 0.5 * 3.666) * condition);
             
@@ -523,33 +535,25 @@
 
             const growthRates = [0, 5, 10, 15, 20];
             const xPositions = [60, 140, 220, 300, 380];
-            
             const projectedDBHYear20 = Math.min(dbh + (20 * 0.35), 100);
             const idealBiomassYear20 = Math.exp(coeff.a + (coeff.b * Math.log(projectedDBHYear20)));
             const dynamicGraphCeiling = idealBiomassYear20 * 0.5 * 3.666;
 
             document.getElementById('yScaleTop').textContent = Math.round(dynamicGraphCeiling).toLocaleString();
             document.getElementById('yScaleMid').textContent = Math.round(dynamicGraphCeiling / 2).toLocaleString();
-            document.getElementById('yScaleBot').textContent = '0';
 
             const coordinates = [];
             growthRates.forEach((years, index) => {
                 const projectedDBH = Math.min(dbh + (years * 0.35), 100);
                 const projectedBiomass = Math.exp(coeff.a + (coeff.b * Math.log(projectedDBH)));
                 const actualProjectedCO2 = (projectedBiomass * 0.5 * 3.666) * condition;
-                
-                let yPercent = dynamicGraphCeiling > 0 ? (actualProjectedCO2 / dynamicGraphCeiling) : 0;
-                if (yPercent > 1) yPercent = 1;
-                
+                const yPercent = dynamicGraphCeiling > 0 ? (actualProjectedCO2 / dynamicGraphCeiling) : 0;
                 const svgYPosition = 160 - (yPercent * 130);
 
                 coordinates.push(`${xPositions[index]} ${svgYPosition}`);
                 document.getElementById('p' + (index + 1)).setAttribute('cy', svgYPosition);
-                document.getElementById('p' + (index + 1)).setAttribute('cx', xPositions[index]);
             });
-
-            const pathDataString = "M " + coordinates.join(" L ");
-            document.getElementById('svgPath').setAttribute('d', pathDataString);
+            document.getElementById('svgPath').setAttribute('d', "M " + coordinates.join(" L "));
         }
     </script>
 </body>
