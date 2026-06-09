@@ -56,7 +56,7 @@
                 <h1 class="text-xl font-black italic uppercase tracking-tighter">NC STATE UNIVERSITY</h1>
                 <p class="text-red-500 text-[10px] font-bold uppercase mt-1 tracking-widest">Campus Planning & Strategic Investment</p>
             </div>
-            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Registry Engine v6.8</div>
+            <div class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Registry Engine v7.2</div>
         </div>
 
         <div class="flex flex-row border-b-2 border-zinc-200 bg-zinc-50 w-full">
@@ -87,7 +87,7 @@
                         </div>
                         <select name="C:Species Group" id="species_group" class="w-full border-2 p-3 rounded-lg font-bold bg-white" onchange="updateSpeciesHelper()" required>
                             <option value="" disabled selected>Identify type...</option>
-                            <option value="hardwood">🌳 STURDY (Oak, Hickory)</option>
+                            <option value="hardwood">🌳 STURDY (Oak, Magnolia, Hickory)</option>
                             <option value="soft_hardwood">🍃 FAST (Maple, Poplar)</option>
                             <option value="evergreen">🌲 EVERGREEN (Pine, Cedar)</option>
                             <option value="small_ornate">🌸 SMALL (Dogwood, Holly)</option>
@@ -175,7 +175,7 @@
                     <input type="hidden" name="E:GPS" id="coords">
                     <input type="hidden" name="G:CO2_Lbs" id="hidden_co2">
                     <input type="hidden" name="H:Asset_Value" id="hidden_value">
-                    <input type="hidden" name="I:Timestamp" id="timestamp">
+                    <input type="hidden" name="I:Created_At" id="timestamp">
                 </form>
 
                 <div class="space-y-6">
@@ -268,7 +268,7 @@
                 <div class="border-l-4 border-red-600 pl-3">
                     <p class="font-black text-red-600 uppercase text-[11px] mb-0.5">🌳 Hardwood (Sturdy)</p>
                     <p class="font-bold">Dense, slow-growing structural trees with broad leaves. Highly valued for long-term canopy architecture.</p>
-                    <p class="text-zinc-500 mt-1"><span class="font-black text-zinc-700">Includes:</span> White Oak, Willow Oak, Southern Red Oak, Shagbark Hickory, Walnut, and American Beech.</p>
+                    <p class="text-zinc-500 mt-1"><span class="font-black text-zinc-700">Includes:</span> White Oak, Willow Oak, Southern Red Oak, Southern Magnolia, Shagbark Hickory, Walnut, and American Beech.</p>
                 </div>
                 <div class="border-l-4 border-amber-500 pl-3">
                     <p class="font-black text-amber-600 uppercase text-[11px] mb-0.5">🍃 Soft Hardwood (Fast Growth)</p>
@@ -324,7 +324,10 @@
     </div>
 
     <script>
-        // ON INITIAL LOAD: Check if a Unity ID was previously saved
+        // SHEETMONKEY PRODUCTION API GATEWAY ENDPOINT
+        const GOOGLE_WEB_APP_URL = "https://api.sheetmonkey.io/form/336EJZmaN8Aa7rG5DSNAJG";
+
+        // ON INITIAL LOAD: Check if a Unity ID was previously saved in the local environment
         document.addEventListener("DOMContentLoaded", function() {
             const savedUnityId = localStorage.getItem("ncsu_surveyor_id");
             if (savedUnityId) {
@@ -332,37 +335,46 @@
             }
         });
 
-        // FORM SUBMISSION HANDLER WITH PERSISTENCE
+        // FORM SUBMISSION HANDLER WITH INTERCEPTED STORAGE LOOPS
         function handleFormSubmission(event) {
             event.preventDefault();
             
-            // Capture the Unity ID and save it locally before handling database transmission logic
+            // Capture the user ID string and preserve it within browser cache
             const currentId = document.getElementById("unity_id").value.trim().toLowerCase();
             if (currentId) {
                 localStorage.setItem("ncsu_surveyor_id", currentId);
             }
 
-            // Show transmission overlay
+            // Create standard tracking timestamp right at execution moment
+            document.getElementById('timestamp').value = new Date().toLocaleString();
+
+            // Ignite interface processing overlay
             const overlay = document.getElementById("overlay");
             overlay.style.display = "flex";
 
-            // Simulate form processing/database submission sequence
-            setTimeout(() => {
+            const formElement = document.getElementById('treeForm');
+            const formData = new FormData(formElement);
+
+            // Forward structural profiles directly to SheetMonkey's servers via fetch
+            fetch(GOOGLE_WEB_APP_URL, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
                 overlay.style.display = "none";
-                alert("Tree successfully saved to registry database!");
+                alert("Tree data logged successfully to operational spreadsheet!");
                 
-                // Reset form fields except for the persistent Unity ID
+                // Clear out physical tree structures, preserving the stored Surveyor field
                 document.getElementById("circ_input").value = "";
                 document.getElementById("dbh_input").value = "";
                 document.getElementById("species_group").selectedIndex = 0;
                 document.getElementById("condition_select").value = "0.8";
                 
-                // Clear active community value checkboxes
                 const checkboxes = document.querySelectorAll('input[name="N:Likes[]"]');
                 checkboxes.forEach(cb => cb.checked = false);
                 document.getElementById('likes_label').textContent = "Select value(s)...";
 
-                // Reset step tracking modules
+                // Wipe location arrays and engage validation locks for subsequent runs
                 document.getElementById('coords').value = "";
                 const statusBox = document.getElementById('status-box');
                 statusBox.className = "bg-amber-50 border-2 border-dashed border-amber-300 rounded-xl p-4 text-center transition-all duration-300";
@@ -377,7 +389,12 @@
                 submitBtn.textContent = "Lock Location Above to Enable Submit";
 
                 clearMetrics();
-            }, 1500);
+            })
+            .catch(error => {
+                overlay.style.display = "none";
+                console.error("SheetMonkey Connectivity Fault:", error);
+                alert("Network error: Data failed to establish communication with SheetMonkey endpoint.");
+            });
         }
 
         // NAVIGATION CONTROLLER
@@ -395,7 +412,6 @@
         function openModal(id) { document.getElementById(id).classList.add('modal-active'); }
         function closeModal(id) { document.getElementById(id).classList.remove('modal-active'); }
 
-        // Dropdown Value Updates Helper
         function updateSpeciesHelper() { 
             updateMath(); 
         }
@@ -403,7 +419,7 @@
         function toggleLikes(e) { e.preventDefault(); document.getElementById('likes_menu').classList.toggle('hidden'); }
         function updateLikesLabel() { document.getElementById('likes_label').textContent = "Values updated..."; }
         
-        // GIS Workflow Coordination Handler
+        // GIS Location Interception Handler
         function handleGPS() { 
             document.getElementById('coords').value = "35.7847,-78.6821"; 
             
@@ -420,7 +436,7 @@
             submitBtn.textContent = "Confirm Tree Entry";
         }
 
-        // INPUT LISTENERS AND CORE OBJECT ACCESSORS
+        // PHYSICAL CALCULATORS AND OBJECT LISTENERS
         const circInput = document.getElementById('circ_input');
         const dbhInput = document.getElementById('dbh_input');
         const warningBox = document.getElementById('dbh-warning');
@@ -476,7 +492,7 @@
             document.getElementById('yScaleBot').textContent = '0';
         }
 
-        // SCIENTIFIC MATH CALCULATIONS ENGINE
+        // FORESTRY AND ENVIRONMENTAL MATHEMATICS LOGIC ENGINE
         function updateMath() {
             const dbh = parseFloat(dbhInput.value);
             if (!dbh || isNaN(dbh) || dbh <= 0) return;
