@@ -306,6 +306,10 @@
             if (savedUnityId) {
                 document.getElementById("unity_id").value = savedUnityId;
             }
+            
+            // Set up input bindings for live math calculations
+            document.getElementById('circ_input').addEventListener('input', handleCircumferenceInput);
+            document.getElementById('dbh_input').addEventListener('input', handleDbhInput);
         });
 
         // HAVERSINE MATHEMATICAL SPHERICAL DISTANCE ENGINE
@@ -472,6 +476,156 @@
             });
             document.getElementById('page-' + id).classList.remove('hidden');
             document.getElementById('btn-' + id).className = "flex-1 inline-flex items-center justify-center gap-1 sm:gap-2 p-3 sm:p-4 font-black uppercase text-[9px] sm:text-[10px] tracking-tight sm:tracking-widest transition-all bg-white text-red-600 border-b-4 border-red-600 truncate";
+        }
+
+        // CARBON FORESTRY MATHEMATICS MATRIX LAYER
+        function handleCircumferenceInput() {
+            const circ = parseFloat(this.value);
+            if (!isNaN(circ) && circ > 0) {
+                const calculatedDbh = circ / Math.PI;
+                document.getElementById('dbh_input').value = calculatedDbh.toFixed(1);
+                document.getElementById('hidden_circ').value = circ.toFixed(1);
+            } else {
+                document.getElementById('dbh_input').value = "";
+                document.getElementById('hidden_circ').value = "";
+            }
+            updateMath();
+        }
+
+        function handleDbhInput() {
+            const dbh = parseFloat(this.value);
+            if (!isNaN(dbh) && dbh > 0) {
+                const calculatedCirc = dbh * Math.PI;
+                document.getElementById('circ_input').value = calculatedCirc.toFixed(1);
+                document.getElementById('hidden_circ').value = calculatedCirc.toFixed(1);
+            } else {
+                document.getElementById('circ_input').value = "";
+                document.getElementById('hidden_circ').value = "";
+            }
+            updateMath();
+        }
+
+        function updateMath() {
+            const dbh = parseFloat(document.getElementById('dbh_input').value);
+            const species = document.getElementById('species_group').value;
+            const condition = parseFloat(document.getElementById('condition_select').value);
+            const warningBox = document.getElementById('dbh-warning');
+            const submitBtn = document.getElementById('submit_btn');
+            const hasGps = document.getElementById('coords').value !== "";
+
+            if (dbh > 100) {
+                warningBox.classList.remove('hidden');
+                submitBtn.disabled = true;
+                submitBtn.className = "w-full bg-zinc-300 text-zinc-500 cursor-not-allowed p-5 rounded-xl font-black uppercase tracking-widest transition-all text-sm shadow-inner";
+                return;
+            } else {
+                warningBox.classList.add('hidden');
+                if (hasGps) {
+                    submitBtn.disabled = false;
+                    submitBtn.className = "w-full ncsu-red text-white p-5 rounded-xl font-black uppercase tracking-widest shadow-xl hover:bg-red-700 active:scale-[0.99] transition-all text-sm cursor-pointer border-b-4 border-red-900";
+                }
+            }
+
+            if (isNaN(dbh) || !species || isNaN(condition)) {
+                clearMetrics();
+                return;
+            }
+
+            // Forestry Biomass Growth Constants
+            let factor = 0.15; 
+            let assetMultiplier = 4.50; 
+            if (species === 'hardwood') { factor = 0.22; assetMultiplier = 6.25; }
+            else if (species === 'evergreen') { factor = 0.18; assetMultiplier = 3.50; }
+            else if (species === 'small_ornate') { factor = 0.12; assetMultiplier = 5.00; }
+
+            // Calculate Base Biomass & CO2 Sequestration Profiles
+            const baseCarbon = (dbh * dbh * factor) * 15 * condition;
+            document.getElementById('display-co2').textContent = Math.round(baseCarbon);
+            document.getElementById('hidden_co2').value = Math.round(baseCarbon);
+
+            const financialAssetValue = baseCarbon * assetMultiplier * 0.035;
+            document.getElementById('display-value').textContent = financialAssetValue.toFixed(2);
+            document.getElementById('hidden_value').value = financialAssetValue.toFixed(2);
+
+            // Render SVG 20-Year Performance Forecast Data Points
+            const points = [];
+            for (let i = 0; i < 5; i++) {
+                const yearInterval = i * 5;
+                const projectedDbh = dbh + (yearInterval * 0.25 * condition);
+                points.push((projectedDbh * projectedDbh * factor) * 15 * condition);
+            }
+
+            const maxVal = Math.max(...points) * 1.15;
+            document.getElementById('yScaleTop').textContent = Math.round(maxVal);
+            document.getElementById('yScaleMid').textContent = Math.round(maxVal / 2);
+            document.getElementById('yScaleBot').textContent = 0;
+
+            const xCoords = [60, 140, 220, 300, 380];
+            let pathD = "";
+
+            points.forEach((val, idx) => {
+                const yCoord = 160 - ((val / maxVal) * 130);
+                const dot = document.getElementById('p' + (idx + 1));
+                dot.setAttribute('cx', xCoords[idx]);
+                dot.setAttribute('cy', yCoord);
+                
+                if (idx === 0) pathD += `M ${xCoords[idx]} ${yCoord}`;
+                else pathD += ` L ${xCoords[idx]} ${yCoord}`;
+            });
+
+            document.getElementById('svgPath').setAttribute('d', pathD);
+        }
+
+        function clearMetrics() {
+            document.getElementById('display-co2').textContent = "0";
+            document.getElementById('display-value').textContent = "0.00";
+            document.getElementById('hidden_co2').value = "";
+            document.getElementById('hidden_value').value = "";
+            
+            const resetPath = "M 60 160 L 140 160 L 220 160 L 300 160 L 380 160";
+            document.getElementById('svgPath').setAttribute('d', resetPath);
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById('p' + i).setAttribute('cy', 160);
+            }
+            document.getElementById('yScaleTop').textContent = "0";
+            document.getElementById('yScaleMid').textContent = "0";
+        }
+
+        // CUSTOM UI DROPDOWN MODAL HANDLERS
+        function toggleLikes(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('likes_menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function updateLikesLabel() {
+            const checkboxes = document.querySelectorAll('input[name="N:Likes[]"]:checked');
+            const label = document.getElementById('likes_label');
+            if (checkboxes.length === 0) {
+                label.textContent = "Select value(s)...";
+                label.className = "text-sm text-zinc-400";
+            } else {
+                label.textContent = `${checkboxes.length} value(s) selected`;
+                label.className = "text-sm font-bold text-zinc-900";
+            }
+        }
+
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+            document.getElementById(id).classList.add('modal-active');
+        }
+
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('likes_menu');
+            const trigger = document.getElementById('likes_trigger');
+            if (menu && !menu.classList.contains('hidden') && !menu.contains(e.target) && !trigger.contains(e.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+            document.getElementById(id).classList.remove('modal-active');
         }
     </script>
 </body>
